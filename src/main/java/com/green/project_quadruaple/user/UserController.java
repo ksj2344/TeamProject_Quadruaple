@@ -1,11 +1,12 @@
 package com.green.project_quadruaple.user;
 
-import com.green.project_quadruaple.user.model.DuplicateEmailDao;
+import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import com.green.project_quadruaple.user.model.UserSignInReq;
 import com.green.project_quadruaple.user.model.UserSignInRes;
 import com.green.project_quadruaple.user.model.UserSignUpReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
@@ -21,15 +22,9 @@ import java.io.IOException;
 public class UserController {
     private final UserService userService;
 
-    // 이메일 중복 체크
-    @GetMapping("check-email")
-    public boolean checkEmail(@ParameterObject @ModelAttribute DuplicateEmailDao email) {
-        return userService.checkEmail(email);
-    }
-
     // 회원가입 요청
     @PostMapping("sign-up")
-    public int postUser(@RequestPart(required = false) MultipartFile pic, @RequestPart UserSignUpReq p) {
+    public int postUser(@RequestPart(required = false) MultipartFile pic, @Valid @RequestPart UserSignUpReq p) {
         int result = userService.signUpWithEmailVerification(pic, p);
 
         if (result > 0) {

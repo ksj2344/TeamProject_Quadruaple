@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DuplicateEmailDao {
+public class DuplicateEmailResult {
     @Schema(title = "중복체크", description = "중복 아님: false, 중복: true")
     private String email;
 }
