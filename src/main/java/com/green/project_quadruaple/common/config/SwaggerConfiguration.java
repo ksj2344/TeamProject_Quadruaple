@@ -1,7 +1,7 @@
-package com.green.project_quadruaple.config;
+package com.green.project_quadruaple.common.config;
 
-import com.green.project_quadruaple.config.constant.InfoConst;
-import com.green.project_quadruaple.config.constant.JwtConst;
+import com.green.project_quadruaple.common.config.constant.InfoConst;
+import com.green.project_quadruaple.common.config.constant.JwtConst;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

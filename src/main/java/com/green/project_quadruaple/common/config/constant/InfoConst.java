@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.config.constant;
+package com.green.project_quadruaple.common.config.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
