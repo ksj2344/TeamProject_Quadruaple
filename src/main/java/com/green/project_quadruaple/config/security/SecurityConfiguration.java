@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.config.security;
 
+import com.green.project_quadruaple.config.jwt.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

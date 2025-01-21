@@ -1,5 +1,9 @@
 package com.green.project_quadruaple.user;
 
+import com.green.project_quadruaple.user.model.DuplicateEmailDao;
+import com.green.project_quadruaple.user.model.UserSelOne;
+import com.green.project_quadruaple.user.model.UserSignInReq;
+import com.green.project_quadruaple.user.model.UserSignUpReq;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Optional;
