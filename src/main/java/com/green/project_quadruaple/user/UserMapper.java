@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.user;
 
-import com.green.project_quadruaple.user.model.DuplicateEmailDao;
+import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import com.green.project_quadruaple.user.model.UserSelOne;
 import com.green.project_quadruaple.user.model.UserSignInReq;
 import com.green.project_quadruaple.user.model.UserSignUpReq;
@@ -11,7 +11,7 @@ import java.util.Optional;
 @Mapper
 public interface UserMapper {
     // 이메일 중복 체크
-    boolean checkEmail(DuplicateEmailDao email);
+    boolean checkEmail(DuplicateEmailResult email);
     // 회원가입
     int insUser(UserSignUpReq req);
     int insUserRole(UserSignUpReq req);

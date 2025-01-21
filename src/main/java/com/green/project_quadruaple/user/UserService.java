@@ -44,7 +44,7 @@ public class UserService {
     private static String FROM_ADDRESS;
 
     // 이메일 중복 체크
-    public boolean checkEmail(DuplicateEmailDao email) {
+    public boolean checkEmail(DuplicateEmailResult email) {
         return userMapper.checkEmail(email);
     }
 
