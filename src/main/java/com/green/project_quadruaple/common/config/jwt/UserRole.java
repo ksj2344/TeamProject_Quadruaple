@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.config.jwt;
+package com.green.project_quadruaple.common.config.jwt;
 
 public enum UserRole {
       USER

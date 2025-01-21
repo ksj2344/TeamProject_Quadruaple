@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.config.jwt;
+package com.green.project_quadruaple.common.config.jwt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;

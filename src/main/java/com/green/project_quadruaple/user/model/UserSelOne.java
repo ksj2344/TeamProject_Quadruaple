@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.user.model;
 
-import com.green.project_quadruaple.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

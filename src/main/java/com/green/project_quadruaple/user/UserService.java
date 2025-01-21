@@ -1,11 +1,11 @@
 package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.common.MyFileUtils;
-import com.green.project_quadruaple.config.CookieUtils;
-import com.green.project_quadruaple.config.constant.JwtConst;
-import com.green.project_quadruaple.config.jwt.JwtTokenProvider;
-import com.green.project_quadruaple.config.jwt.JwtUser;
-import com.green.project_quadruaple.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.CookieUtils;
+import com.green.project_quadruaple.common.config.constant.JwtConst;
+import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.user.model.*;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;

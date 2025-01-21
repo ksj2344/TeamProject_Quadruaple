@@ -1,8 +1,8 @@
-package com.green.project_quadruaple.config.jwt;
+package com.green.project_quadruaple.common.config.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.green.project_quadruaple.config.constant.JwtConst;
+import com.green.project_quadruaple.common.config.constant.JwtConst;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

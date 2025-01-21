@@ -1,6 +1,6 @@
-package com.green.project_quadruaple.config.security;
+package com.green.project_quadruaple.common.config.security;
 
-import com.green.project_quadruaple.config.jwt.JwtTokenProvider;
+import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
