@@ -50,14 +50,6 @@ public class UserService {
 
     // 회원가입 및 이메일 인증 메일 발송
     public int signUpWithEmailVerification(MultipartFile pic, UserSignUpReq p) {
-        // 이메일 중복 체크
-        DuplicateEmailDao emailCheck = new DuplicateEmailDao();
-        boolean isEmailAvailable = checkEmail(emailCheck);
-
-        if (isEmailAvailable) {
-            System.out.println("이메일이 이미 존재합니다: " + p.getEmail());
-            return -1; // 이메일 중복 시 실패 코드 반환
-        }
         // 프로필 사진 처리
         String savedPicName = pic != null ? myFileUtils.makeRandomFileName(pic) : null;
         String hashedPassword = passwordEncoder.encode(p.getPw());
@@ -91,22 +83,15 @@ public class UserService {
 
         // 이메일 인증 메일 발송
         String email = p.getEmail();
-        String body = "<html><body style='background-color: #ffffff !important; margin: 0 auto; max-width: 600px; word-break: break-all; padding-top: 50px; color: #000000;'>";
-        body += "<img class='logo' src='cid:image'>";
-        body += "<h1 style='padding-top: 50px; font-size: 30px;'>이메일 주소 인증</h1>";
-        body += "<p style='padding-top: 20px; font-size: 18px; opacity: 0.6; line-height: 30px; font-weight: 400;'>안녕하세요? quadruple 관리자 입니다.<br />";
-        body += "quadruple 서비스 사용을 위해 회원가입시 고객님께서 입력하신 이메일 주소의 인증이 필요합니다.<br />";
-        body += "하단의 인증 번호로 이메일 인증을 완료하시면, 정상적으로 quadruple 서비스를 이용하실 수 있습니다.<br />";
-        body += "항상 최선의 노력을 다하는 quadruple 되겠습니다.<br />";
-        body += "감사합니다.</p>";
-        body += "<div class='code-box' style='margin-top: 50px; padding-top: 20px; color: #000000; padding-bottom: 20px; font-size: 25px; text-align: center; background-color: #f4f4f4; border-radius: 10px;'>" + authKey + "</div>";
-        body += "</body></html>";
+        String mailContent = "<h1>[이메일 인증]</h1><br><p>아래 링크를 클릭하시면 이메일 인증이 완료됩니다.</p>"
+                + "<a href='http://localhost:8080/api/user/signUpConfirm?email=" + email
+                + "&authKey=" + authKey + "' target='_blenk'>이메일 인증 확인</a>";
 
         try {
             MimeMessage mail = mailSender.createMimeMessage();
             mail.setFrom(FROM_ADDRESS);
             mail.setSubject("회원가입 이메일 인증 ", "utf-8");
-            mail.setText(body, "utf-8", "html");
+            mail.setText(mailContent, "utf-8", "html");
             mail.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             mailSender.send(mail);
         } catch (MessagingException e) {
