@@ -7,17 +7,17 @@ import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.user.model.*;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
+//import jakarta.mail.Message;
+//import jakarta.mail.MessagingException;
+//import jakarta.mail.internet.InternetAddress;
+//import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
+//import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MyFileUtils myFileUtils;
-    private final JavaMailSender mailSender;
+//    private final JavaMailSender mailSender;
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieUtils cookieUtils;
     private final JwtConst jwtConst;
@@ -101,16 +101,16 @@ public class UserService {
         body += "<div class='code-box' style='margin-top: 50px; padding-top: 20px; color: #000000; padding-bottom: 20px; font-size: 25px; text-align: center; background-color: #f4f4f4; border-radius: 10px;'>" + authKey + "</div>";
         body += "</body></html>";
 
-        try {
-            MimeMessage mail = mailSender.createMimeMessage();
-            mail.setFrom(FROM_ADDRESS);
-            mail.setSubject("회원가입 이메일 인증 ", "utf-8");
-            mail.setText(body, "utf-8", "html");
-            mail.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-            mailSender.send(mail);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            MimeMessage mail = mailSender.createMimeMessage();
+//            mail.setFrom(FROM_ADDRESS);
+//            mail.setSubject("회원가입 이메일 인증 ", "utf-8");
+//            mail.setText(body, "utf-8", "html");
+//            mail.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+//            mailSender.send(mail);
+//        } catch (MessagingException e) {
+//            e.printStackTrace();
+//        }
 
         return result;
     }
