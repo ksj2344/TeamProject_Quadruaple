@@ -4,4 +4,7 @@ import lombok.Getter;
 //
 @Getter
 public class req {
+    public void test() {
+
+    }
 }
