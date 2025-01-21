@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.config;
+package com.green.project_quadruaple.common.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

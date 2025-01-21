@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.config;
+package com.green.project_quadruaple.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;

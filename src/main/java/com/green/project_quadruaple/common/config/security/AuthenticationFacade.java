@@ -1,6 +1,6 @@
-package com.green.project_quadruaple.config.security;
+package com.green.project_quadruaple.common.config.security;
 
-import com.green.project_quadruaple.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AuthenticationFacade {
