@@ -12,6 +12,8 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -39,14 +41,14 @@ public class UserController {
 
     // 이메일 인증 요청
     @GetMapping("signUpConfirm")
-    public String signUpConfirm(@RequestParam String email, @RequestParam String authKey, HttpServletResponse response) {
-        // 이메일 인증 처리 (authKey는 이메일 링크에 포함된 값이므로 비교만 수행)
+    public void signUpConfirm(@RequestParam String email, @RequestParam String authKey, HttpServletResponse response) throws IOException {
+        // 이메일 인증 처리
         boolean isConfirmed = userService.confirmEmail(email, authKey);
 
         if (isConfirmed) {
-            return "200";
+            response.sendRedirect("/successPage.html"); // 인증 성공 시 리다이렉트
         } else {
-            return "이메일 인증에 실패했습니다.";
+            response.sendRedirect("/failurePage.html"); // 인증 실패 시 리다이렉트
         }
     }
 
