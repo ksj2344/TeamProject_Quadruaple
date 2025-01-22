@@ -4,10 +4,11 @@
 <mapper namespace="com.green.project_quadruaple.user.UserMapper">
     <!-- 이메일 중복 체크 -->
     <select id="checkEmail">
-        SELECT COUNT(*) > 0
+        SELECT COUNT(email) AS emailCount
         FROM user
         WHERE email = #{email}
     </select>
+
     <!-- 회원가입 -->
     <insert id="insUser" keyProperty="userId" useGeneratedKeys="true">
         INSERT INTO user
@@ -27,11 +28,11 @@
         </foreach>
     </insert>
 
-    <update id="updUser">
-        UPDATE user
-        SET state = 1
+    <select id="findUserByEmail">
+        SELECT *
+        FROM user
         WHERE email = #{email}
-    </update>
+    </select>
 
     <!-- 로그인 -->
     <select id="selUserByEmail">
