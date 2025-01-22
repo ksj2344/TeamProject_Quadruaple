@@ -127,7 +127,6 @@ public class UserService {
         JwtUser jwtUser = jwtTokenProvider.getJwtUserFromToken(refreshToken);
         return jwtTokenProvider.generateAccessToken(jwtUser);
     }
-
 //    private boolean checkEmail(String email) {
 //        // 인증된 이메일이 아닐때, 인증 만료되었을때
 //        return MailService.mailChecked.getOrDefault(email, false);
