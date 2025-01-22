@@ -15,12 +15,10 @@ public class MailConfig {
 
         javaMailSender.setHost("smtp.gmail.com");
         javaMailSender.setUsername("quadrupleart@gmail.com");
-        javaMailSender.setPassword("mnistucxsknhsaen");
-
-        javaMailSender.setPort(587);
+        javaMailSender.setPassword("mnistucxsknhsaen"); // 앱 비밀번호 입력
+        javaMailSender.setPort(587); // 또는 465 (SSL 사용 시)
 
         javaMailSender.setJavaMailProperties(getMailProperties());
-
         return javaMailSender;
     }
 
@@ -28,10 +26,11 @@ public class MailConfig {
         Properties properties = new Properties();
         properties.setProperty("mail.transport.protocol", "smtp");
         properties.setProperty("mail.smtp.auth", "true");
-        properties.setProperty("mail.smtp.starttls.enable", "true");
+        properties.setProperty("mail.smtp.starttls.enable", "true"); // StartTLS 사용
+        properties.setProperty("mail.smtp.ssl.enable", "false"); // StartTLS 사용 시
+        properties.setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
         properties.setProperty("mail.debug", "true");
-        properties.setProperty("mail.smtp.ssl.trust","smtp.naver.com");
-        properties.setProperty("mail.smtp.ssl.enable","true");
         return properties;
     }
 }
