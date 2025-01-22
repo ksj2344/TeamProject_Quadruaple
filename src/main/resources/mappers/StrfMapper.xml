@@ -25,6 +25,8 @@
         ON d.amenity_id = e.amenity_id
         JOIN menu f
         ON a.strf_id = f.strf_id
+        JOIN user g
+        ON g.user_id = c.user_id
         WHERE strf_id = #{strfId}
     </select>
 

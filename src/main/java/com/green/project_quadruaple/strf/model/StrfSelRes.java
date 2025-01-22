@@ -8,17 +8,12 @@ import java.util.List;
 public class StrfSelRes {
     private List<StrfCategory> category;
     private long strfId;
-    private int wishCnt;
-    private boolean wishIn;
-    private int ratingCnt;
-    private int ratingAvg;
-    private String title;
+    private String strfTitle;
     private double latit;
     private double longitude;
     private String address;
     private String post;
     private String tell;
-    private String amenity;
     private String startAt;
     private String endAt;
     private String open;
@@ -26,9 +21,21 @@ public class StrfSelRes {
     private String restDate;
     private String explain;
     private String detail;
+    private long locationId;
     private String busiNum;
+    private String amenity;
+    private String menuId;
+    private String menuTitle;
+    private String menuPic;
+    private int wishCnt;
+    private int ratingAvg;
+
     private String hostName;
+
     private String hostProfilePic;
+
+    private boolean wishIn;
+    private int ratingCnt;
 
 
 }
