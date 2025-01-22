@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.user.UserMapper">
+    <!-- 이메일 중복 체크 -->
+    <select id="checkEmail">
+        SELECT COUNT(*) > 0
+        FROM user
+        WHERE email = #{email}
+    </select>
+    <!-- 회원가입 -->
+    <insert id="insUser" keyProperty="userId" useGeneratedKeys="true">
+        INSERT INTO user
+        SET email = #{email}
+        , pw = #{pw}
+        , name = #{name}
+        , profile_pic = #{profilePic}
+        , state = 0
+    </insert>
+
+    <insert id="insUserRole">
+        INSERT INTO role
+        (role, user_id)
+        VALUES
+        <foreach collection="role" item="item" separator=",">
+            (#{item}, #{userId})
+        </foreach>
+    </insert>
+
+    <update id="updUser">
+        UPDATE user
+        SET state = 1
+        WHERE email = #{email}
+    </update>
+
+    <!-- 로그인 -->
+    <select id="selUserByEmail">
+        SELECT user_id AS userId, email, pw, name, profile_pic AS profilePic
+        FROM user
+        WHERE email = #{email}
+    </select>
+
+</mapper>
