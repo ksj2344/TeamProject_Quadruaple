@@ -24,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class UserService {
 //        }
 
         // 이메일 중복 체크
-        DuplicateEmailResult duplicateEmailResult = userMapper.checkEmail(p);
+        DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
         if (duplicateEmailResult.getEmailCount() > 0) {
             return ResultRespons.badGateway();
         }
@@ -79,7 +80,8 @@ public class UserService {
     }
 
     public ResultRespons checkDuplicatedEmail(String email) {
-        if(userMapper.checkEmail(email)) {
+        boolean isDuplicated = userMapper.isEmailDuplicated(email);
+        if (isDuplicated) {
             return ResultRespons.badGateway();
         }
         return ResultRespons.success();
@@ -88,7 +90,7 @@ public class UserService {
     //-------------------------------------------------
     // 로그인
     @Transactional
-    public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
+    public ResultRespons signIn(UserSignInReq req, HttpServletResponse response) {
         UserSelOne userSelOne = userMapper.selUserByEmail(req).orElseThrow(() -> {
             throw new RuntimeException("아이디를 확인해 주세요.");
         });
@@ -111,11 +113,7 @@ public class UserService {
         // RT를 쿠키에 담는다.
         cookieUtils.setCookie(response, jwtConst.getRefreshTokenCookieName(), refreshToken, jwtConst.getRefreshTokenCookieExpiry());
 
-        return UserSignInRes.builder()
-                .accessToken(accessToken)
-                .userId(userSelOne.getUserId())
-                .name(userSelOne.getName())
-                .build();
+        return new UserSignInRes(ResultRespons.success().getCode(), userSelOne.getUserId(), userSelOne.getName(), accessToken);
     }
 
     public String getAccessToken(HttpServletRequest req) {
@@ -131,4 +129,14 @@ public class UserService {
 //        // 인증된 이메일이 아닐때, 인증 만료되었을때
 //        return MailService.mailChecked.getOrDefault(email, false);
 //    }
+
+    //------------------------------------------------
+    // 마이페이지 조회
+    public ResultRespons infoUser(@RequestParam long userId) {
+        UserInfo userInfo = userMapper.selUserInfo(userId);
+        if (userInfo == null) {
+            return ResultRespons.notFound();
+        }
+        return ResultRespons.success();
+    }
 }

@@ -39,7 +39,7 @@ public class UserController {
 
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
-    public UserSignInRes signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
+    public ResultRespons signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
         log.info("Sign in request: {}", req);
         return userService.signIn(req, response);
     }
@@ -48,5 +48,10 @@ public class UserController {
     @Operation(summary = "토큰")
     public String getAccessToken(HttpServletRequest req) {
         return userService.getAccessToken(req);
+    }
+
+    @GetMapping("userInfo")
+    public ResultRespons getUserInfo(long userId) {
+        return userService.infoUser(userId);
     }
 }
