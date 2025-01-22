@@ -1,9 +1,11 @@
 package com.green.project_quadruaple.user;
 
+import com.green.project_quadruaple.common.model.ResultRespons;
 import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import com.green.project_quadruaple.user.model.UserSignInReq;
 import com.green.project_quadruaple.user.model.UserSignInRes;
 import com.green.project_quadruaple.user.model.UserSignUpReq;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -24,36 +26,26 @@ public class UserController {
 
     // 회원가입 요청
     @PostMapping("sign-up")
-    public int postUser(@RequestPart(required = false) MultipartFile pic, @Valid @RequestPart UserSignUpReq p) {
-        int result = userService.signUpWithEmailVerification(pic, p);
-
-        if (result > 0) {
-            return 200;
-        } else {
-            return 400;
-        }
+    @Operation(summary = "회원가입", description = "사진 파일 때문에 postman 사용")
+    public ResultRespons signUpUser(@RequestPart(required = false) MultipartFile profilePic, @Valid @RequestPart UserSignUpReq p) {
+        return userService.signUp(profilePic, p);
     }
 
-    // 이메일 인증 요청
-    @GetMapping("signUpConfirm")
-    public void signUpConfirm(@RequestParam String email, @RequestParam String authKey, HttpServletResponse response) throws IOException {
-        // 이메일 인증 처리
-        boolean isConfirmed = userService.confirmEmail(email, authKey);
-
-        if (isConfirmed) {
-            response.sendRedirect("/successPage.html"); // 인증 성공 시 리다이렉트
-        } else {
-            response.sendRedirect("/failurePage.html"); // 인증 실패 시 리다이렉트
-        }
+    @GetMapping("sign-up")
+    @Operation(summary = "아이디 중복 체크")
+    public ResultRespons checkDuplicatedEmail(@RequestParam String email) {
+        return userService.checkDuplicatedEmail(email);
     }
 
     @PostMapping("sign-in")
-    public UserSignInRes signIn(@RequestBody UserSignInReq req, HttpServletResponse response) {
+    @Operation(summary = "로그인")
+    public UserSignInRes signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
         log.info("Sign in request: {}", req);
         return userService.signIn(req, response);
     }
 
     @GetMapping("access-token")
+    @Operation(summary = "토큰")
     public String getAccessToken(HttpServletRequest req) {
         return userService.getAccessToken(req);
     }

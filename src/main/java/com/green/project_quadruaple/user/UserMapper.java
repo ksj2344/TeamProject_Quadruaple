@@ -11,11 +11,11 @@ import java.util.Optional;
 @Mapper
 public interface UserMapper {
     // 이메일 중복 체크
-    boolean checkEmail(DuplicateEmailResult email);
+    DuplicateEmailResult checkEmail(UserSignUpReq req);
     // 회원가입
     int insUser(UserSignUpReq req);
     int insUserRole(UserSignUpReq req);
-    int updUser(String email);
+    boolean checkEmail(String email);
 
     // 로그인
     Optional<UserSelOne> selUserByEmail(UserSignInReq req);
