@@ -3,5 +3,44 @@
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
 
+    <select id="getDetail" resultMap="selLocation">
+        SELECT strf_id as strfId, categoty , title , lat as latit , lng as longitude
+        address , post , tell , start_at as startAt, end_at , open , close
+        , rest_date as restDate, explain , detail , location_id as locationId, busi_num as busiNum
+        FROM stay_tour_restaur_fest a
+        JOIN location b
+        ON a.location_id = b.location_id
+        JOIN business_num c
+        ON a.busi_num = c.busi_num
+        JOIN wishlist d
+        ON a.strf_id = d.strf_id
+        WHERE strf_id = #{strfId}
+    </select>
 
+    <resultMap id="selLocation" type="com.green.project_quadruaple.strf.model.StrfLocationList">
+        <id property="locationDetailId" column="location_detail_id"/>
+
+        <collection property="category" resultMap="selUserCategory"/>
+    </resultMap>
+
+    <resultMap id="selUserCategory" type="com.green.project_quadruaple.common.config.enumdata.StrfCategory">
+        <id property="category" column="category"/>
+    </resultMap>
+
+    <select id="getReview">
+        SELECT review_id , content , rating , a.user_id , schedule_id
+        , created_at , updated_at , b.profile_pic , b.name ,
+        FROM review a
+        JOIN user b
+        ON a.user_id = b.user_id
+        JOIN schedule c
+        ON a.schedule_id = c.schedule_id
+        WHERE review_id = #{reviewId}
+    </select>
+
+    <update id="postBooking">
+        UPDATE booking
+        SET booking_id = #{bookingId}
+        WHERE user_id = #{bookingUserId}
+    </update>
 </mapper>

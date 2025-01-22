@@ -1,3 +1,6 @@
+USE p2;
+
+
 # 유저
 CREATE TABLE user(
 	user_id BIGINT PRIMARY KEY auto_increment
@@ -66,6 +69,16 @@ CREATE TABLE trip(
 	, FOREIGN KEY(manager_id) REFERENCES user(user_id)
 );
 
+#여행 참여 인원
+CREATE TABLE trip_user(
+	trip_user_id BIGINT PRIMARY KEY AUTO_INCREMENT
+	, trip_id BIGINT NOT NULL
+	, user_id BIGINT NOT NULL
+	, created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+	, FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
+	, FOREIGN KEY(user_id) REFERENCES user (user_id)
+);
+
 # 여행 장소
 CREATE TABLE trip_location (
 	trip_id BIGINT NOT NULL
@@ -74,33 +87,36 @@ CREATE TABLE trip_location (
 	, FOREIGN KEY(location_id) REFERENCES location(location_id)
 );
 
+# 일정_메모
+CREATE TABLE sche_memo(
+	schedule_memo_id BIGINT PRIMARY KEY AUTO_INCREMENT
+	, trip_id BIGINT NOT NULL
+	, day int NOT NULL
+	, seq int NOT NULL
+	, created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+	, category enum('SCHE', 'MEMO') NOT NULL
+	, FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
+);
+
+# 메모
+CREATE TABLE memo(
+	memo_id BIGINT PRIMARY KEY
+	, title varchar(50) NOT NULL
+	, content varchar(1000) NOT NULL
+	, updated_at datetime NOT NULL
+	, FOREIGN KEY(memo_id) REFERENCES sche_memo (schedule_memo_id)
+);
+
 #일정
 CREATE TABLE schedule(
-	schedule_id BIGINT PRIMARY KEY AUTO_INCREMENT
-	, strf_id BIGINT NOT NULL
-	, trip_id BIGINT NOT NULL
-	, `day` INT NOT NULL
-	, seq INT NOT NULL
-	, undo_schedule TINYINT NOT NULL 
-	, last_edit_user_id BIGINT
+	schedule_id BIGINT PRIMARY KEY
 	, `distance` DOUBLE 
 	, duration INT 
 	, pathtype TINYINT
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, strf_id BIGINT NOT NULL
 	, updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP
-	, FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
+	, FOREIGN KEY(schedule_id) REFERENCES sche_memo (schedule_memo_id)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest (strf_id)
-	, FOREIGN KEY(last_edit_user_id) REFERENCES user (user_id)
-);
-
-#여행 참여 인원
-CREATE TABLE trip_user(
-	trip_id BIGINT NOT NULL
-	, user_id BIGINT NOT NULL
-	, created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-	, PRIMARY KEY (trip_id, user_id)
-	, FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
-	, FOREIGN KEY(user_id) REFERENCES user (user_id)
 );
 
 #상품 사진
@@ -117,6 +133,7 @@ CREATE TABLE menu(
 	, strf_id BIGINT NOT NULL
 	, title varchar(50) NOT NULL
 	, price int NOT NULL
+	, menu_pic varchar(200)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest(strf_id)
 );
 
@@ -147,19 +164,6 @@ CREATE TABLE amenipoint(
 	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
 	, FOREIGN KEY(amenity_id) REFERENCES amenity(amenity_id)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest(strf_id)
-);
-
-# 메모
-CREATE TABLE memo(
-	memo_id BIGINT PRIMARY KEY AUTO_INCREMENT
-	, title VARCHAR(100) NOT NULL
-	, content VARCHAR(500) NOT NULL
-	, `day` int NOT NULL
-	, seq int NOT NULL
-	, trip_id BIGINT NOT NULL
-	, user_id BIGINT NOT NULL
-	, FOREIGN KEY(trip_id) REFERENCES trip(trip_id)
-	, FOREIGN KEY(user_id) REFERENCES user(user_id)
 );
 
 # 가계부
@@ -367,3 +371,4 @@ CREATE TABLE chat (
 	, created_at datetime NOT NULL DEFAULT current_timestamp
 	, FOREIGN KEY(cj_id) REFERENCES chat_join (cj_id)
 );
+
