@@ -1,4 +1,3 @@
-USE p2;
 
 
 # 유저
@@ -15,8 +14,9 @@ CREATE TABLE user(
 # 사업자 번호
 CREATE TABLE business_num(
 	busi_num varchar(20) PRIMARY KEY
-	, user_id BIGINT NOT NULL UNIQUE
+	, user_id BIGINT NOT NULL 
 	, FOREIGN KEY(user_id) REFERENCES user(user_id)
+	, CONSTRAINT busi_user UNIQUE (busi_num, user_id)
 );
 
 #지역
@@ -55,7 +55,7 @@ CREATE TABLE stay_tour_restaur_fest(
 	, created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, busi_num varchar(20) NOT NULL
 	, FOREIGN KEY(busi_num) REFERENCES business_num(busi_num)
-	, FOREIGN KEY(location_id) REFERENCES location(location_id)
+	, FOREIGN KEY(location_detail_id) REFERENCES location_detail(location_detail_id)
 );
 
 #여행
@@ -120,10 +120,10 @@ CREATE TABLE schedule(
 );
 
 #상품 사진
-CREATE TABLE st_pic(
-	title VARCHAR(100)
+CREATE TABLE strf_pic(
+	pic_name VARCHAR(100)
 	, strf_id BIGINT NOT NULL 
-	, PRIMARY KEY (title, strf_id)
+	, PRIMARY KEY (pic_name, strf_id)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest (strf_id)
 );
 
@@ -361,6 +361,7 @@ CREATE TABLE chat_join (
 	, chat_room_id BIGINT NOT NULL
 	, FOREIGN KEY(user_id) REFERENCES user (user_id)
 	, FOREIGN KEY(chat_room_id) REFERENCES chat_room (chat_room_id)
+	, CONSTRAINT user_chat UNIQUE (user_id,chat_room_id)
 );
 
 # 채팅
