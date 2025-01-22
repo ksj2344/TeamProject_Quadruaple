@@ -6,9 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class StrfSelReq {
-
-
-
     @NotNull
     private long strfId;
 }
