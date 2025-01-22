@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.common.config.enumdata;
 
-public enum StrfEnum {
+public enum StrfCategory {
     STAY
     , TOUR
     , RESTAUR
