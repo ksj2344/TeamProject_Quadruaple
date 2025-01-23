@@ -4,15 +4,17 @@
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
 
     <select id="getDetail" resultMap="selLocation">
-        SELECT a.strf_id as strfId, category , a.title as strfTitle ,
+        SELECT a.strf_id as strfId, a.category , a.title as strfTitle ,
         a.lat as latit , a.lng as longitude
         a.address , a.post , a.tell , a.start_at as startAt,
         a.end_at , a.open , a.close
         , a.rest_date as restDate, a.explain , a.detail ,
-        a.location_detail_id as locationId, a.busi_num as busiNum ,
+        a.detail_title as locationName , a.busi_num as busiNum ,
         e.amenity ,e.title as amenityTitle ,
         f.price , f.menu_id as menuId , f.title as menuTitle ,
-        f.menu_pic as menuPic
+        f.menu_pic as menuPic , g.name as hostName ,
+        g.pic as hostProfilePic , COUNT(user_id) as wishCnt ,
+        AVG(rating) as ratingAvg
 
         FROM stay_tour_restaur_fest a
         JOIN location b
@@ -30,20 +32,6 @@
         WHERE strf_id = #{strfId}
     </select>
 
-    <select id="wishCnt">
-        SELECT COUNT(user_id) as wishCnt
-        FROM wishlist
-        WHERE strf_id = #{strfId}
-    </select>
-
-    <select id="strfRatingAvg">
-        SELECT AVG(rating) as ratingAvg
-        FROM review a
-        JOIN schedule b
-        ON a.schedule_id = b.schedule_id
-        WHERE strf_id = #{strfId}
-    </select>
-
     <resultMap id="selLocation" type="com.green.project_quadruaple.strf.model.StrfLocationList">
         <id property="locationDetailId" column="location_detail_id"/>
         <collection property="category" resultMap="selUserCategory"/>
@@ -53,22 +41,50 @@
         <id property="category" column="category"/>
     </resultMap>
 
-    <select id="getReview">
-        SELECT review_id , a.content , a.rating , a.user_id ,
-        c.schedule_id
-        , created_at , updated_at , b.profile_pic as userPic, b.name ,
-        e.review_pic as reviewPic ,
+    <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
+        SELECT t.reviewId, t.strfId, t.userId, t.rating,
+        t.content, q.name AS writerUserName, q.profile_pic AS writerUserPic,
+        t.reviewCount,
+        CASE
+            WHEN t.updated_at IS NOT NULL THEN t.updated_at
+            ELSE t.created_at
+            END AS reviewWriteDate,
+        GROUP_CONCAT(w.pic ORDER BY w.review_id SEPARATOR ',') AS reviewPics
+        FROM (
+        SELECT
+        ROW_NUMBER() OVER (PARTITION BY a.strf_id ORDER BY a.review_id DESC) AS num,
+        a.review_id AS reviewId, a.strf_id AS strfId, a.user_id AS userId,
+        a.rating, a.content, a.created_at, a.updated_at,
+        COUNT(a.review_id) OVER (PARTITION BY a.user_id) AS reviewCount
         FROM review a
-        JOIN user b
-        ON a.user_id = b.user_id
-        JOIN schedule c
-        ON a.schedule_id = c.schedule_id
-        JOIN stay_tour_ restaur_fest d
-        ON d.strf_id = c.strf_id
-        JOIN review_pic e
-        ON e.review_id = a.review_id
-        WHERE review_id = #{reviewId}
+        WHERE a.strf_id IN
+        <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ) t
+        JOIN user q
+        ON t.user_id = q.user_id
+        LEFT JOIN review_pic w
+        ON t.reviewId = w.review_id
+        WHERE t.num <![CDATA[ <= ]]> 4
+        GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content, q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
+        ORDER BY t.reviewId DESC
     </select>
+
+    <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.StrfSelReviewRes">
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="userId" column="userId"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <result property="reviewCount" column="reviewCount"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <collection property="pictures" ofType="String">
+            <result column="reviewPics"/>
+        </collection>
+    </resultMap>
 
     <update id="postBooking">
         UPDATE booking
