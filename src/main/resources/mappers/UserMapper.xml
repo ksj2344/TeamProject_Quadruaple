@@ -54,4 +54,17 @@
          WHERE user_id = #{userId}
     </select>
 
+    <!-- 비밀번호 확인 -->
+    <select id="checkPassword">
+        SELECT pw
+          FROM user
+         WHERE userId = #{userId}
+    </select>
+
+    <update id="changePassword">
+        UPDATE user
+           SET pw = #{pw}
+         WHERE userId = #{userId}
+    </update>
+
 </mapper>

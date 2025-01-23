@@ -3,28 +3,23 @@ package com.green.project_quadruaple.user;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.constant.JwtConst;
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -45,18 +40,18 @@ public class UserService {
     private static String FROM_ADDRESS;
 
     // 회원가입 및 이메일 인증 메일 발송
-    public ResultResponse signUp(MultipartFile pic, UserSignUpReq p) {
+    public int signUp(MultipartFile pic, UserSignUpReq p) {
         String email = p.getEmail();
 
         //이메일 인증 여부
         if (!checkEmail(email)) {
-            return ResultResponse.unauthorized();
+            return 0;
         }
 
         // 이메일 중복 체크
         DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
         if (duplicateEmailResult.getEmailCount() > 0) {
-            return ResultResponse.badGateway();
+            return 0;
         }
 
         // 프로필 사진 처리
@@ -73,10 +68,10 @@ public class UserService {
                 userMapper.insUserRole(p);
             }
         } catch (Exception e) {
-            return ResultResponse.badGateway();
+            return 0;
         }
 
-        return ResultResponse.success();
+        return 1;
     }
 
     public ResultResponse checkDuplicatedEmail(String email) {
@@ -130,14 +125,52 @@ public class UserService {
         return MailService.mailChecked.getOrDefault(email, false);
     }
 
-    //------------------------------------------------
+    //-------------------------------------------------
     // 마이페이지 조회
-    public ResultResponse infoUser(@RequestParam long userId) {
+    public ResultResponse infoUser(long userId) {
         UserInfo userInfo = userMapper.selUserInfo(userId);
         if (userInfo == null) {
             return ResultResponse.notFound();
         }
-
         return new UserInfoDto(ResultResponse.success().getCode(), userInfo.getUserId(), userInfo.getName(), userInfo.getEmail(), userInfo.getProfilePIc());
+    }
+
+    //-------------------------------------------------
+    // 마이페이지 수정
+    public ResultResponse patchUser(MultipartFile profilePic, UserUpdateReq req) {
+        UserUpdateRes checkPassword = userMapper.checkPassword(req.getUserId());
+
+        if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
+            return ResultResponse.badGateway();
+        }
+
+        if (req.getNewPw().equals(checkPassword.getPw())) {
+            String hashedPassword = passwordEncoder.encode(req.getNewPw());
+            userMapper.changePassword(req.getUserId(), hashedPassword);
+        } else {
+            return ResultResponse.badGateway();
+        }
+
+        if (profilePic != null && !profilePic.isEmpty()) {
+            String targetDir = "user/" + req.getUserId();
+            myFileUtils.makeFolders(targetDir);
+
+            String savedFileName = myFileUtils.makeRandomFileName(profilePic);
+            // savedFileName req에 담아야 함
+
+            // 기존 파일 삭제
+            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getUserId());
+            myFileUtils.deleteFolder(deletePath, false);
+
+            // 파일 저장
+            String filePath = String.format("%s/%s", targetDir, savedFileName);
+            try {
+                myFileUtils.transferTo(profilePic, filePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return null;
     }
 }

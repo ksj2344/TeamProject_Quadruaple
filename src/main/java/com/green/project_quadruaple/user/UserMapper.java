@@ -20,4 +20,8 @@ public interface UserMapper {
 
     // 마이페이지 조회
     UserInfo selUserInfo(long userId);
+
+    // 마이페이지 수정
+    UserUpdateRes checkPassword(long userId);
+    void changePassword(long userId, String newPw);
 }
