@@ -13,7 +13,7 @@ public class TripController {
 
     private final TripService tripService;
 
-    @GetMapping("/trip")
+    @GetMapping("/trip-list")
     public ResultResponse getTripList() {
         return tripService.getMyTripList();
     }
@@ -28,8 +28,8 @@ public class TripController {
         return tripService.getLocationList(locationId);
     }
 
-//    @GetMapping
-//    public ResultResponse getTrip(@RequestParam("trip_id") long tripId) {
-//        return tripService.getTrip();
-//    }
+    @GetMapping("/trip")
+    public ResultResponse getTrip(@RequestParam("trip_id") long tripId) {
+        return tripService.getTrip(tripId);
+    }
 }
