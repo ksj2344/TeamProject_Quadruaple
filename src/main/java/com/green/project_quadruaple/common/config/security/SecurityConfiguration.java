@@ -27,11 +27,19 @@ public class SecurityConfiguration {
                         req.requestMatchers("api/admin").hasRole(UserRole.ADMIN.name()) //인가 하나 처리
                                 .requestMatchers(HttpMethod.GET, "/api/user").hasRole(UserRole.USER.name())
                                 .requestMatchers("/api/admin", "/api/user").authenticated()
-
+                                .requestMatchers("/api/").authenticated()
                                 .anyRequest().permitAll()
                 )
                 .build();
     }
+    //
+
+    /*
+    * 찜하기, 예약하기, 리스트보기, 일정추가, 일정검색,
+    * 여행 목록 불러오기, 여행 추가하기, 여행확인하기, 여행 수정,
+    * 일정 등록
+    * 메모, 후기, 쿠폰, 가계부
+    * */
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

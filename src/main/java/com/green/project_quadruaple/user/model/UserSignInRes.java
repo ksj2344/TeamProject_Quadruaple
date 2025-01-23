@@ -1,13 +1,13 @@
 package com.green.project_quadruaple.user.model;
 
-import com.green.project_quadruaple.common.model.ResultRespons;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
 @Getter
 @ToString
-public class UserSignInRes extends ResultRespons {
+public class UserSignInRes extends ResultResponse {
     private long userId;
     private String name;
     private String accessToken;
