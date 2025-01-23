@@ -48,10 +48,10 @@ public class UserService {
     public ResultResponse signUp(MultipartFile pic, UserSignUpReq p) {
         String email = p.getEmail();
 
-//        //이메일 인증 여부
-//        if (!checkEmail(email)) {
-//            return ResultRespons.unauthorized();
-//        }
+        //이메일 인증 여부
+        if (!checkEmail(email)) {
+            return ResultResponse.unauthorized();
+        }
 
         // 이메일 중복 체크
         DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
@@ -125,10 +125,10 @@ public class UserService {
         JwtUser jwtUser = jwtTokenProvider.getJwtUserFromToken(refreshToken);
         return jwtTokenProvider.generateAccessToken(jwtUser);
     }
-//    private boolean checkEmail(String email) {
-//        // 인증된 이메일이 아닐때, 인증 만료되었을때
-//        return MailService.mailChecked.getOrDefault(email, false);
-//    }
+    private boolean checkEmail(String email) {
+        // 인증된 이메일이 아닐때, 인증 만료되었을때
+        return MailService.mailChecked.getOrDefault(email, false);
+    }
 
     //------------------------------------------------
     // 마이페이지 조회
@@ -137,6 +137,6 @@ public class UserService {
         if (userInfo == null) {
             return ResultResponse.notFound();
         }
-        return ResultResponse.success();
+        return new UserInfoDto(ResultResponse.success().getCode(), userInfo.getUserId(), userInfo.getName(), userInfo.getEmail(), userInfo.getProfilePIc());
     }
 }

@@ -51,6 +51,7 @@ public class UserController {
     }
 
     @GetMapping("userInfo")
+    @Operation(summary = "마이페이지 조회")
     public ResultResponse getUserInfo(long userId) {
         return userService.infoUser(userId);
     }
