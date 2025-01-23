@@ -366,10 +366,37 @@ CREATE TABLE chat_join (
 
 # 채팅
 CREATE TABLE chat (
-	chat_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
+	chat_id BIGINT PRIMARY KEY AUTO_INCREMENT
 	, cj_id BIGINT NOT NULL
 	, content varchar(1000) NOT NULL
 	, created_at datetime NOT NULL DEFAULT current_timestamp
 	, FOREIGN KEY(cj_id) REFERENCES chat_join (cj_id)
 );
 
+
+# 여행기
+CREATE TABLE trip_review(
+	trip_review_id BIGINT PRIMARY KEY AUTO_INCREMENT
+	, trip_id BIGINT NOT null
+	, user_id BIGINT NOT null
+	, title VARCHAR(70) NOT null
+	, content TEXT NOT NULL 
+	, created_at DATETIME NOT NULL DEFAULT current_timestamp
+	, FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
+	, FOREIGN KEY(user_id) REFERENCES user (user_id)
+);
+# 여행기 사진
+CREATE TABLE trip_review_pic(
+	trip_review_pic VARCHAR(200)
+	, trip_review_id BIGINT 
+	, FOREIGN KEY(trip_review_id) REFERENCES trip_review (trip_review_id)
+	, PRIMARY KEY(trip_review_pic,trip_review_id)
+);
+# 여행기 붐업
+CREATE TABLE trip_like(
+	user_id bigint
+	, trip_review_id bigint
+	, FOREIGN KEY(user_id) REFERENCES user(user_id)
+	, FOREIGN KEY(trip_review_id) REFERENCES trip_review(trip_review_id)
+	, PRIMARY KEY(user_id,trip_review_id)
+);
