@@ -3,52 +3,38 @@
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
 
-    <select id="getDetail" resultMap="selLocation">
-        SELECT a.strf_id as strfId, a.category , a.title as strfTitle ,
-        a.lat as latit , a.lng as longitude
-        a.address , a.post , a.tell , a.start_at as startAt,
-        a.end_at , a.open , a.close
-        , a.rest_date as restDate, a.explain , a.detail ,
-        a.detail_title as locationName , a.busi_num as busiNum ,
-        e.amenity ,e.title as amenityTitle ,
-        f.price , f.menu_id as menuId , f.title as menuTitle ,
-        f.menu_pic as menuPic , g.name as hostName ,
-        g.pic as hostProfilePic , COUNT(user_id) as wishCnt ,
-        AVG(rating) as ratingAvg
-
+    <select id="getDetail" resultMap="strfDetailResultMap">
+        SELECT
+        a.strf_id AS strfId, a.category, a.title AS strfTitle,
+        a.lat AS latitude, a.lng AS longitude,
+        a.address, a.post, a.tell, a.start_at AS startAt,
+        a.end_at, a.open, a.close,
+        a.rest_date AS restDate, a.explain, a.detail,
+        a.detail_title AS locationName, a.busi_num AS busiNum,
+        e.amenity, e.title AS amenityTitle,
+        f.price, f.menu_id AS menuId, f.title AS menuTitle,
+        f.menu_pic AS menuPic, g.name AS hostName,
+        g.pic AS hostProfilePic, COUNT(user_id) AS wishCnt,
+        AVG(rating) AS ratingAvg
         FROM stay_tour_restaur_fest a
-        JOIN location b
-        ON a.location_id = b.location_id
-        JOIN business_num c
-        ON a.busi_num = c.busi_num
-        JOIN amenipoint d
-        ON a.strf_id = d.strf_id
-        JOIN amenity e
-        ON d.amenity_id = e.amenity_id
-        JOIN menu f
-        ON a.strf_id = f.strf_id
-        JOIN user g
-        ON g.user_id = c.user_id
-        WHERE strf_id = #{strfId}
+        JOIN location b ON a.location_id = b.location_id
+        JOIN business_num c ON a.busi_num = c.busi_num
+        JOIN amenipoint d ON a.strf_id = d.strf_id
+        JOIN amenity e ON d.amenity_id = e.amenity_id
+        JOIN menu f ON a.strf_id = f.strf_id
+        JOIN user g ON g.user_id = c.user_id
+        WHERE a.strf_id = #{strfId}
     </select>
-
-    <resultMap id="selLocation" type="com.green.project_quadruaple.strf.model.StrfLocationList">
-        <id property="locationDetailId" column="location_detail_id"/>
-        <collection property="category" resultMap="selUserCategory"/>
-    </resultMap>
-
-    <resultMap id="selUserCategory" type="com.green.project_quadruaple.common.config.enumdata.StrfCategory">
-        <id property="category" column="category"/>
-    </resultMap>
-
     <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
-        SELECT t.reviewId, t.strfId, t.userId, t.rating,
-        t.content, q.name AS writerUserName, q.profile_pic AS writerUserPic,
+        SELECT
+        t.reviewId, t.strfId, t.userId, t.rating,
+        t.content, q.name AS writerUserName,
+        q.profile_pic AS writerUserPic,
         t.reviewCount,
         CASE
-            WHEN t.updated_at IS NOT NULL THEN t.updated_at
-            ELSE t.created_at
-            END AS reviewWriteDate,
+        WHEN t.updated_at IS NOT NULL THEN t.updated_at
+        ELSE t.created_at
+        END AS reviewWriteDate,
         GROUP_CONCAT(w.pic ORDER BY w.review_id SEPARATOR ',') AS reviewPics
         FROM (
         SELECT
@@ -62,29 +48,142 @@
             #{item}
         </foreach>
         ) t
-        JOIN user q
-        ON t.user_id = q.user_id
-        LEFT JOIN review_pic w
-        ON t.reviewId = w.review_id
-        WHERE t.num <![CDATA[ <= ]]> 4
-        GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content, q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
+        JOIN user q ON t.userId = q.user_id
+        LEFT JOIN review_pic w ON t.reviewId = w.review_id
+        WHERE t.num <![CDATA[<=]]> 4
+        GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content,
+        q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
         ORDER BY t.reviewId DESC
     </select>
-
-    <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.StrfSelReviewRes">
-        <id property="reviewId" column="reviewId"/>
-        <result property="strfId" column="strfId"/>
-        <result property="userId" column="userId"/>
-        <result property="rating" column="rating"/>
-        <result property="content" column="content"/>
-        <result property="reviewWriteDate" column="reviewWriteDate"/>
-        <result property="reviewCount" column="reviewCount"/>
-        <result property="writerUserName" column="writerUserName"/>
-        <result property="writerUserPic" column="writerUserPic"/>
-        <collection property="pictures" ofType="String">
-            <result column="reviewPics"/>
+    <resultMap id="strfDetailResultMap" type="com.green.project_quadruaple.strf.model.StrfDetailDto">
+        <id property="strfId" column="strfId" />
+        <result property="category" column="category" />
+        <result property="strfTitle" column="strfTitle" />
+        <result property="latitude" column="latitude" />
+        <result property="longitude" column="longitude" />
+        <result property="address" column="address" />
+        <result property="post" column="post" />
+        <result property="tell" column="tell" />
+        <result property="startAt" column="startAt" />
+        <result property="endAt" column="endAt" />
+        <result property="open" column="open" />
+        <result property="close" column="close" />
+        <result property="restDate" column="restDate" />
+        <result property="explain" column="explain" />
+        <result property="detail" column="detail" />
+        <result property="locationName" column="locationName" />
+        <result property="busiNum" column="busiNum" />
+        <result property="amenity" column="amenity" />
+        <result property="menuId" column="menuId" />
+        <result property="menuTitle" column="menuTitle" />
+        <result property="menuPic" column="menuPic" />
+        <result property="wishCnt" column="wishCnt" />
+        <result property="ratingAvg" column="ratingAvg" />
+        <result property="hostName" column="hostName" />
+        <result property="hostProfilePic" column="hostProfilePic" />
+        <result property="wishIn" column="wishIn" />
+        <result property="ratingCnt" column="ratingCnt" />
+        <collection property="res" ofType="com.green.project_quadruaple.strf.model.StrfSelRes">
         </collection>
     </resultMap>
+
+    <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.ReviewSelRes">
+        <id property="reviewId" column="reviewId" />
+        <result property="strfId" column="strfId" />
+        <result property="userId" column="userId" />
+        <result property="rating" column="rating" />
+        <result property="content" column="content" />
+        <result property="reviewWriteDate" column="reviewWriteDate" />
+        <result property="reviewCount" column="reviewCount" />
+        <result property="writerUserName" column="writerUserName" />
+        <result property="writerUserPic" column="writerUserPic" />
+        <collection property="pictures" ofType="String">
+            <result column="reviewPics" />
+        </collection>
+    </resultMap>
+    <select id="selReviewPicsByReviewIds" resultType="com.green.project_quadruaple.strf.model.StrfPicSel">
+        SELECT strf_id AS strfId, pic
+        FROM review_pictures
+        WHERE strf_id IN
+        <foreach collection="reviewIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+    <!--
+        <select id="getDetail" resultMap="getReview">
+            SELECT a.strf_id as strfId, a.category , a.title as strfTitle ,
+            a.lat as latit , a.lng as longitude
+            a.address , a.post , a.tell , a.start_at as startAt,
+            a.end_at , a.open , a.close
+            , a.rest_date as restDate, a.explain , a.detail ,
+            a.detail_title as locationName , a.busi_num as busiNum ,
+            e.amenity ,e.title as amenityTitle ,
+            f.price , f.menu_id as menuId , f.title as menuTitle ,
+            f.menu_pic as menuPic , g.name as hostName ,
+            g.pic as hostProfilePic , COUNT(user_id) as wishCnt ,
+            AVG(rating) as ratingAvg
+
+            FROM stay_tour_restaur_fest a
+            JOIN location b
+            ON a.location_id = b.location_id
+            JOIN business_num c
+            ON a.busi_num = c.busi_num
+            JOIN amenipoint d
+            ON a.strf_id = d.strf_id
+            JOIN amenity e
+            ON d.amenity_id = e.amenity_id
+            JOIN menu f
+            ON a.strf_id = f.strf_id
+            JOIN user g
+            ON g.user_id = c.user_id
+            WHERE strf_id = #{strfId}
+        </select>
+        <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
+            SELECT t.reviewId, t.strfId, t.userId, t.rating,
+            t.content, q.name AS writerUserName, q.profile_pic AS writerUserPic,
+            t.reviewCount,
+            CASE
+                WHEN t.updated_at IS NOT NULL THEN t.updated_at
+                ELSE t.created_at
+                END AS reviewWriteDate,
+            GROUP_CONCAT(w.pic ORDER BY w.review_id SEPARATOR ',') AS reviewPics
+            FROM (
+            SELECT
+            ROW_NUMBER() OVER (PARTITION BY a.strf_id ORDER BY a.review_id DESC) AS num,
+            a.review_id AS reviewId, a.strf_id AS strfId, a.user_id AS userId,
+            a.rating, a.content, a.created_at, a.updated_at,
+            COUNT(a.review_id) OVER (PARTITION BY a.user_id) AS reviewCount
+            FROM review a
+            WHERE a.strf_id IN
+            <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            ) t
+            JOIN user q
+            ON t.user_id = q.user_id
+            LEFT JOIN review_pic w
+            ON t.reviewId = w.review_id
+            WHERE t.num <![CDATA[ <= ]]> 4
+            GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content, q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
+            ORDER BY t.reviewId DESC
+        </select>
+        <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.ReviewSelRes">
+            <id property="reviewId" column="reviewId"/>
+            <result property="strfId" column="strfId"/>
+            <result property="userId" column="userId"/>
+            <result property="rating" column="rating"/>
+            <result property="content" column="content"/>
+            <result property="reviewWriteDate" column="reviewWriteDate"/>
+            <result property="reviewCount" column="reviewCount"/>
+            <result property="writerUserName" column="writerUserName"/>
+            <result property="writerUserPic" column="writerUserPic"/>
+            <collection property="pictures" ofType="String">
+                <result column="reviewPics"/>
+            </collection>
+        </resultMap>
+    -->
 
     <update id="postBooking">
         UPDATE booking
