@@ -15,5 +15,7 @@ import lombok.ToString;
 @Schema
 public class StrfSelReq {
     @NotNull
+    @Schema(description = "상품 ID", example = "12345")
     private long strfId;
 }
+

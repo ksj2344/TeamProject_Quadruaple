@@ -1,50 +1,66 @@
 package com.green.project_quadruaple.strf;
 
+import com.green.project_quadruaple.common.model.Constants;
 import com.green.project_quadruaple.strf.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StrfService {
     private final StrfMapper strfMapper;
-    private final ModelMapper modelMapper = new ModelMapper(); // ModelMapper 인스턴스 생성
-
 
     public StrfDto getDetail(StrfSelReq req) {
         StrfDto dto = strfMapper.getDetail(req);
 
         if (dto == null || dto.getStrfId() != req.getStrfId()) {
-            return null;
+            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
         }
 
-        // ModelMapper를 사용하여 매핑
-        List<StrfSelRes> updatedResList = dto.getRes() == null ? new ArrayList<>() :
-                dto.getRes().stream()
-                        .map(item -> modelMapper.map(dto, StrfSelRes.class))
-                        .toList();
+        List<StrfSelRes> updatedResList = Optional.ofNullable(dto.getRes())
+                .orElse(Collections.emptyList());
 
         dto.setRes(updatedResList);
         return dto;
     }
 
-    public List<StrfSelReviewRes> selReviewListWithCount (StrfSelReviewReq req){
-        // DB에서 리뷰 목록 조회
-        List<StrfSelReviewRes> reviews = strfMapper.selReviewListWithCount(req);
+    public List<ReviewSelRes> selReviewListWithCount(ReviewSelReq req) {
+        List<ReviewSelRes> reviewList = strfMapper.selReviewListWithCount(req);
 
-        int limit = 6;
-        // 필요시 limit 적용 (SQL에서 처리 가능하지만 추가로 제어 가능)
-        if (limit > 0 && reviews.size() > limit) {
-            return reviews.subList(0, limit);
+        if (reviewList.isEmpty()) {
+            return reviewList;
         }
-        return reviews;
-    }
 
+        List<Long> reviewIds = reviewList.stream()
+                .map(ReviewSelRes::getReviewId)
+                .collect(Collectors.toList());
+
+        List<StrfPicSel> strfPicSelList = strfMapper.selReviewPicsByReviewIds(reviewIds);
+
+        Map<Long, List<String>> picMap = strfPicSelList.stream()
+                .collect(Collectors.groupingBy(
+                        StrfPicSel::getStrfId,
+                        Collectors.mapping(StrfPicSel::getPic, Collectors.toList())
+                ));
+
+        for (ReviewSelRes review : reviewList) {
+            review.setPictures(picMap.getOrDefault(review.getReviewId(), Collections.emptyList()));
+        }
+
+        boolean hasMore = reviewList.size() > Constants.getDefault_page_size();
+        if (hasMore) {
+            reviewList = reviewList.subList(0, Constants.getDefault_page_size());
+            ReviewSelRes moreItem = new ReviewSelRes();
+            moreItem.setMoreReview(true);
+            reviewList.add(moreItem);
+        }
+
+        return reviewList;
+    }
 }
