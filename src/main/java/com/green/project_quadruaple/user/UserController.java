@@ -37,9 +37,9 @@ public class UserController {
         int result = userService.signUp(profilePic, p);
 
         if (result < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY, 0));
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, result));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     @GetMapping("sign-up")
