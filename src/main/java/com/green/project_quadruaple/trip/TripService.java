@@ -72,7 +72,7 @@ public class TripService {
         return res;
     }
 
-    public ResultResponse getTrip(long tripId) {
-        tripMapper.selTrip();
-    }
+//    public ResultResponse getTrip(long tripId) {
+//        tripMapper.selTrip();
+//    }
 }
