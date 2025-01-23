@@ -3,20 +3,22 @@ package com.green.project_quadruaple.trip.model.dto;
 import com.green.project_quadruaple.trip.model.Category;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class ScheduleDto {
 
     private int seq;
+    private long distance;
+    private int duration;
     private long strfId;
     private String strfTitle;
     private String category;
     private String address;
     private String lat;
     private String lng;
-    private double distance;
-    private int duration;
     private String pathType;
 }
 

@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.trip;
 
 import com.green.project_quadruaple.trip.model.dto.LocationDto;
+import com.green.project_quadruaple.trip.model.dto.ScheCntAndMemoCntDto;
 import com.green.project_quadruaple.trip.model.dto.TripDetailDto;
 import com.green.project_quadruaple.trip.model.dto.TripDto;
 import com.green.project_quadruaple.trip.model.req.PostTripReq;
@@ -20,4 +21,7 @@ public interface TripMapper {
     void insTripLocation(Long tripId, List<Long> idList);
 
     TripDetailDto getTrip(long tripId);
+
+    ScheCntAndMemoCntDto selScheduleCntAndMemoCnt(long tripId);
+    List<TripDetailDto> selScheduleDetail(long tripId);
 }
