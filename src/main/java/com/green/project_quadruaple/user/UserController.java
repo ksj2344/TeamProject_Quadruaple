@@ -2,11 +2,7 @@ package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.common.model.ResultResponse;
-import com.green.project_quadruaple.user.model.DuplicateEmailResult;
-import com.green.project_quadruaple.user.model.UserSignInReq;
-import com.green.project_quadruaple.user.model.UserSignInRes;
-import com.green.project_quadruaple.user.model.UserSignUpReq;
+import com.green.project_quadruaple.user.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +10,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -39,20 +35,38 @@ public class UserController {
         if (result < 0) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY, 0));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, result));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, 200));
     }
 
+    //아이디 중복 체크
     @GetMapping("sign-up")
     @Operation(summary = "아이디 중복 체크")
-    public ResultResponse checkDuplicatedEmail(@RequestParam String email) {
-        return userService.checkDuplicatedEmail(email);
+    public ResponseEntity<?> checkDuplicatedEmail(@RequestParam String email) {
+        boolean result = userService.checkDuplicatedEmail(email);
+
+        if (!result) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseCode.BAD_GATEWAY.getCode());
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, 200));
     }
 
+    //로그인
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
-    public ResultResponse signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
-        log.info("Sign in request: {}", req);
-        return userService.signIn(req, response);
+    public ResponseEntity<?> signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
+        UserSignInRes res = userService.signIn(req, response);
+        if (res == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseCode.NOT_FOUND.getCode());
+        }
+
+        // 로그인 성공 시 반환할 데이터 생성
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("code", ResponseCode.OK.getCode());
+        responseBody.put("data", 200);  // 혹은 적절한 성공 데이터를 설정
+        responseBody.put("accessToken", res.getAccessToken());
+
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping("access-token")
@@ -61,9 +75,27 @@ public class UserController {
         return userService.getAccessToken(req);
     }
 
+    //마이페이지 조회
     @GetMapping("userInfo")
     @Operation(summary = "마이페이지 조회")
-    public ResultResponse getUserInfo(@RequestParam long userId) {
-        return userService.infoUser(userId);
+    public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo(@RequestParam long userId) {
+        UserInfoDto userInfo = userService.infoUser(userId);
+
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND, null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, userInfo));
+    }
+
+    //마이페이지 수정
+    @PatchMapping()
+    @Operation(summary = "마이페이지 수정")
+    public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
+        UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
+        if (userUpdateRes == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY, 0));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, userUpdateRes));
     }
 }
