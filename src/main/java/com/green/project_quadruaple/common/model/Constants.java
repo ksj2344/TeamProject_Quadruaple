@@ -5,11 +5,13 @@ import org.springframework.stereotype.Component;
 
 @Component // 빈 등록
 public class Constants {
+
     private static int default_page_size;
-    @Value("${const.default-review-size}")
-    public void setDefault_page_size(int value) {
+
+    public void setDefault_page_size(@Value("${const.default-review-size}") int value) {
         default_page_size = value;
     }
+
     public static int getDefault_page_size() {
         return default_page_size;
     }
