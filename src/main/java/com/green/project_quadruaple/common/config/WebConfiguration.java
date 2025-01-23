@@ -24,10 +24,9 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**").allowedOrigins("*").allowCredentials(true);
+        //registry.addMapping("/**").allowedOrigins("*").allowCredentials(true);
          registry.addMapping("/**").allowedOriginPatterns("http://*").allowCredentials(true);
     }
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) { //이 메소드는 spring이 호출해줌
         registry.addResourceHandler("/pic/**").addResourceLocations("file:" + uploadPath+"/");
