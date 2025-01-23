@@ -31,11 +31,11 @@ public class StrfController {
         // 데이터가 없을 경우 404 응답 반환
         if (detail == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND, null));
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
 
         // 정상적인 응답 반환
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK,detail));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),detail));
     }
 
     /**
@@ -49,11 +49,11 @@ public class StrfController {
         // 빈 리스트일 경우 204(No Content) 응답 반환
         if (reviews.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new ResponseWrapper<>(ResponseCode.OK, reviews));
+                    .body(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviews));
         }
 
         // 정상적인 응답 반환
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, reviews));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviews));
     }
 }
 
