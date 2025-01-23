@@ -28,8 +28,8 @@ public class TripController {
         return tripService.getLocationList(locationId);
     }
 
-    @GetMapping
-    public ResultResponse getTrip(@RequestParam("trip_id") long tripId) {
-        return tripService.getTrip();
-    }
+//    @GetMapping
+//    public ResultResponse getTrip(@RequestParam("trip_id") long tripId) {
+//        return tripService.getTrip();
+//    }
 }
