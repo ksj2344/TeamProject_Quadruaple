@@ -15,8 +15,7 @@ public class TripController {
 
     @GetMapping("/trip")
     public ResultResponse getTripList() {
-        ResultResponse res = tripService.getMyTripList();
-        return res;
+        return tripService.getMyTripList();
     }
 
     @PostMapping("/trip")
@@ -27,5 +26,10 @@ public class TripController {
     @GetMapping("/trip/location")
     public ResultResponse getLocationList(@RequestParam("location_id") long locationId) {
         return tripService.getLocationList(locationId);
+    }
+
+    @GetMapping
+    public ResultResponse getTrip(@RequestParam("trip_id") long tripId) {
+        return tripService.getTrip();
     }
 }

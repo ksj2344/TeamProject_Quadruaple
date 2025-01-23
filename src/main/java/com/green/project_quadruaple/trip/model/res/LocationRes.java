@@ -2,8 +2,7 @@ package com.green.project_quadruaple.trip.model.res;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResultResponse;
-import com.green.project_quadruaple.trip.model.LocationDto;
-import lombok.EqualsAndHashCode;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
