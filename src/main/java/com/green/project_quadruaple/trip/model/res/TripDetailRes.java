@@ -17,7 +17,7 @@ public class TripDetailRes extends ResultResponse {
         super(ResponseCode.OK.getCode());
     }
 
-    private double totalDistance;
+    private long totalDistance;
     private int totalDuration;
     private int scheduleCnt;
     private int memoCnt;
