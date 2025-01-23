@@ -2,12 +2,10 @@ package com.green.project_quadruaple.trip.model.res;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResultResponse;
-import com.green.project_quadruaple.trip.model.TripDto;
+import com.green.project_quadruaple.trip.model.dto.TripDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 import java.util.List;
 
