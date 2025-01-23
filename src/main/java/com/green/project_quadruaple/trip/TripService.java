@@ -2,11 +2,14 @@ package com.green.project_quadruaple.trip;
 
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.trip.model.dto.LocationDto;
+import com.green.project_quadruaple.trip.model.dto.ScheCntAndMemoCntDto;
+import com.green.project_quadruaple.trip.model.dto.TripDetailDto;
 import com.green.project_quadruaple.trip.model.dto.TripDto;
 import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.trip.model.res.LocationRes;
 import com.green.project_quadruaple.trip.model.res.MyTripListRes;
 import com.green.project_quadruaple.trip.model.res.PostTripRes;
+import com.green.project_quadruaple.trip.model.res.TripDetailRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,7 +75,13 @@ public class TripService {
         return res;
     }
 
-//    public ResultResponse getTrip(long tripId) {
-//        tripMapper.selTrip();
-//    }
+    public ResultResponse getTrip(long tripId) {
+        ScheCntAndMemoCntDto scamcdDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
+        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId);
+        TripDetailRes res = new TripDetailRes();
+        res.setScheduleCnt(scamcdDto.getScheduleCnt());
+        res.setMemoCnt(scamcdDto.getMemoCnt());
+        res.setDays(tripDetailDto);
+        return res;
+    }
 }
