@@ -21,12 +21,6 @@
         JOIN sche_memo sm
             ON sm.trip_id = t.trip_id
             AND sm.category = 'SCHE'
-        <if test="bOrA == 0">
-            WHERE t.end_at &lt; #{currentAt}
-        </if>
-        <if test="bOrA == 1">
-            WHERE t.end_at &gt; #{currentAt}
-        </if>
         GROUP BY t.trip_id
     </select>
 
@@ -54,4 +48,75 @@
             (#{tripId}, #{id})
         </foreach>
     </insert>
+    
+    <select id="selScheduleCntAndMemoCnt">
+        SELECT
+            count(sms.category) AS scheduleCnt
+            , count(smm.category) AS memoCnt
+        FROM sche_memo sm
+        LEFT JOIN (
+            SELECT * FROM sche_memo
+            WHERE trip_id = #{tripId}
+                AND category = 'SCHE') sms
+            ON sm.schedule_memo_id = sms.schedule_memo_id
+        LEFT JOIN (
+            SELECT * FROM sche_memo
+            WHERE trip_id = #{tripId}
+                AND category = 'MEMO') smm
+            ON sm.schedule_memo_id = smm.schedule_memo_id
+    </select>
+
+    <select id="selScheduleDetail">
+        SELECT
+            sm.`day`
+            , sm.seq
+            , s.distance
+            , s.duration
+            , s.strf_id
+            , s.pathtype
+            , strf.title
+            , strf.category
+            , strf.address
+            , strf.lat
+            , strf.lng
+        FROM sche_memo sm
+        LEFT JOIN schedule s
+            ON sm.schedule_memo_id = s.schedule_id
+        JOIN stay_tour_restaur_fest strf
+            ON strf.strf_id = s.strf_id
+        WHERE sm.trip_id = #{tripId}
+        AND sm.category = "SCHE"
+    </select>
 </mapper>
+
+<!--
+{
+  "code" : "200 성공",
+  "totalDistance" : 200102000,
+  "totalDuration" : 420,
+  "scheduleCnt" : 12, (sm의 category 가 SCHE 인것들)
+  "memoCnt" : 8, (sm의 category 가 MEMO 인것들)
+  "days":[
+    {
+      "day" : 1, (sm 의 day)
+      "weather" : "cloudy" or null, (api 사용)
+      "schedules" : [
+        {
+          "seq" : 1, (sm 의 seq)
+          "strfId" : 1, (s의 strf_id)
+          "strfTitle" : "차이나 타운", (strf 의 title)
+          "category" : "관광", (strf 의 category)
+          "address" : "인천 중구", (strf 의 address)
+          "lat" : 37.5664707, (strf 의 lat)
+          "lng" : 127.0039404, (strf 의 lng)
+          "distance" : 13920 or null, (오디세이)
+          "duration" : 35 or null, (오디세이, totalTime)
+          "pathtype" : "BUS" or null, (오디세이)
+        },
+        ...
+      ]
+   }
+   ...
+  ],
+}
+-->

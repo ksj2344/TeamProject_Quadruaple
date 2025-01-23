@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.trip.model;
+package com.green.project_quadruaple.trip.model.dto;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

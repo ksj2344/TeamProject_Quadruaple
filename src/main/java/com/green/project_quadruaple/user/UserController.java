@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.user;
 
-import com.green.project_quadruaple.common.model.ResultRespons;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import com.green.project_quadruaple.user.model.UserSignInReq;
 import com.green.project_quadruaple.user.model.UserSignInRes;
@@ -27,19 +27,19 @@ public class UserController {
     // 회원가입 요청
     @PostMapping("sign-up")
     @Operation(summary = "회원가입", description = "사진 파일 때문에 postman 사용")
-    public ResultRespons signUpUser(@RequestPart(required = false) MultipartFile profilePic, @Valid @RequestPart UserSignUpReq p) {
+    public ResultResponse signUpUser(@RequestPart(required = false) MultipartFile profilePic, @Valid @RequestPart UserSignUpReq p) {
         return userService.signUp(profilePic, p);
     }
 
     @GetMapping("sign-up")
     @Operation(summary = "아이디 중복 체크")
-    public ResultRespons checkDuplicatedEmail(@RequestParam String email) {
+    public ResultResponse checkDuplicatedEmail(@RequestParam String email) {
         return userService.checkDuplicatedEmail(email);
     }
 
     @PostMapping("sign-in")
     @Operation(summary = "로그인")
-    public ResultRespons signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
+    public ResultResponse signInUser(@RequestBody UserSignInReq req, HttpServletResponse response) {
         log.info("Sign in request: {}", req);
         return userService.signIn(req, response);
     }
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("userInfo")
-    public ResultRespons getUserInfo(long userId) {
+    public ResultResponse getUserInfo(long userId) {
         return userService.infoUser(userId);
     }
 }
