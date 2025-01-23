@@ -1,15 +1,16 @@
 package com.green.project_quadruaple.user.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
+@AllArgsConstructor
 @ToString
 public class UserInfo {
-    private long userId;
-    private String email;
-    private String name;
-    private String profilePIc;
+    private final long userId;
+    private final String email;
+    private final String name;
+    private final String profilePIc;
 }
