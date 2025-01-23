@@ -189,12 +189,12 @@ CREATE TABLE `review` (
 	review_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
 	, content varchar(500) NOT NULL
 	, rating TINYINT NOT NULL
-	, schedule_id BIGINT NOT NULL
+	, strf_id BIGINT NOT NULL
 	, user_id BIGINT NOT NULL
 	, created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, updated_at datetime
 	, FOREIGN KEY (user_id) REFERENCES user(user_id)
-	, FOREIGN KEY (schedule_id) REFERENCES schedule(schedule_id)
+	, FOREIGN KEY (strf_id) REFERENCES stay_tour_restaur_fest(strf_id)
 );
 
 # 후기 사진
