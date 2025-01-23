@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
+
+    <select id="getDetail" resultMap="selLocation">
+        SELECT a.strf_id as strfId, category , a.title as strfTitle ,
+        a.lat as latit , a.lng as longitude
+        a.address , a.post , a.tell , a.start_at as startAt,
+        a.end_at , a.open , a.close
+        , a.rest_date as restDate, a.explain , a.detail ,
+        a.location_detail_id as locationId, a.busi_num as busiNum ,
+        e.amenity ,e.title as amenityTitle ,
+        f.price , f.menu_id as menuId , f.title as menuTitle ,
+        f.menu_pic as menuPic
+
+        FROM stay_tour_restaur_fest a
+        JOIN location b
+        ON a.location_id = b.location_id
+        JOIN business_num c
+        ON a.busi_num = c.busi_num
+        JOIN amenipoint d
+        ON a.strf_id = d.strf_id
+        JOIN amenity e
+        ON d.amenity_id = e.amenity_id
+        JOIN menu f
+        ON a.strf_id = f.strf_id
+        JOIN user g
+        ON g.user_id = c.user_id
+        WHERE strf_id = #{strfId}
+    </select>
+
+    <select id="wishCnt">
+        SELECT COUNT(user_id) as wishCnt
+        FROM wishlist
+        WHERE strf_id = #{strfId}
+    </select>
+
+    <select id="strfRatingAvg">
+        SELECT AVG(rating) as ratingAvg
+        FROM review a
+        JOIN schedule b
+        ON a.schedule_id = b.schedule_id
+        WHERE strf_id = #{strfId}
+    </select>
+
+    <resultMap id="selLocation" type="com.green.project_quadruaple.strf.model.StrfLocationList">
+        <id property="locationDetailId" column="location_detail_id"/>
+        <collection property="category" resultMap="selUserCategory"/>
+    </resultMap>
+
+    <resultMap id="selUserCategory" type="com.green.project_quadruaple.common.config.enumdata.StrfCategory">
+        <id property="category" column="category"/>
+    </resultMap>
+
+    <select id="getReview">
+        SELECT review_id , a.content , a.rating , a.user_id ,
+        c.schedule_id
+        , created_at , updated_at , b.profile_pic as userPic, b.name ,
+        e.review_pic as reviewPic ,
+        FROM review a
+        JOIN user b
+        ON a.user_id = b.user_id
+        JOIN schedule c
+        ON a.schedule_id = c.schedule_id
+        JOIN stay_tour_ restaur_fest d
+        ON d.strf_id = c.strf_id
+        JOIN review_pic e
+        ON e.review_id = a.review_id
+        WHERE review_id = #{reviewId}
+    </select>
+
+    <update id="postBooking">
+        UPDATE booking
+        SET booking_id = #{bookingId}
+        WHERE user_id = #{bookingUserId} and menu_id = #{menuId}
+    </update>
+</mapper>

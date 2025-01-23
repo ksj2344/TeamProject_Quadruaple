@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.search.SearchMapper">
+
+    <!-- 검색 기능 -->
+    <select id="searchPage" resultType="com.green.project_quadruaple.search.model.SearchPageRes">
+        SELECT *
+        FROM location_detail
+        WHERE location_name LIKE CONCAT('%', #{searchWord}, '%')
+    </select>
+
+    <!-- 검색 기본 페이지 정보 -->
+    <select id="getSearchPageInfo" resultType="com.green.project_quadruaple.search.model.SearchResponse">
+        SELECT
+        recent_list AS recentList,
+        hot_key_words AS hotKeyWords,
+        searched_txts AS searchedTxts
+        FROM search_page_info
+        LIMIT 1
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
