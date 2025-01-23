@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.user.mail;
 
-import com.green.project_quadruaple.common.model.ResultRespons;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,14 +19,14 @@ public class MailController {
 
     @GetMapping
     @Operation(summary = "인증 메일 발송")
-    public ResultRespons sendMail(@Valid String email) {
+    public ResultResponse sendMail(@Valid String email) {
         log.info("Send mail to " + email);
         return mailService.send(email);
     }
 
     @PostMapping
     @Operation(summary = "인증 코드 확인")
-    public ResultRespons checkMail(@Valid @RequestBody GetEmailAndCodeReq req) {
+    public ResultResponse checkMail(@Valid @RequestBody GetEmailAndCodeReq req) {
         return mailService.check(req);
     }
 }

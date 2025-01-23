@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.user.mail;
 
-import com.green.project_quadruaple.common.model.ResultRespons;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.thread.AuthCode;
 import com.green.project_quadruaple.user.mail.thread.MailCheck;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class MailService {
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
 
-    public ResultRespons send(String email) {
+    public ResultResponse send(String email) {
 
         // 인증코드 생성
         StringBuilder code = new StringBuilder();
@@ -48,21 +48,21 @@ public class MailService {
             mailHandler.send();
         } catch (Exception e) {
             e.printStackTrace();
-            return ResultRespons.severError();
+            return ResultResponse.severError();
         }
-        return ResultRespons.success();
+        return ResultResponse.success();
     }
 
-    public ResultRespons check(GetEmailAndCodeReq req) {
+    public ResultResponse check(GetEmailAndCodeReq req) {
         String email = req.getEmail();
         String code = req.getCode();
         String savedCode = codes.getOrDefault(email, "");
         if (!savedCode.equals(code)) {
-            return new ResultRespons("FAIL");
+            return new ResultResponse("FAIL");
         }
         codes.remove(email);
         mailChecked.put(email, true);
         new Thread(new MailCheck(email)).start(); // 3분간 인증 성공, 이후 만료
-        return ResultRespons.success();
+        return ResultResponse.success();
     }
 }
