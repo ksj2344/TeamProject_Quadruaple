@@ -3,18 +3,18 @@
 # 유저
 CREATE TABLE user(
 	user_id BIGINT PRIMARY KEY auto_increment
-	, profile_pic VARCHAR(500) 
+	, profile_pic VARCHAR(500)
 	, name VARCHAR(20) NOT null
-	, email VARCHAR(50) NOT NULL 
-	, pw VARCHAR(200) NOT NULL 
-	, state TINYINT NOT NULL 
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, email VARCHAR(50) NOT NULL
+	, pw VARCHAR(200) NOT NULL
+	, state TINYINT NOT NULL
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 # 사업자 번호
 CREATE TABLE business_num(
 	busi_num varchar(20) PRIMARY KEY
-	, user_id BIGINT NOT NULL 
+	, user_id BIGINT NOT NULL
 	, FOREIGN KEY(user_id) REFERENCES user(user_id)
 	, CONSTRAINT busi_user UNIQUE (busi_num, user_id)
 );
@@ -65,7 +65,7 @@ CREATE TABLE trip(
 	, manager_id BIGINT NOT NULL
 	, start_at date NOT NULL
 	, end_at date NOT NULL
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY(manager_id) REFERENCES user(user_id)
 );
 
@@ -110,8 +110,8 @@ CREATE TABLE memo(
 #일정
 CREATE TABLE schedule(
 	schedule_id BIGINT PRIMARY KEY
-	, `distance` DOUBLE 
-	, duration INT 
+	, `distance` DOUBLE
+	, duration INT
 	, pathtype TINYINT
 	, strf_id BIGINT NOT NULL
 	, updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP
@@ -122,7 +122,7 @@ CREATE TABLE schedule(
 #상품 사진
 CREATE TABLE strf_pic(
 	pic_name VARCHAR(100)
-	, strf_id BIGINT NOT NULL 
+	, strf_id BIGINT NOT NULL
 	, PRIMARY KEY (pic_name, strf_id)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest (strf_id)
 );
@@ -154,14 +154,14 @@ CREATE TABLE booking(
 # 편의시설
 CREATE TABLE amenity(
 	amenity_id BIGINT PRIMARY KEY auto_increment
-	, title VARCHAR(20) NOT NULL 
+	, title VARCHAR(20) NOT NULL
 );
 
 # 편의정보
 CREATE TABLE amenipoint(
 	amenity_id BIGINT NOT NULL
 	, strf_id BIGINT NOT NULL
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY(amenity_id) REFERENCES amenity(amenity_id)
 	, FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest(strf_id)
 );
@@ -208,10 +208,10 @@ CREATE TABLE review_pic(
 # 쿠폰
 CREATE TABLE coupon(
 	coupon_id BIGINT PRIMARY KEY AUTO_INCREMENT
-	, title VARCHAR(200) NOT NULL 
-	, expired_at DATETIME NOT NULL 
-	, discountper INT NOT NULL 
-	, distribute_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, title VARCHAR(200) NOT NULL
+	, expired_at DATETIME NOT NULL
+	, discountper INT NOT NULL
+	, distribute_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 # 쿠폰 수령자
@@ -219,7 +219,7 @@ CREATE TABLE receive_coupon(
 	receive_id BIGINT PRIMARY KEY AUTO_INCREMENT
 	, user_id BIGINT NOT NULL
 	, coupon_id BIGINT NOT NULL
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY(user_id) REFERENCES user (user_id)
 	, FOREIGN KEY(coupon_id) REFERENCES coupon (coupon_id)
 	, UNIQUE KEY (user_id, coupon_id)
@@ -245,15 +245,15 @@ CREATE TABLE `role`(
 CREATE TABLE search_word(
 	txt varchar(100)
 	, user_id BIGINT NOT NULL
-	, search_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, search_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, FOREIGN KEY(user_id) REFERENCES user (user_id)
 );
 
 # 알람
 CREATE TABLE notice(
 	notice_id BIGINT PRIMARY KEY AUTO_INCREMENT
-	, content VARCHAR(800) NOT NULL 
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, content VARCHAR(800) NOT NULL
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, category enum('NOTICE', 'TRIP', 'AD', 'BUSI')  NOT NULL
 );
 
@@ -261,7 +261,7 @@ CREATE TABLE notice(
 CREATE TABLE notice_receive(
 	user_id BIGINT NOT NULL
 	, notice_id BIGINT NOT NULL
-	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+	, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 	, `open` TINYINT NOT NULL DEFAULT 0
 	, PRIMARY KEY (user_id, notice_id)
 	, FOREIGN KEY(user_id) REFERENCES user (user_id)
