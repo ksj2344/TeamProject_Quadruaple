@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.green.project_quadruaple.wishlist.WishlistMapper">
+<mapper namespace="com.green.project_quadruaple.wishlist.model.WishlistMapper">
+    <insert id="insertWishList" parameterType="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq">
+        INSERT INTO wishlist (strf_id)
+        VALUES (#{strfId})
+    </insert>
 
+    <select id="selectWishList" resultMap="WishListResMap">
+        SELECT
+        w.strf_id AS strfId,
+        w.category AS category,
+        w.strf_pic AS strfPic,
+        w.title AS title,
+        w.location_title AS locationTitle,
+        w.rating_cnt AS ratingCnt,
+        w.average_rating AS averageRating,
+        w.wish_cnt AS wishCnt
+        FROM wishlist w
+        WHERE w.category IN
+        <foreach item="item" index="index" collection="category" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        LIMIT #{page}, 10
+    </select>
 
+    <resultMap id="WishListResMap" type="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes">
+        <result property="strfId" column="strf_id"/>
+        <result property="category" column="category"/>
+        <result property="strfPic" column="strf_pic"/>
+        <result property="title" column="title"/>
+        <result property="locationTitle" column="location_title"/>
+        <result property="ratingCnt" column="rating_cnt"/>
+        <result property="averageRating" column="average_rating"/>
+        <result property="wishCnt" column="wish_cnt"/>
+    </resultMap>
 </mapper>
