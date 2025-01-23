@@ -6,10 +6,10 @@ import lombok.Getter;
 @Getter
 public class ResponseWrapper<T> {
 
-    private final ResponseCode code;
+    private final String code;
     private final T data;
 
-    public ResponseWrapper(ResponseCode code, T data) {
+    public ResponseWrapper(String code, T data) {
         this.code = code;
         this.data = data;
     }
