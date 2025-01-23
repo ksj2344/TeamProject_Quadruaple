@@ -137,6 +137,7 @@ public class UserService {
         if (userInfo == null) {
             return ResultResponse.notFound();
         }
+
         return new UserInfoDto(ResultResponse.success().getCode(), userInfo.getUserId(), userInfo.getName(), userInfo.getEmail(), userInfo.getProfilePIc());
     }
 }

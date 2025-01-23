@@ -1,21 +1,25 @@
 package com.green.project_quadruaple.trip;
 
-import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResultResponse;
-import com.green.project_quadruaple.trip.model.LocationDto;
-import com.green.project_quadruaple.trip.model.TripDto;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
+import com.green.project_quadruaple.trip.model.dto.TripDto;
 import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.trip.model.res.LocationRes;
 import com.green.project_quadruaple.trip.model.res.MyTripListRes;
 import com.green.project_quadruaple.trip.model.res.PostTripRes;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TripService {
@@ -25,11 +29,25 @@ public class TripService {
     public ResultResponse getMyTripList() {
 //        long signedUserId = AuthenticationFacade.getSignedUserId();
         long signedUserId = 101L;
-        int before = 0;
-        int after = 1;
-        String now = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        List<TripDto> beforeTripList = tripMapper.getTripList(now, signedUserId, before);
-        List<TripDto> afterTripList = tripMapper.getTripList(now, signedUserId, after);
+        long now = new Date().getTime();
+        List<TripDto> TripList = tripMapper.getTripList(String.valueOf(now), signedUserId);
+
+        List<TripDto> beforeTripList = new ArrayList<>();
+        List<TripDto> afterTripList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.KOREA);
+        for (TripDto trip : TripList) {
+            try {
+                long tripEndTime = sdf.parse(trip.getEndAt()).getTime();
+                if(now > tripEndTime) {
+                    beforeTripList.add(trip);
+                } else {
+                    afterTripList.add(trip);
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         MyTripListRes res = new MyTripListRes();
         res.setBeforeTripList(beforeTripList);
         res.setAfterTripList(afterTripList);
@@ -52,5 +70,9 @@ public class TripService {
         PostTripRes res = new PostTripRes();
         res.setTripId(req.getTripId());
         return res;
+    }
+
+    public ResultResponse getTrip(long tripId) {
+        tripMapper.selTrip();
     }
 }
