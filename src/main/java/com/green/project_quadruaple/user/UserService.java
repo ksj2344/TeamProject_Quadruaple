@@ -6,7 +6,7 @@ import com.green.project_quadruaple.common.config.constant.JwtConst;
 import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
-import com.green.project_quadruaple.common.model.ResultRespons;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
 import jakarta.mail.Message;
@@ -45,7 +45,7 @@ public class UserService {
     private static String FROM_ADDRESS;
 
     // 회원가입 및 이메일 인증 메일 발송
-    public ResultRespons signUp(MultipartFile pic, UserSignUpReq p) {
+    public ResultResponse signUp(MultipartFile pic, UserSignUpReq p) {
         String email = p.getEmail();
 
 //        //이메일 인증 여부
@@ -56,7 +56,7 @@ public class UserService {
         // 이메일 중복 체크
         DuplicateEmailResult duplicateEmailResult = userMapper.getEmailDuplicateInfo(p);
         if (duplicateEmailResult.getEmailCount() > 0) {
-            return ResultRespons.badGateway();
+            return ResultResponse.badGateway();
         }
 
         // 프로필 사진 처리
@@ -73,24 +73,24 @@ public class UserService {
                 userMapper.insUserRole(p);
             }
         } catch (Exception e) {
-            return ResultRespons.badGateway();
+            return ResultResponse.badGateway();
         }
 
-        return ResultRespons.success();
+        return ResultResponse.success();
     }
 
-    public ResultRespons checkDuplicatedEmail(String email) {
+    public ResultResponse checkDuplicatedEmail(String email) {
         boolean isDuplicated = userMapper.isEmailDuplicated(email);
         if (isDuplicated) {
-            return ResultRespons.badGateway();
+            return ResultResponse.badGateway();
         }
-        return ResultRespons.success();
+        return ResultResponse.success();
     }
 
     //-------------------------------------------------
     // 로그인
     @Transactional
-    public ResultRespons signIn(UserSignInReq req, HttpServletResponse response) {
+    public ResultResponse signIn(UserSignInReq req, HttpServletResponse response) {
         UserSelOne userSelOne = userMapper.selUserByEmail(req).orElseThrow(() -> {
             throw new RuntimeException("아이디를 확인해 주세요.");
         });
@@ -113,7 +113,7 @@ public class UserService {
         // RT를 쿠키에 담는다.
         cookieUtils.setCookie(response, jwtConst.getRefreshTokenCookieName(), refreshToken, jwtConst.getRefreshTokenCookieExpiry());
 
-        return new UserSignInRes(ResultRespons.success().getCode(), userSelOne.getUserId(), userSelOne.getName(), accessToken);
+        return new UserSignInRes(ResultResponse.success().getCode(), userSelOne.getUserId(), userSelOne.getName(), accessToken);
     }
 
     public String getAccessToken(HttpServletRequest req) {
@@ -132,11 +132,11 @@ public class UserService {
 
     //------------------------------------------------
     // 마이페이지 조회
-    public ResultRespons infoUser(@RequestParam long userId) {
+    public ResultResponse infoUser(@RequestParam long userId) {
         UserInfo userInfo = userMapper.selUserInfo(userId);
         if (userInfo == null) {
-            return ResultRespons.notFound();
+            return ResultResponse.notFound();
         }
-        return ResultRespons.success();
+        return ResultResponse.success();
     }
 }
