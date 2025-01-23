@@ -9,13 +9,9 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class TripDto {
+public class LocationDto {
 
-    private long tripId;
-    private String title;
-    private String startAt;
-    private String endAt;
+    private long locationId;
     private String locationPic;
-    private int scheduleCnt;
-
+    private String title;
 }
