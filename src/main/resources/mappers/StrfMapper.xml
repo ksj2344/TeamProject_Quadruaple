@@ -69,7 +69,7 @@
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
         <result property="strfTitle" column="strfTitle" />
-        <result property="latitude" column="latitude" />
+        <result property="latit" column="latit" />
         <result property="longitude" column="longitude" />
         <result property="address" column="address" />
         <result property="post" column="post" />

@@ -6,6 +6,7 @@ import com.green.project_quadruaple.strf.model.ReviewSelReq;
 import com.green.project_quadruaple.strf.model.ReviewSelRes;
 import com.green.project_quadruaple.strf.model.StrfDto;
 import com.green.project_quadruaple.strf.model.StrfSelReq;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class StrfController {
     private final StrfService strfService;
 
     @GetMapping
+    @Operation(summary = "상품 조회")
     public ResponseEntity<?> getDetail(@Valid @ModelAttribute StrfSelReq req) {
         // Service 호출하여 상세 정보 조회
         StrfDto detail = strfService.getDetail(req);
@@ -39,6 +41,7 @@ public class StrfController {
     }
 
     @GetMapping("/review")
+    @Operation(summary = "리뷰 조회")
     public ResponseEntity<?> selReviewListWithCount(@Valid @ModelAttribute ReviewSelReq req) {
         // Service 호출하여 리뷰 목록 조회
         List<ReviewSelRes> reviews = strfService.selReviewLisztWithCount(req);
