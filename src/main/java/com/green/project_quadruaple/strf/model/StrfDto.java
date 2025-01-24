@@ -29,18 +29,21 @@ public class StrfDto {
     private String restDate;  // 휴무일
     private String explain;   // 상품 설명
     private String detail;    // 상세 설명
-    private String locationName; // 지역 이름
     private String busiNum;  // 사업자 번호
+    private String locationName; // 지역 이름
     private long amenityId;  // 편의시설
-    private String amenityTitle;
+    private String amenityTitles;
     private int menuPrice;
     private String menuId;   // 메뉴 ID
     private String menuTitle; // 메뉴 이름
     private String menuPic;  // 메뉴 사진
     private String hostName; // 사업자 이름
     private String hostProfilePic; // 사업자 사진
+    private int recentCheck; // 최근 본 목록 비활성화
+    private String inquiredAt; // 최근 본 목록에서 상품의 조회 시간
     private int wishCnt;     // 찜 개수
     private int ratingAvg;   // 평점 평균
+
 
     private boolean wishIn;  // 찜 여부
     private int ratingCnt;   // 평점 개수
