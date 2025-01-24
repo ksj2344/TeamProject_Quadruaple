@@ -47,21 +47,25 @@ public class StrfSelRes {
     @Schema(description = "사업자 번호")
     private String busiNum;
     @Schema(description = "편의시설")
-    private String amenity;
+    private String amenityId;
+    @Schema(description = "편의이름")
+    private String amenityTitle;
+    @Schema(description = "메뉴 가격")
+    private String menuPrice;
     @Schema(description = "메뉴 ID")
     private String menuId;
     @Schema(description = "메뉴 이름")
     private String menuTitle;
     @Schema(description = "메뉴 사진")
     private String menuPic;
-    @Schema(description = "찜 개수")
-    private int wishCnt;
-    @Schema(description = "평점 평균")
-    private int ratingAvg;
     @Schema(description = "사업자 이름")
     private String hostName;
     @Schema(description = "사업자 사진")
     private String hostProfilePic;
+    @Schema(description = "찜 개수")
+    private int wishCnt;
+    @Schema(description = "평점 평균")
+    private int ratingAvg;
     @Schema(description = "찜 여부")
     private boolean wishIn;
     @Schema(description = "평점 개수")

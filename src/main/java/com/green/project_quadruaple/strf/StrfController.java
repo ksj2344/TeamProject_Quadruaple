@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 @RestController
-@RequestMapping("/api/strf")
+@RequestMapping("detail")
 @RequiredArgsConstructor
 public class StrfController {
     private final StrfService strfService;
@@ -38,13 +38,10 @@ public class StrfController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),detail));
     }
 
-    /**
-     * 특정 상품에 대한 리뷰 목록을 조회하는 엔드포인트
-     */
     @GetMapping("/review")
     public ResponseEntity<?> selReviewListWithCount(@Valid @ModelAttribute ReviewSelReq req) {
         // Service 호출하여 리뷰 목록 조회
-        List<ReviewSelRes> reviews = strfService.selReviewListWithCount(req);
+        List<ReviewSelRes> reviews = strfService.selReviewLisztWithCount(req);
 
         // 빈 리스트일 경우 204(No Content) 응답 반환
         if (reviews.isEmpty()) {

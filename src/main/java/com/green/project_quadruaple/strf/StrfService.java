@@ -4,7 +4,6 @@ import com.green.project_quadruaple.common.model.Constants;
 import com.green.project_quadruaple.strf.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,19 +17,26 @@ public class StrfService {
 
     public StrfDto getDetail(StrfSelReq req) {
         StrfDto dto = strfMapper.getDetail(req);
-
-        if (dto == null || dto.getStrfId() != req.getStrfId()) {
+        if (dto == null) {
             throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
         }
 
-        List<StrfSelRes> updatedResList = Optional.ofNullable(dto.getRes())
-                .orElse(Collections.emptyList());
+        if (dto.getStrfId() != req.getStrfId()) {
+            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
+        }
+
+        List<StrfSelRes> updatedResList = dto.getRes();
+        if (updatedResList == null) {
+            updatedResList = Collections.emptyList();
+        }
+
+
 
         dto.setRes(updatedResList);
         return dto;
     }
 
-    public List<ReviewSelRes> selReviewListWithCount(ReviewSelReq req) {
+    public List<ReviewSelRes> selReviewLisztWithCount(ReviewSelReq req) {
         List<ReviewSelRes> reviewList = strfMapper.selReviewListWithCount(req);
 
         if (reviewList.isEmpty()) {
