@@ -2,6 +2,7 @@ package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,15 +36,15 @@ public class UserController {
         if (result < 0) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, 200));
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     //아이디 중복 체크
     @GetMapping("sign-up")
     @Operation(summary = "아이디 중복 체크")
-    public ResultResponse checkDuplicatedEmail(@RequestParam String email) {
-        return userService.checkDuplicatedEmail(email);
+    public ResponseEntity<?> checkDuplicatedEmail(@RequestParam String email) {
+        boolean result = userService.checkDuplicatedEmail(email);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     //로그인
@@ -79,9 +80,9 @@ public class UserController {
 
         if (userInfo == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND, null));
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, userInfo));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
     }
 
     //마이페이지 수정
@@ -90,8 +91,8 @@ public class UserController {
     public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
         if (userUpdateRes == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY, 0));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, userUpdateRes));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userUpdateRes));
     }
 }
