@@ -61,6 +61,7 @@ public class UserController {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("code", ResponseCode.OK.getCode());
         responseBody.put("data", 200);  // 혹은 적절한 성공 데이터를 설정
+        responseBody.put("userId", res.getUserId());
         responseBody.put("accessToken", res.getAccessToken());
 
         return ResponseEntity.ok(responseBody);
@@ -68,8 +69,22 @@ public class UserController {
 
     @GetMapping("access-token")
     @Operation(summary = "토큰")
-    public String getAccessToken(HttpServletRequest req) {
-        return userService.getAccessToken(req);
+    public ResponseEntity<?> getAccessToken(HttpServletRequest req) {
+        try {
+            String accessToken = userService.getAccessToken(req); // Access Token 발급
+            return ResponseEntity.ok(accessToken);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Token has expired")) {
+                // Refresh Token 만료 시 401 반환
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseCode.UNAUTHORIZED.getCode());
+            } else if (e.getMessage().contains("AccessToken을 재발행 할 수 없습니다.")) {
+                // Refresh Token이 없거나 유효하지 않을 때
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseCode.BAD_GATEWAY.getCode());
+            }
+            // 기타 예외 처리
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ResponseCode.SERVER_ERROR.getCode());
+        }
     }
 
     //마이페이지 조회
