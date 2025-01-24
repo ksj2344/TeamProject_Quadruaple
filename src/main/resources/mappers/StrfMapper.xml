@@ -19,8 +19,8 @@
         , if (
         exists ( select 1
         from recent
-        where user_id = 102
-        and strf_id = 1
+        where user_id = #{userId}
+        and strf_id = #{strfId}
         and undo_recent = 0
         ) , 1 , 0 ) as recentCheck
         , j.inquired_at AS inquiredAt
@@ -44,7 +44,7 @@
         ON a.strf_id = f.strf_id
         LEFT JOIN recent j
         ON j.user_id = d.user_id
-        WHERE a.strf_id = 1;
+        WHERE a.strf_id = #{strfId};
     </select>
     <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
         SELECT
