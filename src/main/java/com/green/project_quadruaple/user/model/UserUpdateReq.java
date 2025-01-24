@@ -3,19 +3,18 @@ package com.green.project_quadruaple.user.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@AllArgsConstructor
+@Setter
 @ToString
 public class UserUpdateReq {
-    @JsonIgnore
-    private final long userId;
-    private final String email;
-    private final String name;
-    private final String pw;
-    private final String newPw;
-    private final String checkPw;
-    @JsonIgnore
-    private final String profilePic;
+    private long userId;
+    private String email;
+    private String name;
+    private String pw;
+    private String newPw;
+    private String checkPw;
+    private String profilePic;
 }

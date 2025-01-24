@@ -145,25 +145,23 @@ public class UserService {
         UserUpdateRes checkPassword = userMapper.checkPassword(req.getUserId());
 
         if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
-            return null;
+            throw new IllegalArgumentException("잘못된 사용자 ID 또는 비밀번호입니다.");
         }
 
         if (req.getNewPw().equals(checkPassword.getPw())) {
-            String hashedPassword = passwordEncoder.encode(req.getNewPw());
-            //userMapper.changePassword(req.getUserId(), hashedPassword);
-        } else {
-            return null;
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
         }
+        String hashedPassword = passwordEncoder.encode(req.getNewPw());
+        userMapper.changePassword(req.getEmail(), hashedPassword);
 
         if (profilePic != null && !profilePic.isEmpty()) {
-            String targetDir = "user/" + req.getUserId();
+            String targetDir = "user/" + req.getEmail();
             myFileUtils.makeFolders(targetDir);
 
             String savedFileName = myFileUtils.makeRandomFileName(profilePic);
-            // savedFileName req에 담아야 함
 
             // 기존 파일 삭제
-            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getUserId());
+            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getEmail());
             myFileUtils.deleteFolder(deletePath, false);
 
             // 파일 저장
@@ -171,15 +169,17 @@ public class UserService {
             try {
                 myFileUtils.transferTo(profilePic, filePath);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
         }
 
         int result = userMapper.updUser(req);
+        if (result == 0) {
+            throw new RuntimeException("사용자 정보를 업데이트하는 데 실패했습니다.");
+        }
 
         return UserUpdateRes.builder()
-                .userId(req.getUserId())
-                .pw(req.getPw())
+                .email(req.getEmail())
                 .email(req.getEmail())
                 .build();
     }
