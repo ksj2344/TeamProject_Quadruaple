@@ -15,11 +15,11 @@ public interface TripMapper {
 
     List<TripDto> getTripList(String currentAt, long userId);
 
-    List<LocationDto> selLocationList(long locationId);
+    List<LocationDto> selLocationList();
 
     void insTrip(PostTripReq req);
 
-    void insTripLocation(Long tripId, List<Long> idList);
+    void insTripLocation(long tripId, List<Long> idList);
 
     TripDetailDto getTrip(long tripId);
 
@@ -27,4 +27,13 @@ public interface TripMapper {
     List<TripDetailDto> selScheduleDetail(long tripId);
 
     void updateTrip(PatchTripReq req);
+    void insTripUser(long tripId, List<Long> userIdList);
+
+    void delTripMemo(List<Long> scheduleIdList);
+    void delTripUser(long tripId, List<Long> userIdList);
+    void delTripScheMemo(List<Long> scheduleIdList);
+
+    void delTripLocation(long tripId, List<Long> locationList);
+
+    List<Long> selScheduleUserId(long tripId, List<Long> userIdList);
 }

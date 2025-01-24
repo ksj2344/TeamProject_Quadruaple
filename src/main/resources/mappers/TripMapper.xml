@@ -105,6 +105,73 @@
     </resultMap>
 
     <update id="updateTrip">
-
+        UPDATE trip
+        SET title = #{title}
+            , start_at = #{startAt}
+            , end_at = #{endAt}
+        WHERE trip_id = #{tripId}
     </update>
+
+    <insert id="insTripUser">
+        INSERT INTO trip_user
+        (trip_id, user_id)
+        VALUES
+        <foreach collection="userIdList" item="userId" separator=",">
+            (#{tripId}, #{userId})
+        </foreach>
+    </insert>
+
+    <select id="selScheduleUserId">
+        SELECT
+            sm.schedule_memo_id
+        FROM sche_memo sm
+        JOIN memo m
+            ON m.memo_id = sm.schedule_memo_id
+            AND sm.trip_id = #{tripId}
+        JOIN trip_user tu
+            ON tu.trip_user_id = m.trip_user_id
+        WHERE tu.user_id IN (
+        <foreach collection="userIdList" item="userId" separator=",">
+            #{userId}
+        </foreach>
+        )
+    </select>
+
+    <delete id="delTripMemo">
+        DELETE FROM memo
+        WHERE memo_id IN (
+        <foreach collection="scheduleIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="delTripUser">
+        DELETE FROM trip_user
+        WHERE user_id IN (
+        <foreach collection="userIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+        AND trip_id = #{tripId}
+    </delete>
+
+    <delete id="delTripScheMemo">
+        DELETE FROM sche_memo
+        WHERE schedule_memo_id IN (
+        <foreach collection="scheduleIdList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="delTripLocation">
+        DELETE FROM trip_location
+        WHERE location_id IN (
+        <foreach collection="locationList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+        AND trip_id = #{tripId}
+    </delete>
 </mapper>
