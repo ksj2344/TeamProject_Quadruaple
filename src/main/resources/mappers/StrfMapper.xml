@@ -11,11 +11,20 @@
         , a.`open` , a.`close` , a.rest_date AS restDate
         , a.`explain` , a.detail , a.busi_num AS busiNum
         , b.detail_title AS locationName , h.amenity_id AS amenityId
-        , i.title AS amenityTtitle , g.price AS menuPrice
+        , g.price AS menuPrice
         , g.menu_id AS menuId , g.title AS menuTitle
         , g.menu_pic AS menuPic , d.name AS hostName
         , d.profile_pic AS hostProfilePic , COUNT(f.user_id) AS wishCnt
         , AVG(e.rating) AS ratingAvg
+        , if (
+        exists ( select 1
+        from recent
+        where user_id = 102
+        and strf_id = 1
+        and undo_recent = 0
+        ) , 1 , 0 ) as recentCheck
+        , j.inquired_at AS inquiredAt
+        , GROUP_CONCAT(i.title ORDER BY a.strf_id SEPARATOR ', ') AS amenityTitles
         FROM stay_tour_restaur_fest a
         JOIN location_detail b
         ON a.location_detail_id = b.location_detail_id
@@ -26,14 +35,16 @@
         JOIN `user` d
         ON c.user_id = d.user_id
         LEFT JOIN review e
-        ON e.user_id = d.user_id
+        ON e.strf_id = a.strf_id
         LEFT JOIN amenipoint h
         ON h.strf_id = a.strf_id
         LEFT JOIN amenity i
         ON h.amenity_id = i.amenity_id
         LEFT JOIN wishlist f
-        ON f.user_id = d.user_id
-        WHERE a.strf_id = #{strfId}
+        ON a.strf_id = f.strf_id
+        LEFT JOIN recent j
+        ON j.user_id = d.user_id
+        WHERE a.strf_id = 1;
     </select>
     <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
         SELECT
@@ -81,18 +92,22 @@
         <result property="restDate" column="restDate" />
         <result property="explain" column="explain" />
         <result property="detail" column="detail" />
-        <result property="locationName" column="locationName" />
         <result property="busiNum" column="busiNum" />
-        <result property="amenity" column="amenity" />
+        <result property="locationName" column="locationName" />
+        <result property="amenityId" column="amenityId" />
+        <result property="amenityTitle" column="amenityTitle" />
+        <result property="menuPrice" column="menuPrice" />
         <result property="menuId" column="menuId" />
         <result property="menuTitle" column="menuTitle" />
         <result property="menuPic" column="menuPic" />
-        <result property="wishCnt" column="wishCnt" />
-        <result property="ratingAvg" column="ratingAvg" />
         <result property="hostName" column="hostName" />
         <result property="hostProfilePic" column="hostProfilePic" />
+        <result property="wishCnt" column="wishCnt" />
+        <result property="ratingAvg" column="ratingAvg" />
         <result property="wishIn" column="wishIn" />
         <result property="ratingCnt" column="ratingCnt" />
+        <result property="recentCheck" column="recentCheck" />
+        <result property="inquiredAt" column="inquiredAt" />
         <collection property="res" ofType="com.green.project_quadruaple.strf.model.StrfSelRes">
         </collection>
     </resultMap>
