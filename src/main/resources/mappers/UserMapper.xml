@@ -58,13 +58,30 @@
     <select id="checkPassword">
         SELECT pw
           FROM user
-         WHERE userId = #{userId}
+         WHERE user_id = #{userId}
     </select>
 
     <update id="changePassword">
         UPDATE user
            SET pw = #{pw}
-         WHERE userId = #{userId}
+         WHERE user_id = #{userId}
+    </update>
+
+    <!-- 마이페이지 수정 -->
+    <update id="updUser">
+        UPDATE user
+        <set>
+        <if test=" newUpw != null and newUpw != '' and checkUpw != null and checkUpw != '' " >
+            pw = #{newUpw}
+        </if>
+        <if test=" name != null and name != '' ">
+            , name = #{name}
+        </if>
+        <if test="profilePic != null">
+            , profilePic = #{profilePic}
+        </if>
+        </set>
+        WHERE user_id = #{userId}
     </update>
 
 </mapper>
