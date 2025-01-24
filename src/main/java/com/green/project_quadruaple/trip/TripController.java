@@ -40,8 +40,8 @@ public class TripController {
         return tripService.getTrip(tripId);
     }
 
-    @PatchMapping("trip")
-    public ResponseWrapper patchTrip(PatchTripReq req) {
-        return tripService.patchTrip(req);
-    }
+//    @PatchMapping("trip")
+//    public ResponseWrapper patchTrip(PatchTripReq req) {
+//        return tripService.patchTrip(req);
+//    }
 }

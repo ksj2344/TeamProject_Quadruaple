@@ -88,8 +88,8 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-    @Transactional
-    public ResponseWrapper patchTrip(PatchTripReq req) {
-        tripMapper.updateTrip(req);
-    }
+//    @Transactional
+//    public ResponseWrapper patchTrip(PatchTripReq req) {
+//        tripMapper.updateTrip(req);
+//    }
 }
