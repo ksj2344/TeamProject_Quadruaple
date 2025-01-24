@@ -19,9 +19,9 @@
         , if (
         exists ( select 1
         from recent
-        where user_id = #{userId}
-        and strf_id = #{strfId}
-        and undo_recent = 0
+        where d.user_id = #{userId}
+        and a.strf_id = #{strfId}
+        and j.undo_recent = 0
         ) , 1 , 0 ) as recentCheck
         , j.inquired_at AS inquiredAt
         , GROUP_CONCAT(i.title ORDER BY a.strf_id SEPARATOR ', ') AS amenityTitles
