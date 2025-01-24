@@ -3,11 +3,9 @@ package com.green.project_quadruaple.user;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.constant.JwtConst;
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
-import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
@@ -74,18 +72,18 @@ public class UserService {
         return 1;
     }
 
-    public ResultResponse checkDuplicatedEmail(String email) {
+    public boolean checkDuplicatedEmail(String email) {
         boolean isDuplicated = userMapper.isEmailDuplicated(email);
         if (isDuplicated) {
-            return ResultResponse.badGateway();
+            return false;
         }
-        return ResultResponse.success();
+        return true;
     }
 
     //-------------------------------------------------
     // 로그인
     @Transactional
-    public ResultResponse signIn(UserSignInReq req, HttpServletResponse response) {
+    public UserSignInRes signIn(UserSignInReq req, HttpServletResponse response) {
         UserSelOne userSelOne = userMapper.selUserByEmail(req).orElseThrow(() -> {
             throw new RuntimeException("아이디를 확인해 주세요.");
         });
@@ -108,7 +106,11 @@ public class UserService {
         // RT를 쿠키에 담는다.
         cookieUtils.setCookie(response, jwtConst.getRefreshTokenCookieName(), refreshToken, jwtConst.getRefreshTokenCookieExpiry());
 
-        return new UserSignInRes(ResultResponse.success().getCode(), userSelOne.getUserId(), userSelOne.getName(), accessToken);
+        return UserSignInRes.builder()
+                .accessToken(accessToken)
+                .userId(userSelOne.getUserId())
+                .name(userSelOne.getName())
+                .build();
     }
 
     public String getAccessToken(HttpServletRequest req) {
@@ -127,28 +129,30 @@ public class UserService {
 
     //-------------------------------------------------
     // 마이페이지 조회
-    public ResultResponse infoUser(long userId) {
+    public UserInfoDto infoUser(long userId) {
         UserInfo userInfo = userMapper.selUserInfo(userId);
-        if (userInfo == null) {
-            return ResultResponse.notFound();
-        }
-        return new UserInfoDto(ResultResponse.success().getCode(), userInfo.getUserId(), userInfo.getName(), userInfo.getEmail(), userInfo.getProfilePIc());
+        return UserInfoDto.builder()
+                .userId(userId)
+                .name(userInfo.getName())
+                .email(userInfo.getEmail())
+                .profilePIc(userInfo.getProfilePIc())
+                .build();
     }
 
     //-------------------------------------------------
     // 마이페이지 수정
-    public ResultResponse patchUser(MultipartFile profilePic, UserUpdateReq req) {
+    public UserUpdateRes patchUser(MultipartFile profilePic, UserUpdateReq req) {
         UserUpdateRes checkPassword = userMapper.checkPassword(req.getUserId());
 
         if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
-            return ResultResponse.badGateway();
+            return null;
         }
 
         if (req.getNewPw().equals(checkPassword.getPw())) {
             String hashedPassword = passwordEncoder.encode(req.getNewPw());
-            userMapper.changePassword(req.getUserId(), hashedPassword);
+            //userMapper.changePassword(req.getUserId(), hashedPassword);
         } else {
-            return ResultResponse.badGateway();
+            return null;
         }
 
         if (profilePic != null && !profilePic.isEmpty()) {
@@ -171,6 +175,12 @@ public class UserService {
             }
         }
 
-        return null;
+        int result = userMapper.updUser(req);
+
+        return UserUpdateRes.builder()
+                .userId(req.getUserId())
+                .pw(req.getPw())
+                .email(req.getEmail())
+                .build();
     }
 }

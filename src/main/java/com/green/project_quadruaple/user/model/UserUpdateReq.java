@@ -16,5 +16,6 @@ public class UserUpdateReq {
     private final String pw;
     private final String newPw;
     private final String checkPw;
+    @JsonIgnore
     private final String profilePic;
 }
