@@ -60,8 +60,8 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-    public ResponseWrapper<LocationRes> getLocationList(long locationId) {
-        List<LocationDto> dto = tripMapper.selLocationList(locationId);
+    public ResponseWrapper<LocationRes> getLocationList() {
+        List<LocationDto> dto = tripMapper.selLocationList();
         LocationRes res = new LocationRes();
         res.setLocationList(dto);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
@@ -88,8 +88,21 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-//    @Transactional
-//    public ResponseWrapper patchTrip(PatchTripReq req) {
-//        tripMapper.updateTrip(req);
-//    }
+    @Transactional
+    public ResultResponse patchTrip(PatchTripReq req) {
+        long tripId = req.getTripId();
+        List<Long> scheduleUserIdList = tripMapper.selScheduleUserId(tripId, req.getDelUserList());
+        tripMapper.updateTrip(req);
+
+        // 참여 유저 수정
+        tripMapper.insTripUser(tripId, req.getInsUserList());
+        tripMapper.delTripMemo(scheduleUserIdList);
+        tripMapper.delTripUser(tripId, req.getDelUserList());
+        tripMapper.delTripScheMemo(scheduleUserIdList);
+
+        // 여행 지역 수정
+        tripMapper.insTripLocation(tripId, req.getInsLocationList());
+        tripMapper.delTripLocation(tripId, req.getDelLocationList());
+        return ResultResponse.success();
+    }
 }
