@@ -12,10 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class TripDetailRes extends ResultResponse {
-    public TripDetailRes() {
-        super(ResponseCode.OK.getCode());
-    }
+public class TripDetailRes {
 
     private long totalDistance;
     private int totalDuration;

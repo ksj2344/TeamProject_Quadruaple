@@ -33,21 +33,17 @@ public class UserController {
         int result = userService.signUp(profilePic, p);
 
         if (result < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY, 0));
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, 200));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
     //아이디 중복 체크
     @GetMapping("sign-up")
     @Operation(summary = "아이디 중복 체크")
-    public ResponseEntity<?> checkDuplicatedEmail(@RequestParam String email) {
-        boolean result = userService.checkDuplicatedEmail(email);
-
-        if (!result) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseCode.BAD_GATEWAY.getCode());
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK, 200));
+    public ResultResponse checkDuplicatedEmail(@RequestParam String email) {
+        return userService.checkDuplicatedEmail(email);
     }
 
     //로그인
