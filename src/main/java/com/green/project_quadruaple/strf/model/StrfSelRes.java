@@ -6,6 +6,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -49,7 +54,7 @@ public class StrfSelRes {
     @Schema(description = "편의시설")
     private String amenityId;
     @Schema(description = "편의이름")
-    private String amenityTitle;
+    private List<String> amenityTitles;
     @Schema(description = "메뉴 가격")
     private String menuPrice;
     @Schema(description = "메뉴 ID")
@@ -57,7 +62,7 @@ public class StrfSelRes {
     @Schema(description = "메뉴 이름")
     private String menuTitle;
     @Schema(description = "메뉴 사진")
-    private String menuPic;
+    private List<MenuDto> menuPics;  // 메뉴 사진
     @Schema(description = "사업자 이름")
     private String hostName;
     @Schema(description = "사업자 사진")
@@ -74,4 +79,14 @@ public class StrfSelRes {
     private int recentCheck;
     @Schema(description = "최근 본 목록에서 상품 조회 시간")
     private String inquiredAt;
+
+    public List<String> getAmenityTitles() {
+        return amenityTitles;
+    }
+
+    public void setAmenityTitles(String amenityTitles) {
+        this.amenityTitles = amenityTitles == null || amenityTitles.isEmpty()
+                ? new ArrayList<>()
+                : Arrays.asList(amenityTitles.split(", "));
+    }
 }

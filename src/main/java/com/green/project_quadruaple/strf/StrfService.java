@@ -30,11 +30,9 @@ public class StrfService {
             updatedResList = Collections.emptyList();
         }
 
-
-
-        dto.setRes(updatedResList);
         return dto;
     }
+
 
     public List<ReviewSelRes> selReviewLisztWithCount(ReviewSelReq req) {
         List<ReviewSelRes> reviewList = strfMapper.selReviewListWithCount(req);

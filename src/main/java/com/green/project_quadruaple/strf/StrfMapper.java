@@ -18,6 +18,9 @@ public interface StrfMapper {
     // 특정 리뷰 ID 리스트에 해당하는 사진 정보를 가져오는 메서드
     List<StrfPicSel> selReviewPictures(List<Long> reviewIds);
 
+    StrfDto getStrfDetail(StrfSelReq req);
+    StrfDto strfDetailResultMap (StrfDto dto);
+
     // 예약 관련 메서드 (추후 구현 예정)
     // void postBooking(BookingReq req);
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -32,21 +34,31 @@ public class StrfDto {
     private String busiNum;  // 사업자 번호
     private String locationName; // 지역 이름
     private long amenityId;  // 편의시설
-    private String amenityTitles;
+    private List<String> amenityTitles;
     private int menuPrice;
     private String menuId;   // 메뉴 ID
     private String menuTitle; // 메뉴 이름
-    private String menuPic;  // 메뉴 사진
     private String hostName; // 사업자 이름
     private String hostProfilePic; // 사업자 사진
     private int recentCheck; // 최근 본 목록 비활성화
     private String inquiredAt; // 최근 본 목록에서 상품의 조회 시간
     private int wishCnt;     // 찜 개수
     private int ratingAvg;   // 평점 평균
+    private List<MenuDto> menuPics;  // 메뉴 사진
 
 
     private boolean wishIn;  // 찜 여부
     private int ratingCnt;   // 평점 개수
 
     private List<StrfSelRes> res; // StrfSelRes 객체 리스트
+
+    public List<String> getAmenityTitles() {
+        return amenityTitles;
+    }
+
+    public void setAmenityTitles(String amenityTitles) {
+        this.amenityTitles = amenityTitles == null || amenityTitles.isEmpty()
+                ? new ArrayList<>()
+                : Arrays.asList(amenityTitles.split(", "));
+    }
 }
