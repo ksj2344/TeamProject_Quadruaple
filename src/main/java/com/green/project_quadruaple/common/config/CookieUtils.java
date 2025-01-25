@@ -14,12 +14,15 @@ import java.util.Optional;
 public class CookieUtils {
     // Req header에서 내가 원하는 쿠키를 찾는 메소드
     public Cookie getCookie(HttpServletRequest req, String name) {
-        // Optional.ofNullable 메소드는 null을 가질 수 있는 Optional 생성
-        Optional<Cookie[]> optCookie = Optional.ofNullable(req.getCookies());
-        return Arrays.stream(optCookie.orElseThrow(() -> new RuntimeException("Cookie not found"))) //Stream<Cookie[]> 생성
-                .filter(item -> item.getName().equals(name)) // filter 조건에 맞는 Stream을 리턴 (중간 연산)
-                .findFirst() //첫 번째 item 선택해서 Optional로 리턴 (최종 연산)
-                .orElseThrow(() -> new RuntimeException("Cookie not found"));
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null && cookies.length > 0) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
     }
 
     // Res header에 내가 원하는 쿠키를 담는 메소드
@@ -31,4 +34,3 @@ public class CookieUtils {
         res.addCookie(cookie);
     }
 }
-
