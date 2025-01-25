@@ -66,7 +66,7 @@ public class TokenProvider {
 
     // Spring Security에서 인증 처리를 해주어야 한다. 그 때 Authentication 객체가 필요
     public Authentication getAuthentication(String token) { //인증, 인가할 때 쓰는
-       UserDetails userDetails = getUserDetailsFromToken(token);
+       MyUserDetails userDetails = getUserDetailsFromToken(token);
        return userDetails == null ? null : new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
@@ -82,7 +82,7 @@ public class TokenProvider {
         return jwtUser;
     }
 
-    public UserDetails getUserDetailsFromToken(String token) {
+    public MyUserDetails getUserDetailsFromToken(String token) {
         JwtUser jwtUser = getJwtUserFromToken(token);
         MyUserDetails userDetails = new MyUserDetails();
         userDetails.setJwtUser(jwtUser);
