@@ -56,7 +56,7 @@
 
     <!-- 비밀번호 확인 -->
     <select id="checkPassword">
-        SELECT pw
+        SELECT user_id AS userId, pw
           FROM user
          WHERE user_id = #{userId}
     </select>
@@ -71,8 +71,8 @@
     <update id="updUser">
         UPDATE user
         <set>
-        <if test=" newUpw != null and newUpw != '' and checkUpw != null and checkUpw != '' " >
-            pw = #{newUpw}
+        <if test=" newPw != null and newPw != '' and checkPw != null and checkPw != '' " >
+            pw = #{newPw}
         </if>
         <if test=" name != null and name != '' ">
             , name = #{name}
@@ -81,7 +81,7 @@
             , profilePic = #{profilePic}
         </if>
         </set>
-        WHERE user_id = #{userId}
+        WHERE email = #{email}
     </update>
 
 </mapper>

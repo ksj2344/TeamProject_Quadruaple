@@ -10,7 +10,6 @@ import lombok.ToString;
 @Builder
 @ToString
 public class UserUpdateRes {
-    @JsonIgnore
     private final long userId;
     private final String email;
     private final String pw;
