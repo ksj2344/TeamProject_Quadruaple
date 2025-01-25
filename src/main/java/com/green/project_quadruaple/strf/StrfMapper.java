@@ -23,5 +23,6 @@ public interface StrfMapper {
 
     // 예약 관련 메서드 (추후 구현 예정)
     // void postBooking(BookingReq req);
+    //
 }
 
