@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.home.model.res;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,8 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
-public class userTripDto {
+public class UserTripDto {
     private long tripId;
     private String locationPic;
     private String title;

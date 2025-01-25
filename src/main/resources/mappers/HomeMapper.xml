@@ -26,14 +26,14 @@
                                               ORDER BY
                                               priority DESC,
         ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
-        LIMIT #{size}
+        LIMIT 10
     </select>
 
     <select id="getPopularLocation">
         SELECT
-        LD.detail_title,
-        L.location_pic,
-        COUNT(TL.location_id) AS tripedCnt
+        L.location_id AS locationId,
+        LD.detail_title AS locationTitle,
+        L.location_pic AS locationPic,
         FROM
         location L
         LEFT JOIN
@@ -47,18 +47,26 @@
         LIMIT 10
     </select>
 
+    <resultMap id="RecentStrf" type="com.green.project_quadruaple.home.model.res.RecentStrf">
+        <id property="category" column="category" />
+        <collection property="recent" resultMap="recent" />
+    </resultMap>
 
-    <select id="getRecent">
+    <resultMap id="RecentDto" type="com.green.project_quadruaple.home.model.res.RecentDto">
+
+    </resultMap>
+
+    <select id="getRecent" resultMap="RecentStrf">
         WITH CategoryData AS (
         SELECT
         A.category,
-        A.strf_id AS strfID,
+        A.strf_id AS strfId,
         A.title AS strfTitle,
         SP.pic_name AS strfPic,
         LD.detail_title AS locationName,
         IF(EXISTS (SELECT 1 FROM wishlist W WHERE W.strf_id = A.strf_id AND W.user_id = 101), 1, 0) AS wishIn,
         COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
-        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt, R.inquired_at
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt
         FROM
         stay_tour_restaur_fest A
         LEFT JOIN
@@ -98,6 +106,8 @@
         LIMIT 6
         ) AS TourData
     </select>
+
+
 
     <select id="getRecommend">
         SELECT
@@ -139,14 +149,14 @@
         LIMIT 10
     </select>
 
-    <resultMap id="userInfo" type="com.green.project_quadruaple.home.model.res.myPageRes">
+    <resultMap id="userInfo" type="com.green.project_quadruaple.home.model.res.MyPageRes">
         <id property="name" column="name" />
         <result property="profilePic" column="profilePic" />
         <result property="couponCnt" column="couponCnt" />
         <collection property="tripList" resultMap="tripList" />
     </resultMap>
 
-    <resultMap id="tripList" type="com.green.project_quadruaple.home.model.res.userTripDto">
+    <resultMap id="tripList" type="com.green.project_quadruaple.home.model.res.UserTripDto">
         <id property="tripId" column="tripId" />
         <result property="locationPic" column="locationPic" />
         <result property="title" column="title" />
