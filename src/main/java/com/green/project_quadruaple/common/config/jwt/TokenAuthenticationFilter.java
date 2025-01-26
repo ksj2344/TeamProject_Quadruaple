@@ -30,19 +30,26 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String token = getAccessToken(authorizationHeader);
         log.info("token: {}", token);
 
-        if(token != null) {
+        if (token != null) {
             try {
+                // 토큰에서 Authentication 객체를 얻어옴
                 Authentication auth = tokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                if (auth != null) {
+                    log.info("Authentication is set: {}", auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                } else {
+                    log.warn("Authentication is null.");
+                }
             } catch (Exception e) {
                 request.setAttribute("exception", e);
+                log.error("Error during authentication", e);
             }
         }
         filterChain.doFilter(request, response);
     }
 
     private String getAccessToken(String authorizationHeader) {
-        if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) { // 문자열이 TOKEN_PREFIX 로 시작하는 지 안하는 지
+        if (authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)) { // 문자열이 TOKEN_PREFIX 로 시작하는지 확인
             return authorizationHeader.substring(TOKEN_PREFIX.length());
         }
         return null;
