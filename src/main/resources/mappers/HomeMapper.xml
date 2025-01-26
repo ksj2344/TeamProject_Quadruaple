@@ -47,13 +47,19 @@
         LIMIT 10
     </select>
 
-    <resultMap id="RecentStrf" type="com.green.project_quadruaple.home.model.res.RecentStrf">
+    <resultMap id="RecentStrf" type="com.green.project_quadruaple.home.res.RecentStrf">
         <id property="category" column="category" />
         <collection property="recent" resultMap="recent" />
     </resultMap>
 
-    <resultMap id="RecentDto" type="com.green.project_quadruaple.home.model.res.RecentDto">
-
+    <resultMap id="RecentDto" type="com.green.project_quadruaple.home.res.RecentDto">
+        <id property="strfId" column="strfId" />
+        <result property="strfTitle" column="strfTitle" />
+        <result property="strfPic" column="strfPic" />
+        <result property="locationName" column="locationName" />
+        <result property="wishIn" column="wishIn" />
+        <result property="averageRating" column="averageRating" />
+        <result property="wishCnt" column="wishCnt" />
     </resultMap>
 
     <select id="getRecent" resultMap="RecentStrf">
@@ -127,7 +133,7 @@
         JOIN trip T ON T.trip_id = TL.trip_id
         JOIN trip_user TU ON TU.trip_id = T.trip_id
         WHERE
-        TU.user_id = 101
+        TU.user_id = #{userId}
         AND NOW() <![CDATA[ < ]]> T.end_at
         )
         AND NOT EXISTS (
@@ -137,26 +143,26 @@
         JOIN trip_user E ON E.trip_id = D.trip_id
         WHERE
         C.strf_id = A.strf_id
-        AND E.user_id = 101
+        AND E.user_id = #{userId}
         )
         AND NOT EXISTS (
         SELECT 1
         FROM wishlist W
         WHERE W.strf_id = A.strf_id
-        AND W.user_id = 101
+        AND W.user_id = #{userId}
         )
         AND A.category !='FEST'
         LIMIT 10
     </select>
 
-    <resultMap id="userInfo" type="com.green.project_quadruaple.home.model.res.MyPageRes">
+    <resultMap id="userInfo" type="com.green.project_quadruaple.home.res.MyPageRes">
         <id property="name" column="name" />
         <result property="profilePic" column="profilePic" />
         <result property="couponCnt" column="couponCnt" />
         <collection property="tripList" resultMap="tripList" />
     </resultMap>
 
-    <resultMap id="tripList" type="com.green.project_quadruaple.home.model.res.UserTripDto">
+    <resultMap id="tripList" type="com.green.project_quadruaple.home.res.UserTripDto">
         <id property="tripId" column="tripId" />
         <result property="locationPic" column="locationPic" />
         <result property="title" column="title" />
