@@ -1,4 +1,5 @@
 package com.green.project_quadruaple.booking.model;
 
-public class req {
+public class BookingGetRes {
+
 }
