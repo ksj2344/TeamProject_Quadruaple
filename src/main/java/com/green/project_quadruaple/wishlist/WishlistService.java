@@ -1,6 +1,6 @@
 package com.green.project_quadruaple.wishlist;
 
-import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
+//import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
 import com.green.project_quadruaple.wishlist.model.WishlistMapper;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;

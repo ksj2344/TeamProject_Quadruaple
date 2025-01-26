@@ -2,6 +2,37 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.booking.BookingMapper">
+    <select id="bookingList">
+    SELECT
+    b.booking_id AS bookingId,
+    s.title AS strfTitle,
+    b.check_in AS checkIn,
+    b.check_out AS checkOut,
+    m.price AS menuPrice,
+    DATE_FORMAT(b.check_in, '%Y년 %m월 %d일 (%W) %H:%i') AS checkInFormatted,
+    DATE_FORMAT(b.check_out, '%Y년 %m월 %d일 (%W) %H:%i') AS checkOutFormatted
+    FROM booking b
+    JOIN menu m ON b.menu_id = m.menu_id
+    JOIN stay_tour_restaur_fest s ON m.strf_id = s.strf_id
+    WHERE b.check_out <![CDATA[ > ]]> NOW();
+    </select>
+    <select id="bookingCompleteList">
+        SELECT
+        b.booking_id AS bookingId,
+        s.title AS strfTitle,
+        b.check_in AS checkIn,
+        b.check_out AS checkOut,
+        m.price AS menuPrice,
+        DATE_FORMAT(b.check_in, '%Y년 %m월 %d일 (%W) %H:%i') AS checkInFormatted,
+        DATE_FORMAT(b.check_out, '%Y년 %m월 %d일 (%W) %H:%i') AS checkOutFormatted,
+        IF(r.review_id IS NULL, '리뷰 작성', '리뷰 조회') AS reviewStatus
+        FROM booking b
+        JOIN menu m ON b.menu_id = m.menu_id
+        JOIN stay_tour_restaur_fest s ON m.strf_id = s.strf_id
+        LEFT JOIN review r ON r.booking_id = b.booking_id
+        WHERE b.check_out <![CDATA[ <= ]]> NOW();
+    </select>
+
 
 
 </mapper>
