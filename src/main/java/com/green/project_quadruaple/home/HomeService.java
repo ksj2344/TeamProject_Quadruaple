@@ -35,7 +35,7 @@ public class HomeService {
         long userId=101L;
         List<MyPageRes> myPageRes=homeMapper.pushHamburger(userId);
         if(myPageRes==null){
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),myPageRes));
