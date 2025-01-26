@@ -6,6 +6,7 @@ import com.green.project_quadruaple.common.config.constant.JwtConst;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
@@ -33,7 +34,7 @@ public class UserService {
     private final MyFileUtils myFileUtils;
     private final TokenProvider jwtTokenProvider;
     private final CookieUtils cookieUtils;
-    private final JwtConst jwtConst;
+    private final AuthenticationFacade authenticationFacade;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
