@@ -1,6 +1,6 @@
-package com.green.project_quadruaple.picmanager;
+package com.green.project_quadruaple.datamanager;
 
-import com.green.project_quadruaple.picmanager.model.StrfPicReq;
+import com.green.project_quadruaple.datamanager.model.StrfPicReq;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
