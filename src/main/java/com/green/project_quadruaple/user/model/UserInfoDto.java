@@ -8,7 +8,7 @@ import lombok.*;
 @ToString
 public class UserInfoDto {
     @JsonIgnore
-    private final long userId;
+    private final long signedUserId;
     private final String email;
     private final String name;
     private final String profilePIc;

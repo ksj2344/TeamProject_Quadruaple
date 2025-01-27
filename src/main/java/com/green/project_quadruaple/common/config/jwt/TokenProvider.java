@@ -2,9 +2,9 @@ package com.green.project_quadruaple.common.config.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.green.project_quadruaple.common.config.security.MyUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TokenProvider {
@@ -49,7 +50,7 @@ public class TokenProvider {
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(new Date())
                 .expiration(expiry)
-                .claim("signedUser", makeClaimByUserToString(jwtUser))
+                .claim("signedUserId", makeClaimByUserToString(jwtUser))
                 .signWith(secretKey)
                 .compact();
     }
@@ -58,7 +59,19 @@ public class TokenProvider {
         // 객체 자체를 JWT에 담고 싶어서 객체를 직렬화(여기서는 객체를 String으로 바꾸는 작업)
         // jwtUser에 담고 있는 데이터를 JSON 형태의 문자열로 변환 - 직렬화
         try {
-            return objectMapper.writeValueAsString(jwtUser);
+            String json = objectMapper.writeValueAsString(jwtUser);
+            return json;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public JwtUser getJwtUserFromToken(String token) {
+        Claims claims = getClaims(token);
+        String json = claims.get("signedUserId", String.class);
+        try {
+            return objectMapper.readValue(json, JwtUser.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -66,35 +79,8 @@ public class TokenProvider {
 
     // Spring Security에서 인증 처리를 해주어야 한다. 그 때 Authentication 객체가 필요
     public Authentication getAuthentication(String token) { //인증, 인가할 때 쓰는
-<<<<<<< HEAD
-       MyUserDetails userDetails = getUserDetailsFromToken(token);
-=======
-       UserDetails userDetails = getUserDetailsFromToken(token);
->>>>>>> 01035d4 (access-token 재발행 이슈 해결 중)
-       return userDetails == null ? null : new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
-    public JwtUser getJwtUserFromToken(String token) {
-        Claims claims = getClaims(token);
-        String json = (String)claims.get("signedUser");
-        JwtUser jwtUser = null;
-        try {
-            jwtUser = objectMapper.readValue(json, JwtUser.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return jwtUser;
-    }
-
-<<<<<<< HEAD
-    public MyUserDetails getUserDetailsFromToken(String token) {
-=======
-    public UserDetails getUserDetailsFromToken(String token) {
->>>>>>> 01035d4 (access-token 재발행 이슈 해결 중)
-        JwtUser jwtUser = getJwtUserFromToken(token);
-        MyUserDetails userDetails = new MyUserDetails();
-        userDetails.setJwtUser(jwtUser);
-        return userDetails;
+        UserDetails userDetails = getJwtUserFromToken(token);
+        return userDetails == null ? null : new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
     private Claims getClaims(String token) {
