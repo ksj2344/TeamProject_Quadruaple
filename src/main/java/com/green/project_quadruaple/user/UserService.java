@@ -101,8 +101,8 @@ public class UserService {
         userSelOne.setRoles(roles);
 
         // AT, RT
-        JwtUser jwtUser = new JwtUser();
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(20));
+        JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
@@ -135,10 +135,11 @@ public class UserService {
 
     //-------------------------------------------------
     // 마이페이지 조회
-    public UserInfoDto infoUser(long userId) {
-        UserInfo userInfo = userMapper.selUserInfo(userId);
+    public UserInfoDto infoUser() {
+        long signedUserId = authenticationFacade.getSignedUserId();
+        UserInfo userInfo = userMapper.selUserInfo(signedUserId);
         return UserInfoDto.builder()
-                .userId(userId)
+                .signedUserId(signedUserId)
                 .name(userInfo.getName())
                 .email(userInfo.getEmail())
                 .profilePIc(userInfo.getProfilePIc())
@@ -148,7 +149,8 @@ public class UserService {
     //-------------------------------------------------
     // 마이페이지 수정
     public UserUpdateRes patchUser(MultipartFile profilePic, UserUpdateReq req) {
-        UserUpdateRes checkPassword = userMapper.checkPassword(req.getUserId());
+        long signedUserId = authenticationFacade.getSignedUserId();
+        UserUpdateRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
 
         if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
             throw new IllegalArgumentException("잘못된 사용자 ID 또는 비밀번호입니다.");
@@ -157,8 +159,15 @@ public class UserService {
         if (req.getNewPw().equals(checkPassword.getPw())) {
             throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
         }
-        String hashedPassword = passwordEncoder.encode(req.getNewPw());
-        userMapper.changePassword(req.getEmail(), hashedPassword);
+
+        // newPw가 null이 아닌 경우에만 비밀번호 변경
+        if (req.getNewPw() != null && !req.getNewPw().equals(checkPassword.getPw())) {
+            String hashedPassword = passwordEncoder.encode(req.getNewPw());
+            userMapper.changePassword(signedUserId, hashedPassword);
+            req.setNewPw(hashedPassword);
+        } else if (req.getNewPw() != null) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
 
         if (profilePic != null && !profilePic.isEmpty()) {
             String targetDir = "user/" + req.getEmail();
@@ -185,8 +194,9 @@ public class UserService {
         }
 
         return UserUpdateRes.builder()
-                .email(req.getEmail())
-                .email(req.getEmail())
+                .signedUserId(signedUserId)
+                .pw(req.getNewPw())
                 .build();
     }
 }
+//
