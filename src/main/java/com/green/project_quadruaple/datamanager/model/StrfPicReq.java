@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.picmanager.model;
+package com.green.project_quadruaple.datamanager.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
