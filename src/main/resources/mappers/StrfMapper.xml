@@ -2,12 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
+
     <select id="getDetail" resultMap="strfDetailResultMap">
     SELECT
     a.strf_id AS strfId, a.category, a.title AS strfTitle,
     a.lat AS latit, a.lng AS longitude, a.address,
     a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,
-    a.`open`, a.`close`, a.rest_date AS restDate,
+    a.open_check as openCheck, a.close_check as closeCheck
+    , a.rest_date AS restDate,
     a.`explain`, a.detail, a.busi_num AS busiNum,
     b.detail_title AS locationName, d.name AS hostName,
     d.profile_pic AS hostProfilePic, COUNT(DISTINCT f.user_id) AS wishCnt,
@@ -40,15 +42,14 @@
         FROM recent
         WHERE j.user_id = d.user_id
         AND a.strf_id = #{strfId}
-        ) THEN '활성화'
+        ) THEN 1
         WHEN EXISTS(
         SELECT 1
         FROM recent
         WHERE j.user_id = d.user_id
         AND a.strf_id = #{strfId}
         AND j.undo_recent = 1
-        ) THEN '비활성화'
-        ELSE '기타'
+        ) THEN 0
         END AS recentCheckStatus
     FROM
     stay_tour_restaur_fest a
@@ -62,10 +63,9 @@
     LEFT JOIN wishlist f ON a.strf_id = f.strf_id
     LEFT JOIN recent j ON j.user_id = d.user_id
     LEFT JOIN strf_pic l ON a.strf_id = l.strf_id
-    <!--
+
         LEFT JOIN
         wishlist w ON a.strf_id = w.strf_id AND w.user_id = #{userId}
-    -->
 
         WHERE a.strf_id = #{strfId}
     GROUP BY
@@ -84,8 +84,8 @@
         <result property="tell" column="tell" />
         <result property="startAt" column="startAt" />
         <result property="endAt" column="endAt" />
-        <result property="open" column="open" />
-        <result property="close" column="close" />
+        <result property="openCheck" column="openCheck" />
+        <result property="closeCheck" column="closeCheck" />
         <result property="restDate" column="restDate" />
         <result property="explain" column="explain" />
         <result property="detail" column="detail" />
@@ -117,5 +117,6 @@
             <result property="pic" column="strfPic" />
         </collection>
     </resultMap>
+
 
 </mapper>
