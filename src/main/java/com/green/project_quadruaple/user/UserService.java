@@ -156,17 +156,15 @@ public class UserService {
             throw new IllegalArgumentException("잘못된 사용자 ID 또는 비밀번호입니다.");
         }
 
-        if (req.getNewPw().equals(checkPassword.getPw())) {
-            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
-        }
+        // newPw가 null이 아니고 기존 비밀번호와 같지 않은 경우에만 비밀번호 변경
+        if (req.getNewPw() != null) {
+            if (req.getNewPw().equals(checkPassword.getPw())) {
+                throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+            }
 
-        // newPw가 null이 아닌 경우에만 비밀번호 변경
-        if (req.getNewPw() != null && !req.getNewPw().equals(checkPassword.getPw())) {
             String hashedPassword = passwordEncoder.encode(req.getNewPw());
             userMapper.changePassword(signedUserId, hashedPassword);
             req.setNewPw(hashedPassword);
-        } else if (req.getNewPw() != null) {
-            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
         }
 
         if (profilePic != null && !profilePic.isEmpty()) {
@@ -195,7 +193,7 @@ public class UserService {
 
         return UserUpdateRes.builder()
                 .signedUserId(signedUserId)
-                .pw(req.getNewPw())
+                .pw(req.getNewPw())  // 새로운 비밀번호가 없으면 null일 수 있으므로 그대로 반환
                 .build();
     }
 }
