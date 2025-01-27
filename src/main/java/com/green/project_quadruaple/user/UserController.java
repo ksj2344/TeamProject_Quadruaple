@@ -96,6 +96,7 @@ public class UserController {
     @PatchMapping()
     @Operation(summary = "마이페이지 수정")
     public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
+        log.info("updateUserInfo > UserUpdateReq > p: {}", p);
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
         if (userUpdateRes == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
