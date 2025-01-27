@@ -2,14 +2,11 @@ package com.green.project_quadruaple.strf;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.strf.model.ReviewSelReq;
-import com.green.project_quadruaple.strf.model.ReviewSelRes;
 import com.green.project_quadruaple.strf.model.StrfDto;
 import com.green.project_quadruaple.strf.model.StrfSelReq;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 @RestController
 @RequestMapping("detail")
 @RequiredArgsConstructor
@@ -40,21 +36,7 @@ public class StrfController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),detail));
     }
 
-    @GetMapping("/review")
-    @Operation(summary = "리뷰 조회")
-    public ResponseEntity<?> selReviewListWithCount(@Valid @ModelAttribute ReviewSelReq req) {
-        // Service 호출하여 리뷰 목록 조회
-        List<ReviewSelRes> reviews = strfService.selReviewLisztWithCount(req);
 
-        // 빈 리스트일 경우 204(No Content) 응답 반환
-        if (reviews.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviews));
-        }
-
-        // 정상적인 응답 반환
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviews));
-    }
 }
 
 

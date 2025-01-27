@@ -1,6 +1,8 @@
 package com.green.project_quadruaple.common.config.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.jwt.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +22,8 @@ public class MyUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>(jwtUser.getRoles().size());
-        for (String role : jwtUser.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority(role));
+        for (UserRole role : jwtUser.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority(String.valueOf(role)));
         }
         return authorities;
     }
@@ -34,5 +36,25 @@ public class MyUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }
