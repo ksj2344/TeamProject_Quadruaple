@@ -78,17 +78,25 @@ public class UserController {
         return userService.getAccessToken(req);
     }
 
-    //마이페이지 조회
     @GetMapping("userInfo")
     @Operation(summary = "마이페이지 조회")
-    public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo(@RequestParam long userId) {
-        UserInfoDto userInfo = userService.infoUser(userId);
+    public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo() {
+        try {
 
-        if (userInfo == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            long signedUserId = authenticationFacade.getSignedUserId();
+
+            // 사용자 ID로 정보 조회
+            UserInfoDto userInfo = userService.infoUser(signedUserId);
+
+            if (userInfo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            }
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
     }
 
 

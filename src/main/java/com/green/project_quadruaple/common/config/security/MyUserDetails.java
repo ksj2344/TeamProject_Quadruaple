@@ -1,8 +1,12 @@
 package com.green.project_quadruaple.common.config.security;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+=======
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
+>>>>>>> 01035d4 (access-token 재발행 이슈 해결 중)
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,8 +26,13 @@ public class MyUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>(jwtUser.getRoles().size());
+<<<<<<< HEAD
         for (UserRole role : jwtUser.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(String.valueOf(role)));
+=======
+        for (String role : jwtUser.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority(role));
+>>>>>>> 01035d4 (access-token 재발행 이슈 해결 중)
         }
         return authorities;
     }
@@ -37,6 +46,7 @@ public class MyUserDetails implements UserDetails {
     public String getUsername() {
         return null;
     }
+<<<<<<< HEAD
 
     @Override
     public boolean isAccountNonExpired() {
@@ -57,4 +67,6 @@ public class MyUserDetails implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+=======
+>>>>>>> 01035d4 (access-token 재발행 이슈 해결 중)
 }

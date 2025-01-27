@@ -168,19 +168,17 @@ CREATE TABLE amenipoint(
 
 # 가계부
 CREATE TABLE `daily_expense` (
-                                 de_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
-    , trip_id BIGINT NOT NULL
-    , `for` varchar(100) NOT NULL
-    , FOREIGN KEY (trip_id) REFERENCES trip(trip_id)
+    de_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
+    , `for` varchar(200) NOT NULL
 );
 
 # 결제인원
 CREATE TABLE `paid_user` (
-                             user_id BIGINT NOT NULL
+     trip_user_id BIGINT NOT NULL
     , de_id BIGINT NOT NULL
     , price int NOT NULL
-    , PRIMARY KEY(user_id, de_id)
-    , FOREIGN KEY (user_id) REFERENCES user(user_id)
+    , PRIMARY KEY(trip_user_id, de_id)
+    , FOREIGN KEY (trip_user_id) REFERENCES trip_user(trip_user_id)
     , FOREIGN KEY (de_id) REFERENCES `daily_expense`(de_id)
 );
 

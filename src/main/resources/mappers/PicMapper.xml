@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.picmanager.PicMapper">
+
+    <insert id="insStrfPic">
+        INSERT INTO strf_pic
+            (pic_name, strf_id)
+        VALUES
+        <foreach collection="picAndStrfId" item="picAndstrfId" separator=",">
+            (#{picAndstrfId})
+        </foreach>
+    </insert>
+
+    <select id="selectStrfId">
+        SELECT strf_id
+        FROM stay_tour_restaur_fest
+        WHERE category =#{category}
+        AND strf_id BETWEEN #{startId} AND #{endId}
+    </select>
+
+    <delete id="delStrfIdPic">
+        DELETE FROM strf_pic
+        WHERE strf_id IN
+        <foreach collection="strfIds" item="strfId" open="(" close=")" separator=",">
+            #{strfId}
+        </foreach>
+    </delete>
+</mapper>
