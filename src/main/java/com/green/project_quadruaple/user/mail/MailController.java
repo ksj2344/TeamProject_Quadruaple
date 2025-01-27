@@ -19,7 +19,7 @@ public class MailController {
 
     @GetMapping
     @Operation(summary = "인증 메일 발송")
-    public ResultResponse sendMail(@Valid String email) {
+    public ResultResponse sendMail(@RequestParam @Valid String email) {
         log.info("Send mail to " + email);
         return mailService.send(email);
     }
