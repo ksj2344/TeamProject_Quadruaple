@@ -11,6 +11,14 @@ CREATE TABLE user(
     , created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+# 임시 비밀번호
+CREATE TABLE temporary_pw (
+user_id BIGINT NOT NULL
+, tp_pw VARCHAR(300) NOT NULL
+, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+, FOREIGN KEY(user_id) REFERENCES user(user_id)
+);
+
 # 사업자 번호
 CREATE TABLE business_num(
                              busi_num varchar(20) PRIMARY KEY
@@ -47,8 +55,8 @@ CREATE TABLE stay_tour_restaur_fest(
     , tell varchar(50)
     , start_at date
     , end_at date
-    , `open` time
-    , `close` time
+    , `open_check` time
+    , `close_check` time
     , rest_date varchar(100)
     , `explain` varchar(600)
     , `detail` text
@@ -139,14 +147,13 @@ CREATE TABLE menu(
 
 # 예약
 CREATE TABLE booking(
-                        booking_id BIGINT PRIMARY KEY AUTO_INCREMENT
+    booking_id BIGINT PRIMARY KEY AUTO_INCREMENT
     , message VARCHAR(500) NOT NULL
-    , visit_at DATETIME NOT NULL
-    , actual_paid int NOT NULL
-    , check_in DATE NOT NULL
-    , check_out DATE NOT NULL
+    , check_in DATETIME NOT NULL
+    , check_out DATETIME NOT NULL
     , user_id BIGINT NOT NULL
     , menu_id BIGINT NOT NULL
+    , final_payment int not null
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
     , FOREIGN KEY(menu_id) REFERENCES menu (menu_id)
 );
