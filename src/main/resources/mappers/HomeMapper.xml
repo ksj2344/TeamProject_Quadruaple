@@ -118,6 +118,7 @@
     <select id="getRecommend">
         SELECT
         A.strf_id AS strfId,
+        A.title AS strfTitle,
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,

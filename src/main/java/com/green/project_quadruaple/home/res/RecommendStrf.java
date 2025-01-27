@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 public class RecommendStrf {
     private long strfId;
+    private String strfTitle;
     private String locationTitle;
     private String category;
     private String strfPic;

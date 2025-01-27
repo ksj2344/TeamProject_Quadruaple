@@ -15,6 +15,6 @@ public interface HomeMapper {
 
     //mypage 가져오기
     //일단 mybatis에서 list로 묶었기 때문에 list로 받긴하는데 단일도 가능한지 확인해볼것.
-    List<MyPageRes> pushHamburger(long userId);
+    MyPageRes pushHamburger(long userId);
 
 }
