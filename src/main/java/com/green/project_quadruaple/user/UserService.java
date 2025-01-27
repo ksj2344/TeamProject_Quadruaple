@@ -102,7 +102,7 @@ public class UserService {
 
         // AT, RT
         JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(15));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
