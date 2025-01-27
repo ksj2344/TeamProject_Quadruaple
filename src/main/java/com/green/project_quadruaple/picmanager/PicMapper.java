@@ -7,8 +7,10 @@ import java.util.List;
 
 @Mapper
 public interface PicMapper {
-    //테이블에 pic넣기
-    int insStrfPic(String pic,List<Long> strfList);
-    //넣을 strf_id 찾기
+    //strf 테이블에 pic넣기
+    int insStrfPic(List<String> picAndStrfId);
+    //strf_id 목록 찾기
     List<Long> selectStrfId(StrfPicReq p);
+    //strf pic 삭제
+    int delStrfIdPic(List<Long> strfIds);
 }

@@ -7,8 +7,8 @@
         INSERT INTO strf_pic
             (pic_name, strf_id)
         VALUES
-        <foreach collection="strfList" item="strfId" separator=",">
-            (#{pic}, #{strfId})
+        <foreach collection="picAndStrfId" item="picAndstrfId" separator=",">
+            (#{picAndstrfId})
         </foreach>
     </insert>
 
@@ -18,4 +18,12 @@
         WHERE category =#{category}
         AND strf_id BETWEEN #{startId} AND #{endId}
     </select>
+
+    <delete id="delStrfIdPic">
+        DELETE FROM strf_pic
+        WHERE strf_id IN
+        <foreach collection="strfIds" item="strfId" open="(" close=")" separator=",">
+            #{strfId}
+        </foreach>
+    </delete>
 </mapper>
