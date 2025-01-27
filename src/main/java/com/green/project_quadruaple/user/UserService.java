@@ -101,8 +101,8 @@ public class UserService {
         userSelOne.setRoles(roles);
 
         // AT, RT
-        JwtUser jwtUser = new JwtUser();
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(20));
+        JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
@@ -135,10 +135,11 @@ public class UserService {
 
     //-------------------------------------------------
     // 마이페이지 조회
-    public UserInfoDto infoUser(long userId) {
-        UserInfo userInfo = userMapper.selUserInfo(userId);
+    public UserInfoDto infoUser() {
+        long signedUserId = authenticationFacade.getSignedUserId();
+        UserInfo userInfo = userMapper.selUserInfo(signedUserId);
         return UserInfoDto.builder()
-                .userId(userId)
+                .signedUserId(signedUserId)
                 .name(userInfo.getName())
                 .email(userInfo.getEmail())
                 .profilePIc(userInfo.getProfilePIc())
