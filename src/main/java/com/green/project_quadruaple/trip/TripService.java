@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
-import jdk.jfr.ContentType;
-import org.springframework.http.MediaType;
+import com.green.project_quadruaple.trip.model.req.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.green.project_quadruaple.common.config.constant.OdsayApiConst;
@@ -14,20 +14,15 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.trip.model.dto.*;
-import com.green.project_quadruaple.trip.model.req.PatchTripReq;
-import com.green.project_quadruaple.trip.model.req.PostStrfScheduleReq;
-import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.trip.model.res.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.jdbc.Null;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -176,33 +171,33 @@ public class TripService {
     * shcedule 테이블에 상품(일정)을 저장. 이동수단과 거리는 미정
     * trip_location 테이블에 상품의 location 이 존재하지 않으면 저장.
     * */
-    public ResultResponse postIncomplete(PostStrfScheduleReq req) {
-        long tripId = req.getTripId();
-        long strfId = req.getStrfId();
-        Long existLocation = tripMapper.existLocation(tripId, strfId);
-        long locationId = tripMapper.selStrfLocationId(strfId);
+//    public ResultResponse postIncomplete(PostStrfScheduleReq req) {
+//        long tripId = req.getTripId();
+//        long strfId = req.getStrfId();
+//        Long existLocation = tripMapper.existLocation(tripId, strfId);
+//
+//        if(existLocation == null) {
+//            long locationId = tripMapper.selStrfLocationId(strfId);
+//            tripMapper.insTripLocation(tripId, List.of(locationId));
+//        }
+//        tripMapper.insScheMemo(req);
+//        tripMapper.insSchedule(req);
+//        return ResultResponse.success();
+//    }
 
-        if(existLocation == null) {
-            tripMapper.insTripLocation(tripId, List.of(locationId));
-        }
-        tripMapper.insScheMemo(req);
-        tripMapper.insScheduleStrf(req);
-        return ResultResponse.success();
-    }
-
-    public ResponseWrapper<List<PubTransPathVo>> getTransPort() {
+    public ResponseWrapper<List<PubTransPathVo>> getTransPort() throws IOException {
         String startLat = "35.858798";
         String startLng = "128.523111";
         String endLat = "35.865417";
         String endLng = "128.593601";
-        String enKey = URLEncoder.encode(odsayApiConst.getParamApiKeyValue(), StandardCharsets.UTF_8);
-        String urlPath = odsayApiConst.getBaseUrl()
-                + odsayApiConst.getSearchPubTransPathUrl()
-                + "?" + odsayApiConst.getParamApiKeyName() + "=" + enKey
-                + "&" + odsayApiConst.getParamStartLatName() + "=" + startLat
-                + "&" + odsayApiConst.getParamStartLngName() + "=" + startLng
-                + "&" + odsayApiConst.getParamEndLatName() + "=" + endLat
-                + "&" + odsayApiConst.getParamEndLngName() + "=" + endLng;
+//        String enKey = URLEncoder.encode(odsayApiConst.getParamApiKeyValue(), StandardCharsets.UTF_8);
+//        String urlPath = odsayApiConst.getBaseUrl()
+//                + odsayApiConst.getSearchPubTransPathUrl()
+//                + "?" + odsayApiConst.getParamApiKeyName() + "=" + enKey
+//                + "&" + odsayApiConst.getParamStartLatName() + "=" + startLat
+//                + "&" + odsayApiConst.getParamStartLngName() + "=" + startLng
+//                + "&" + odsayApiConst.getParamEndLatName() + "=" + endLat
+//                + "&" + odsayApiConst.getParamEndLngName() + "=" + endLng;
 
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -213,7 +208,7 @@ public class TripService {
         formData.add(odsayApiConst.getParamEndLngName(), endLng);
 
         String json = webClient.post()
-                .uri(urlPath)
+                .uri(odsayApiConst.getSearchPubTransPathUrl())
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve() //통신 시도
                 .bodyToMono(String.class) // 결과물을 String변환
@@ -229,6 +224,63 @@ public class TripService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Transactional
+    public ResultResponse postSchedule(PostScheduleReq req) {
+        long tripId = req.getTripId();
+        long strfId = req.getStrfId();
+        Long existLocation = tripMapper.existLocation(tripId, strfId);
+
+        if(existLocation == null) {
+            long locationId = tripMapper.selStrfLocationId(strfId);
+            tripMapper.insTripLocation(tripId, List.of(locationId));
+        }
+
+        PathType keyByName = PathType.getKeyByName(req.getPathType());
+        if(keyByName != null) {
+            req.setPathTypeValue(keyByName.getValue());
+        }
+        tripMapper.insScheMemo(req);
+        tripMapper.insSchedule(req);
+        return ResultResponse.success();
+    }
+
+    /*
+    * 1. 만약 첫번째 일정을 삭제한다면 다음으로 첫번째 일정이 되는 일정의 시간, 거리, 이동수단을 null 로 바꿔야함
+    * 2. 삭제하는 일정의 seq 보다 seq가 높은 일정+메모들의 seq 를 모두 -1 해주어야함
+    * 3. sche_memo 의 category 가 SCHE 인 가장 가까운 seq 의 일정은 거리, 시간, 이동수단을 삭제하는 일정의 이전 일정과 다시 맞추어야함
+    * 4. 먄약 삭제하는 일정이 마지막 일정이라면 그냥 일정만 삭제하면 됨
+    * */
+    @Transactional
+    public ResultResponse deleteSchedule(long scheduleId) {
+        int distance = 100000;
+        int duration = 100;
+        int pathType = 2;
+        long tripId = tripMapper.selScheduleByScheduleId(scheduleId);
+        ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId);
+        StrfLatAndLngDto prevLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId()); // 이걸로 API 요청
+
+        tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq());
+        tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), distance, duration, pathType);
+        tripMapper.deleteSchedule(scheduleId);
+        tripMapper.deleteScheMemo(scheduleId);
+        return ResultResponse.success();
+    }
+
+    @Transactional
+    public ResultResponse deleteTripUser(DeleteTripUserReq req) {
+        long signedUserId = 101L;
+        long tripId = req.getTripId();
+        long targetUserId = req.getTargetUserId();
+
+        Long managerId = tripMapper.selTripById(tripId);
+        if(managerId != req.getLeaderId() || signedUserId != targetUserId || managerId == targetUserId) {
+            return ResultResponse.forbidden();
+        }
+
+        tripMapper.disableTripUser(tripId, targetUserId);
+        return ResultResponse.success();
     }
 
     private long getMilliTime(String time) {

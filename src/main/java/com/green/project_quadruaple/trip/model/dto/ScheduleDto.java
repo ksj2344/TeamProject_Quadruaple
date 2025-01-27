@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 public class ScheduleDto {
 
+    private long scheduleId;
     private int seq;
     private long distance;
     private int duration;
@@ -19,7 +20,11 @@ public class ScheduleDto {
     private String address;
     private String lat;
     private String lng;
-    private String pathType;
+    private int pathType;
+    private long tripId;
+    private boolean isNotFirst;
+    private long nextScheduleId;
+    private long prevScheduleStrfId;
 }
 
 /*
