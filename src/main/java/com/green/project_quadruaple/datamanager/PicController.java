@@ -1,6 +1,6 @@
-package com.green.project_quadruaple.picmanager;
+package com.green.project_quadruaple.datamanager;
 
-import com.green.project_quadruaple.picmanager.model.StrfPicReq;
+import com.green.project_quadruaple.datamanager.model.StrfPicReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.print.DocFlavor;
-
 @Getter
 @Setter
 @ToString

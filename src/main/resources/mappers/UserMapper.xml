@@ -83,5 +83,13 @@
         </set>
         WHERE email = #{email}
     </update>
+    
+    <!-- 임시 비밀번호 -->
+    <insert id="temporaryPw">
+        INSERT INTO temporary_pw (user_id, tp_pw)
+        VALUES (#{userId}, #{tpPw})
+            ON DUPLICATE KEY
+        UPDATE tp_pw = VALUES(tp_pw)
+    </insert>
 
 </mapper>
