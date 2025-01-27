@@ -2,12 +2,11 @@ package com.green.project_quadruaple.trip;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
+import com.green.project_quadruaple.trip.model.dto.IncompleteTripDto;
 import com.green.project_quadruaple.trip.model.req.PatchTripReq;
+import com.green.project_quadruaple.trip.model.req.PostStrfScheduleReq;
 import com.green.project_quadruaple.trip.model.req.PostTripReq;
-import com.green.project_quadruaple.trip.model.res.LocationRes;
-import com.green.project_quadruaple.trip.model.res.MyTripListRes;
-import com.green.project_quadruaple.trip.model.res.PostTripRes;
-import com.green.project_quadruaple.trip.model.res.TripDetailRes;
+import com.green.project_quadruaple.trip.model.res.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.Null;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -49,9 +50,28 @@ public class TripController {
         return tripService.getTrip(tripId);
     }
 
-    @PatchMapping("trip")
+    @PatchMapping("/trip")
     @Operation(summary = "여행 수정하기", description = "여행 타이틀 수정, 여행 일자 수정, 여행 장소 추가 삭제, 구성원 추가 삭제.")
     public ResultResponse patchTrip(@RequestBody PatchTripReq req) {
         return tripService.patchTrip(req);
+    }
+
+    @GetMapping("/add")
+    @Operation(summary = "미완료 여행 목록 불러오기", description = "내 여행에 상품 담기 할때 어느 여행에 담을지 목록 출력")
+    public ResponseWrapper<IncompleteTripRes> getIncomplete(@RequestParam("strf_id") long strfId) {
+        return tripService.getIncomplete(strfId);
+    }
+
+    @PostMapping("/add")
+    @Operation(summary = "상품 담기", description = "선택한 여행의 일차에 상품(일정) 추가")
+    public ResultResponse postIncomplete(@RequestBody PostStrfScheduleReq req) {
+        return tripService.postIncomplete(req);
+    }
+
+    @GetMapping("/transport/get")
+    @Operation(summary = "길 찾기", description = "출발지와 목적지 사이의 대중 교통(시외버스, 시내버스, 열차, 지하철 등)과 거리, 시간, 금액 정보 불러오기")
+    public ResponseWrapper<String> getTransPort() {
+        tripService.getTransPort();
+        return null;
     }
 }
