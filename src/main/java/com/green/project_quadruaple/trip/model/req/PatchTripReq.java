@@ -2,6 +2,8 @@ package com.green.project_quadruaple.trip.model.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +17,7 @@ import java.util.List;
 @ToString
 public class PatchTripReq {
 
+    @NotNull
     @Schema(title = "여행 ID", type = "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonProperty("trip_id")
     private long tripId;
