@@ -3,19 +3,25 @@
 
 <mapper namespace="com.green.project_quadruaple.booking.BookingMapper">
     <select id="bookingList">
-    SELECT
-    b.booking_id AS bookingId,
-    s.title AS strfTitle,
-    b.check_in AS checkIn,
-    b.check_out AS checkOut,
-    m.price AS menuPrice,
+        SELECT a.booking_id AS bookingId , a.final_payment
+        , c.title as strfTitle , d.pic_name AS strfPics
+        , c.close_check AS checkOut , c.open_check AS checkIn
+        <!--
+    , b.final_payment as finalPayment
     DATE_FORMAT(b.check_in, '%Y년 %m월 %d일 (%W) %H:%i') AS checkInFormatted,
     DATE_FORMAT(b.check_out, '%Y년 %m월 %d일 (%W) %H:%i') AS checkOutFormatted
-    FROM booking b
-    JOIN menu m ON b.menu_id = m.menu_id
-    JOIN stay_tour_restaur_fest s ON m.strf_id = s.strf_id
-    WHERE b.check_out <![CDATA[ > ]]> NOW();
+    -->
+        FROM booking a
+        JOIN menu b
+        ON a.menu_id = b.menu_id
+        JOIN stay_tour_ restaur_fest c
+        ON b.strf_id = c.strf_id
+        JOIN strf_pic d
+        ON b.strf_id = d.strf_id
+        WHERE a.user_id = a.user_id
+        AND a.check_out <![CDATA[ > ]]> NOW();
     </select>
+
     <select id="bookingCompleteList">
         SELECT
         b.booking_id AS bookingId,
@@ -32,7 +38,4 @@
         LEFT JOIN review r ON r.booking_id = b.booking_id
         WHERE b.check_out <![CDATA[ <= ]]> NOW();
     </select>
-
-
-
 </mapper>

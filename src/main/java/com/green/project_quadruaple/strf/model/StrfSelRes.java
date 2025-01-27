@@ -34,9 +34,9 @@ public class StrfSelRes {
     @Schema(description = "종료일")
     private String endAt;
     @Schema(description = "운영 시작 시간")
-    private String open;
+    private String openCheck;
     @Schema(description = "운영 종료 시간")
-    private String close;
+    private String closeCheck;
     @Schema(description = "휴무일")
     private String restDate;
     @Schema(description = "상품 설명")
