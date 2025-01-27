@@ -1,5 +1,15 @@
 package com.green.project_quadruaple.trip;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.green.project_quadruaple.trip.model.PubTransPathVo;
+import jdk.jfr.ContentType;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import com.green.project_quadruaple.common.config.constant.OdsayApiConst;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
@@ -13,7 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.jdbc.Null;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -29,6 +43,9 @@ import java.util.Locale;
 public class TripService {
 
     private final TripMapper tripMapper;
+    private final OdsayApiConst odsayApiConst;
+    private final WebClient webClient;
+    private final ObjectMapper objectMapper;
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
 //        long signedUserId = AuthenticationFacade.getSignedUserId();
@@ -171,6 +188,47 @@ public class TripService {
         tripMapper.insScheMemo(req);
         tripMapper.insScheduleStrf(req);
         return ResultResponse.success();
+    }
+
+    public ResponseWrapper<List<PubTransPathVo>> getTransPort() {
+        String startLat = "35.858798";
+        String startLng = "128.523111";
+        String endLat = "35.865417";
+        String endLng = "128.593601";
+        String enKey = URLEncoder.encode(odsayApiConst.getParamApiKeyValue(), StandardCharsets.UTF_8);
+        String urlPath = odsayApiConst.getBaseUrl()
+                + odsayApiConst.getSearchPubTransPathUrl()
+                + "?" + odsayApiConst.getParamApiKeyName() + "=" + enKey
+                + "&" + odsayApiConst.getParamStartLatName() + "=" + startLat
+                + "&" + odsayApiConst.getParamStartLngName() + "=" + startLng
+                + "&" + odsayApiConst.getParamEndLatName() + "=" + endLat
+                + "&" + odsayApiConst.getParamEndLngName() + "=" + endLng;
+
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(odsayApiConst.getParamApiKeyName(), odsayApiConst.getParamApiKeyValue());
+        formData.add(odsayApiConst.getParamStartLatName(), startLat);
+        formData.add(odsayApiConst.getParamStartLngName(), startLng);
+        formData.add(odsayApiConst.getParamEndLatName(), endLat);
+        formData.add(odsayApiConst.getParamEndLngName(), endLng);
+
+        String json = webClient.post()
+                .uri(urlPath)
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve() //통신 시도
+                .bodyToMono(String.class) // 결과물을 String변환
+                .block(); //비동기 > 동기
+        log.info("json = {}", json);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            List<PubTransPathVo> res =  objectMapper.convertValue(jsonNode.at("/result/path")
+                    , new TypeReference<>() {});
+            log.info("res = {}", res);
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private long getMilliTime(String time) {

@@ -67,4 +67,11 @@ public class TripController {
     public ResultResponse postIncomplete(@RequestBody PostStrfScheduleReq req) {
         return tripService.postIncomplete(req);
     }
+
+    @GetMapping("/transport/get")
+    @Operation(summary = "길 찾기", description = "출발지와 목적지 사이의 대중 교통(시외버스, 시내버스, 열차, 지하철 등)과 거리, 시간, 금액 정보 불러오기")
+    public ResponseWrapper<String> getTransPort() {
+        tripService.getTransPort();
+        return null;
+    }
 }
