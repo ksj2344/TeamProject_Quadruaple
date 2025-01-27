@@ -10,8 +10,8 @@ import java.util.List;
 @Setter
 @ToString
 public class MyPageRes {
-    private int couponCnt;
     private String name;
     private String profilePic;
+    private int couponCnt;
     private List<UserTripDto> tripList;
 }

@@ -9,6 +9,6 @@ import lombok.ToString;
 @ToString
 public class PopularLocation {
     private long locationId;
-    private String locationName;
+    private String locationTitle;
     private String locationPic;
 }
