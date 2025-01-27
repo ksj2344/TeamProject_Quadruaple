@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.home.model.res;
+package com.green.project_quadruaple.home.res;
 
 import lombok.Getter;
 import lombok.Setter;
