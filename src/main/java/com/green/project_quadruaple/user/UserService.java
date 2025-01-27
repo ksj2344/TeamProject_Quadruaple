@@ -3,9 +3,10 @@ package com.green.project_quadruaple.user;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.constant.JwtConst;
-import com.green.project_quadruaple.common.config.jwt.JwtTokenProvider;
+import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -30,9 +32,9 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MyFileUtils myFileUtils;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider jwtTokenProvider;
     private final CookieUtils cookieUtils;
-    private final JwtConst jwtConst;
+    private final AuthenticationFacade authenticationFacade;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -99,12 +101,14 @@ public class UserService {
         userSelOne.setRoles(roles);
 
         // AT, RT
-        JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
-        String accessToken = jwtTokenProvider.generateAccessToken(jwtUser);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(jwtUser);
+        JwtUser jwtUser = new JwtUser();
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(20));
+        String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
-        cookieUtils.setCookie(response, jwtConst.getRefreshTokenCookieName(), refreshToken, jwtConst.getRefreshTokenCookieExpiry());
+        // refreshToken은 쿠키에 담는다.
+        int maxAge = 1_296_000; // 15 * 24 * 60 * 60 > 15일의 초(second) 값
+        cookieUtils.setCookie(response, "refreshToken", refreshToken, maxAge);
 
         return UserSignInRes.builder()
                 .accessToken(accessToken)
@@ -113,15 +117,17 @@ public class UserService {
                 .build();
     }
 
-    public String getAccessToken(HttpServletRequest req) {
-        Cookie cookie = Optional.ofNullable(cookieUtils.getCookie(req, jwtConst.getRefreshTokenCookieName()))
-                .orElseThrow(() -> {
-                    throw new RuntimeException("AccessToken을 재발행 할 수 없습니다.");
-                });
+    public String getAccessToken (HttpServletRequest req) {
+        Cookie cookie = cookieUtils.getCookie(req,"refreshToken");
         String refreshToken = cookie.getValue();
+        log.info("refreshToken: {}", refreshToken);
+
         JwtUser jwtUser = jwtTokenProvider.getJwtUserFromToken(refreshToken);
-        return jwtTokenProvider.generateAccessToken(jwtUser);
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(8));
+
+        return accessToken;
     }
+
     private boolean checkEmail(String email) {
         // 인증된 이메일이 아닐때, 인증 만료되었을때
         return MailService.mailChecked.getOrDefault(email, false);

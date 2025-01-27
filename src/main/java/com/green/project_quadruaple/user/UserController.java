@@ -1,9 +1,13 @@
 package com.green.project_quadruaple.user;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.TokenProvider;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.common.model.ResultResponse;
 import com.green.project_quadruaple.user.model.*;
+import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +30,7 @@ import java.util.Map;
 @Tag(name = "사용자")
 public class UserController {
     private final UserService userService;
+    private final AuthenticationFacade authenticationFacade;
 
     // 회원가입 요청
     @PostMapping("sign-up")
@@ -68,23 +73,9 @@ public class UserController {
     }
 
     @GetMapping("access-token")
-    @Operation(summary = "토큰")
-    public ResponseEntity<?> getAccessToken(HttpServletRequest req) {
-        try {
-            String accessToken = userService.getAccessToken(req); // Access Token 발급
-            return ResponseEntity.ok(accessToken);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("Token has expired")) {
-                // Refresh Token 만료 시 401 반환
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseCode.UNAUTHORIZED.getCode());
-            } else if (e.getMessage().contains("AccessToken을 재발행 할 수 없습니다.")) {
-                // Refresh Token이 없거나 유효하지 않을 때
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ResponseCode.BAD_GATEWAY.getCode());
-            }
-            // 기타 예외 처리
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ResponseCode.SERVER_ERROR.getCode());
-        }
+    @Operation(summary = "accessToken 재발행")
+    public String getAccessToken(HttpServletRequest req) {
+        return userService.getAccessToken(req);
     }
 
     //마이페이지 조회
@@ -99,6 +90,7 @@ public class UserController {
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
     }
+
 
     //마이페이지 수정
     @PatchMapping()

@@ -2,44 +2,77 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
-
     <select id="getDetail" resultMap="strfDetailResultMap">
-        SELECT a.strf_id AS strfId, a.category
-        , a.title AS strfTitle , a.lat AS latit
-        , a.lng AS longitude, a.address , a.post , a.tell
-        , a.start_at AS startAt , a.end_at AS endAt
-        , a.`open` , a.`close` , a.rest_date AS restDate
-        , a.`explain` , a.detail , a.busi_num AS busiNum
-        , b.detail_title AS locationName , h.amenity_id AS amenityId
-        , g.price AS menuPrice
-        , g.menu_id AS menuId , g.title AS menuTitle
-        , d.name AS hostName
-        , d.profile_pic AS hostProfilePic , COUNT(f.user_id) AS wishCnt
-        , AVG(e.rating) AS ratingAvg
-        , if (
-        exists ( select 1
-        from recent
-        where d.user_id = #{userId}
-        and a.strf_id = #{strfId}
-        and j.undo_recent = 0
-        ) , 1 , 0 ) as recentCheck
-        , j.inquired_at AS inquiredAt
-        , GROUP_CONCAT(DISTINCT g.menu_pic ORDER BY a.strf_id SEPARATOR ', ') AS menuPics
-        , GROUP_CONCAT(i.title ORDER BY a.strf_id SEPARATOR ', ') AS amenityTitles
+    SELECT
+    a.strf_id AS strfId, a.category, a.title AS strfTitle,
+    a.lat AS latit, a.lng AS longitude, a.address,
+    a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,
+    a.`open`, a.`close`, a.rest_date AS restDate,
+    a.`explain`, a.detail, a.busi_num AS busiNum,
+    b.detail_title AS locationName, d.name AS hostName,
+    d.profile_pic AS hostProfilePic, COUNT(DISTINCT f.user_id) AS wishCnt,
+    AVG(e.rating) AS ratingAvg, j.inquired_at AS inquiredAt,
+    IF(
+    EXISTS(
+    SELECT 1
+    FROM recent
+    WHERE j.user_id = d.user_id
+    AND a.strf_id = #{strfId}
+    AND j.undo_recent = 0
+    ), 1, 0 ) AS recentCheck,
+    h.amenity_id AS amenityId, i.title AS amenityTitle, g.menu_id AS menuId,
+    g.title AS menuTitle, g.price AS menuPrice, g.menu_pic AS menuPic,
+    l.pic_name AS strfPic ,
 
-        FROM stay_tour_restaur_fest a
-        JOIN location_detail b ON a.location_detail_id = b.location_detail_id
-        JOIN business_num c ON a.busi_num = c.busi_num
-        LEFT JOIN menu g ON g.strf_id = a.strf_id
-        JOIN `user` d ON c.user_id = d.user_id
-        LEFT JOIN review e ON e.strf_id = a.strf_id
-        LEFT JOIN amenipoint h ON h.strf_id = a.strf_id
-        LEFT JOIN amenity i ON h.amenity_id = i.amenity_id
-        LEFT JOIN wishlist f ON a.strf_id = f.strf_id
-        LEFT JOIN recent j ON j.user_id = d.user_id
+        IF(
+        EXISTS(
+        SELECT 1
+        FROM recent
+        WHERE j.user_id = d.user_id
+        AND a.strf_id = #{strfId}
+        AND j.undo_recent = 0
+        ), 1, 0
+        ) AS recentCheck,
+
+        CASE
+        WHEN EXISTS(
+        SELECT 1
+        FROM recent
+        WHERE j.user_id = d.user_id
+        AND a.strf_id = #{strfId}
+        ) THEN '활성화'
+        WHEN EXISTS(
+        SELECT 1
+        FROM recent
+        WHERE j.user_id = d.user_id
+        AND a.strf_id = #{strfId}
+        AND j.undo_recent = 1
+        ) THEN '비활성화'
+        ELSE '기타'
+        END AS recentCheckStatus
+    FROM
+    stay_tour_restaur_fest a
+    JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+    JOIN business_num c ON a.busi_num = c.busi_num
+    LEFT JOIN menu g ON g.strf_id = a.strf_id
+    JOIN `user` d ON c.user_id = d.user_id
+    LEFT JOIN review e ON e.strf_id = a.strf_id
+    LEFT JOIN amenipoint h ON h.strf_id = a.strf_id
+    LEFT JOIN amenity i ON h.amenity_id = i.amenity_id
+    LEFT JOIN wishlist f ON a.strf_id = f.strf_id
+    LEFT JOIN recent j ON j.user_id = d.user_id
+    LEFT JOIN strf_pic l ON a.strf_id = l.strf_id
+    <!--
+        LEFT JOIN
+        wishlist w ON a.strf_id = w.strf_id AND w.user_id = #{userId}
+    -->
+
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id;
+    GROUP BY
+    a.strf_id, b.detail_title, d.name,
+    d.profile_pic, h.amenity_id, g.menu_id, l.pic_name;
     </select>
+
     <resultMap id="strfDetailResultMap" type="com.green.project_quadruaple.strf.model.StrfDto">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
@@ -58,174 +91,31 @@
         <result property="detail" column="detail" />
         <result property="busiNum" column="busiNum" />
         <result property="locationName" column="locationName" />
-        <result property="amenityId" column="amenityId" />
-        <result property="amenityTitles" column="amenityTitles"/>
-        <result property="menuPrice" column="menuPrice" />
-        <result property="menuId" column="menuId" />
-        <result property="menuTitle" column="menuTitle" />
-        <result property="menuPics" column="menuPics" />
         <result property="hostName" column="hostName" />
         <result property="hostProfilePic" column="hostProfilePic" />
         <result property="wishCnt" column="wishCnt" />
         <result property="ratingAvg" column="ratingAvg" />
-        <result property="wishIn" column="wishIn" />
-        <result property="ratingCnt" column="ratingCnt" />
         <result property="recentCheck" column="recentCheck" />
         <result property="inquiredAt" column="inquiredAt" />
-        <collection property="res" ofType="com.green.project_quadruaple.strf.model.StrfSelRes">
+        <result property="recentCheckStatus" column="recentCheckStatus" />
+
+
+        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
+            <id property="amenityId" column="amenityId" />
+            <result property="amenityTitle" column="amenityTitle" />
         </collection>
 
-        <!-- 메뉴 리스트 매핑 -->
-        <collection property="menuList" resultMap="menuList" />
+        <collection property="menu" ofType="com.green.project_quadruaple.strf.model.Menu">
+            <id property="menuId" column="menuId" />
+            <result property="menuTitle" column="menuTitle" />
+            <result property="menuPrice" column="menuPrice" />
+            <result property="menuPic" column="menuPic" />
+        </collection>
 
-        <!-- Amenity ID 매핑 -->
-        <collection property="amenityIds" ofType="Integer">
-            <result property="amenityId" column="amenityId"/>
+        <collection property="strfPics" ofType="com.green.project_quadruaple.strf.model.StrfPicSel">
+            <id property="strfId" column="strfId" />
+            <result property="pic" column="strfPic" />
         </collection>
     </resultMap>
-    <!-- 메뉴 리스트 매핑 -->
-    <resultMap id="menuList" type="com.green.project_quadruaple.strf.model.MenuDto">
-        <result property="menuId" column="menuId"/>
-        <result property="menuTitle" column="menuTitle"/>
-        <result property="menuPrice" column="menuPrice"/>
-        <result property="menuPic" column="menuPic"/>
-    </resultMap>
 
-
-
-    <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
-        SELECT
-        t.reviewId, t.strfId, t.userId, t.rating,
-        t.content, q.name AS writerUserName,
-        q.profile_pic AS writerUserPic,
-        t.reviewCount,
-        CASE
-        WHEN t.updated_at IS NOT NULL THEN t.updated_at
-        ELSE t.created_at
-        END AS reviewWriteDate,
-        GROUP_CONCAT(w.pic ORDER BY w.review_id SEPARATOR ',') AS reviewPics
-        FROM (
-        SELECT
-        ROW_NUMBER() OVER (PARTITION BY a.strf_id ORDER BY a.review_id DESC) AS num,
-        a.review_id AS reviewId, a.strf_id AS strfId, a.user_id AS userId,
-        a.rating, a.content, a.created_at, a.updated_at,
-        COUNT(a.review_id) OVER (PARTITION BY a.user_id) AS reviewCount
-        FROM review a
-        WHERE a.strf_id IN
-        <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        ) t
-        JOIN user q ON t.userId = q.user_id
-        LEFT JOIN review_pic w ON t.reviewId = w.review_id
-        WHERE t.num <![CDATA[<=]]> 4
-        GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content,
-        q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
-        ORDER BY t.reviewId DESC
-    </select>
-
-
-    <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.ReviewSelRes">
-        <id property="reviewId" column="reviewId" />
-        <result property="strfId" column="strfId" />
-        <result property="userId" column="userId" />
-        <result property="rating" column="rating" />
-        <result property="content" column="content" />
-        <result property="reviewWriteDate" column="reviewWriteDate" />
-        <result property="reviewCount" column="reviewCount" />
-        <result property="writerUserName" column="writerUserName" />
-        <result property="writerUserPic" column="writerUserPic" />
-        <collection property="pictures" ofType="String">
-            <result column="reviewPics" />
-        </collection>
-    </resultMap>
-    <select id="selReviewPicsByReviewIds" resultType="com.green.project_quadruaple.strf.model.StrfPicSel">
-        SELECT strf_id AS strfId, pic
-        FROM review_pictures
-        WHERE strf_id IN
-        <foreach collection="reviewIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </select>
-
-
-    <!--
-        <select id="getDetail" resultMap="getReview">
-            SELECT a.strf_id as strfId, a.category , a.title as strfTitle ,
-            a.lat as latit , a.lng as longitude
-            a.address , a.post , a.tell , a.start_at as startAt,
-            a.end_at , a.open , a.close
-            , a.rest_date as restDate, a.explain , a.detail ,
-            a.detail_title as locationName , a.busi_num as busiNum ,
-            e.amenity ,e.title as amenityTitle ,
-            f.price , f.menu_id as menuId , f.title as menuTitle ,
-            f.menu_pic as menuPic , g.name as hostName ,
-            g.pic as hostProfilePic , COUNT(user_id) as wishCnt ,
-            AVG(rating) as ratingAvg
-
-            FROM stay_tour_restaur_fest a
-            JOIN location b
-            ON a.location_id = b.location_id
-            JOIN business_num c
-            ON a.busi_num = c.busi_num
-            JOIN amenipoint d
-            ON a.strf_id = d.strf_id
-            JOIN amenity e
-            ON d.amenity_id = e.amenity_id
-            JOIN menu f
-            ON a.strf_id = f.strf_id
-            JOIN user g
-            ON g.user_id = c.user_id
-            WHERE strf_id = #{strfId}
-        </select>
-        <select id="selReviewListWithCount" resultMap="reviewWithPicsMap">
-            SELECT t.reviewId, t.strfId, t.userId, t.rating,
-            t.content, q.name AS writerUserName, q.profile_pic AS writerUserPic,
-            t.reviewCount,
-            CASE
-                WHEN t.updated_at IS NOT NULL THEN t.updated_at
-                ELSE t.created_at
-                END AS reviewWriteDate,
-            GROUP_CONCAT(w.pic ORDER BY w.review_id SEPARATOR ',') AS reviewPics
-            FROM (
-            SELECT
-            ROW_NUMBER() OVER (PARTITION BY a.strf_id ORDER BY a.review_id DESC) AS num,
-            a.review_id AS reviewId, a.strf_id AS strfId, a.user_id AS userId,
-            a.rating, a.content, a.created_at, a.updated_at,
-            COUNT(a.review_id) OVER (PARTITION BY a.user_id) AS reviewCount
-            FROM review a
-            WHERE a.strf_id IN
-            <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
-            ) t
-            JOIN user q
-            ON t.user_id = q.user_id
-            LEFT JOIN review_pic w
-            ON t.reviewId = w.review_id
-            WHERE t.num <![CDATA[ <= ]]> 4
-            GROUP BY t.reviewId, t.strfId, t.userId, t.rating, t.content, q.name, q.profile_pic, t.reviewCount, t.created_at, t.updated_at
-            ORDER BY t.reviewId DESC
-        </select>
-        <resultMap id="reviewWithPicsMap" type="com.green.project_quadruaple.strf.model.ReviewSelRes">
-            <id property="reviewId" column="reviewId"/>
-            <result property="strfId" column="strfId"/>
-            <result property="userId" column="userId"/>
-            <result property="rating" column="rating"/>
-            <result property="content" column="content"/>
-            <result property="reviewWriteDate" column="reviewWriteDate"/>
-            <result property="reviewCount" column="reviewCount"/>
-            <result property="writerUserName" column="writerUserName"/>
-            <result property="writerUserPic" column="writerUserPic"/>
-            <collection property="pictures" ofType="String">
-                <result column="reviewPics"/>
-            </collection>
-        </resultMap>
-    -->
-
-    <update id="postBooking">
-        UPDATE booking
-        SET booking_id = #{bookingId}
-        WHERE user_id = #{bookingUserId} and menu_id = #{menuId}
-    </update>
 </mapper>
