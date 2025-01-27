@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.strf.model.StrfDto;
 import com.green.project_quadruaple.strf.model.StrfSelReq;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("detail")
 @RequiredArgsConstructor
+@Tag(name = "상품")
 public class StrfController {
     private final StrfService strfService;
 

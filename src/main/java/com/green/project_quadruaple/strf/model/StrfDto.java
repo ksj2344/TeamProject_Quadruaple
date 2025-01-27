@@ -23,8 +23,8 @@ public class StrfDto {
     private String tell;
     private String startAt;
     private String endAt;
-    private String open;
-    private String close;
+    private String openCheck;
+    private String closeCheck;
     private String restDate;
     private String explain;
     private String detail;

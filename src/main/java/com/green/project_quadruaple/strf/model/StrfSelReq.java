@@ -16,7 +16,7 @@ import lombok.ToString;
 @Schema
 public class StrfSelReq {
     @NotNull
-    @Schema(description = "상품 ID", example = "12345")
+    @Schema(description = "상품 ID", example = "1")
     private long strfId;
     @JsonIgnore
     private long userId;
