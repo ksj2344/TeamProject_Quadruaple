@@ -78,25 +78,17 @@ public class UserController {
         return userService.getAccessToken(req);
     }
 
+    //마이페이지 조회
     @GetMapping("userInfo")
     @Operation(summary = "마이페이지 조회")
     public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo() {
-        try {
+        UserInfoDto userInfo = userService.infoUser();
 
-            long signedUserId = authenticationFacade.getSignedUserId();
-
-            // 사용자 ID로 정보 조회
-            UserInfoDto userInfo = userService.infoUser(signedUserId);
-
-            if (userInfo == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-            }
-            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userInfo));
     }
 
 
@@ -104,6 +96,7 @@ public class UserController {
     @PatchMapping()
     @Operation(summary = "마이페이지 수정")
     public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
+        log.info("updateUserInfo > UserUpdateReq > p: {}", p);
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
         if (userUpdateRes == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
