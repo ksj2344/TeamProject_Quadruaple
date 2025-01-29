@@ -81,8 +81,8 @@ public class UserController {
     //마이페이지 조회
     @GetMapping("userInfo")
     @Operation(summary = "마이페이지 조회")
-    public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo(@RequestParam long userId) {
-        UserInfoDto userInfo = userService.infoUser(userId);
+    public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo() {
+        UserInfoDto userInfo = userService.infoUser();
 
         if (userInfo == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -96,6 +96,7 @@ public class UserController {
     @PatchMapping()
     @Operation(summary = "마이페이지 수정")
     public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
+        log.info("updateUserInfo > UserUpdateReq > p: {}", p);
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
         if (userUpdateRes == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));

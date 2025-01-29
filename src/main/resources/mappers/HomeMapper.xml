@@ -21,10 +21,9 @@
         LEFT JOIN location L ON LD.location_id = L.location_id
         LEFT JOIN trip_location TL ON TL.location_id = L.location_id
         LEFT JOIN trip T ON T.trip_id = TL.trip_id
-        LEFT JOIN trip_user TU ON TU.trip_id = T.trip_id AND TU.user_id = 1
+        LEFT JOIN trip_user TU ON TU.trip_id = T.trip_id AND TU.user_id = #{userId}
         WHERE A.category = 'FEST' AND NOW() <![CDATA[ < ]]> A.end_at
-                                              ORDER BY
-                                              priority DESC,
+        ORDER BY priority DESC,
         ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
         LIMIT 10
     </select>
@@ -34,6 +33,7 @@
         L.location_id AS locationId,
         LD.detail_title AS locationTitle,
         L.location_pic AS locationPic,
+        COUNT(TL.location_id) AS tripedCnt
         FROM
         location L
         LEFT JOIN
@@ -52,7 +52,7 @@
         <collection property="recent" resultMap="recent" />
     </resultMap>
 
-    <resultMap id="RecentDto" type="com.green.project_quadruaple.home.res.RecentDto">
+    <resultMap id="recent" type="com.green.project_quadruaple.home.res.RecentDto">
         <id property="strfId" column="strfId" />
         <result property="strfTitle" column="strfTitle" />
         <result property="strfPic" column="strfPic" />
@@ -72,7 +72,8 @@
         LD.detail_title AS locationName,
         IF(EXISTS (SELECT 1 FROM wishlist W WHERE W.strf_id = A.strf_id AND W.user_id = 101), 1, 0) AS wishIn,
         COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
-        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt,
+        inquired_at
         FROM
         stay_tour_restaur_fest A
         LEFT JOIN
@@ -118,6 +119,7 @@
     <select id="getRecommend">
         SELECT
         A.strf_id AS strfId,
+        A.title AS strfTitle,
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,
@@ -174,8 +176,8 @@
         T1.name,
         T1.profile_pic AS profilePic,
         T1.couponCnt,
-        T2.trip_id AS tripId,
-        T2.location_pic AS locationPic,
+        T2.tripId,
+        T2.locationPic,
         T2.title ,
         T2.dDay
         FROM
@@ -201,10 +203,10 @@
         LEFT JOIN
         (
         SELECT
-        TU.trip_id,
+        TU.trip_id as tripId,
         TU.user_id,
         T.title,
-        L.location_pic,
+        L.location_pic AS locationPic,
         CASE
         WHEN T.start_at <![CDATA[ < ]]> NOW() THEN -1
         ELSE DATEDIFF(DATE(T.start_at), NOW())

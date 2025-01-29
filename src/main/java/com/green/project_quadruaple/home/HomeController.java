@@ -20,11 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "홈화면")
 public class HomeController {
     private final HomeService homeService;
-    private final AuthenticationFacade authenticationFacade;
 
     //홈화면
     @GetMapping
-    @Operation(summary = "홈화면 부르기", description = "jwt해결까진 유저넘버 101로 고정")
+    @Operation(summary = "홈화면 부르기", description = "추천축제,인기지역,최근본목록(축제제외),테스트시 userId 101 쓰셈")
     public ResponseEntity<?> getHome(){
         return homeService.getHome();
     }
@@ -32,7 +31,7 @@ public class HomeController {
 
     //마이페이지
     @GetMapping("user")
-    @Operation(summary = "마이페이지", description = "홈에서 햄버거버튼 누르면 나오는 그거")
+    @Operation(summary = "마이페이지", description = "홈에서 햄버거버튼 누르면 나오는 그거. 테스트시 userId 112번")
     public ResponseEntity<?> myPage(){
         return homeService.myPage();
     }

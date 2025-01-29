@@ -29,4 +29,5 @@ public class UserSignUpReq {
     @JsonIgnore
     private int state;
     private List<UserRole> role = new ArrayList<>();
+    private boolean tmpPaasWord;
 }
