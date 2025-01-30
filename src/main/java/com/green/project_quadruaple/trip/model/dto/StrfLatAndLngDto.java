@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 public class StrfLatAndLngDto {
 
-    private Double Lat;
-    private Double Lng;
+    private long strfId;
+    private String Lat;
+    private String Lng;
 }

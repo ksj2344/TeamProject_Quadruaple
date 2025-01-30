@@ -9,11 +9,11 @@ public enum PathType {
 
     SUBWAY("SUBWAY","지하철", 1),
     CITY_BUS("CITY_BUS", "버스", 2),
-    CITY_BUS_SUBWAY("CITY_BUS_SUBWAY", "버스지하철", 3),
-    BUS("BUS", "시외버스", 11),
-    TRAIN("TRAIN", "열차", 12),
+    CITY_BUS_SUBWAY("CITY_BUS_SUBWAY", "버스 + 지하철", 3),
+    TRAIN("TRAIN", "기차", 11),
+    BUS("BUS", "시외버스", 12),
     AIR("AIR", "항공", 13),
-    BUS_TRAIN("BUS_TRAIN", "복합", 20),
+    BUS_TRAIN("BUS_TRAIN", "시외교통 복합(기차 + 시외버스)", 20),
     WALK("WALK", "도보", 101);
 
 

@@ -25,6 +25,7 @@ public class ScheduleDto {
     private boolean isNotFirst;
     private long nextScheduleId;
     private long prevScheduleStrfId;
+    private long nextScheduleStrfId;
 }
 
 /*

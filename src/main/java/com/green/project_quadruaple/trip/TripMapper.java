@@ -52,5 +52,5 @@ public interface TripMapper {
     // deleteTripUser
     Long selTripById(long tripId);
     void disableTripUser(long tripId, long userId);
-    StrfLatAndLngDto selStrfLatAndLng(long strfId);
+    List<StrfLatAndLngDto> selStrfLatAndLng(long prevStrfId, long nextStrfId);
 }

@@ -311,6 +311,22 @@
                 ORDER BY smemo.seq DESC
                 LIMIT 1
             ) AS prevScheduleStrfId
+            , (
+                SELECT
+                    s.strf_id
+                FROM sche_memo smemo
+                JOIN schedule s
+                ON s.schedule_id = smemo.schedule_memo_id
+                WHERE smemo.category = 'SCHE'
+                AND smemo.trip_id = 1
+                AND smemo.seq &gt; (
+                SELECT seq
+                FROM sche_memo
+                WHERE schedule_memo_id = #{scheduleId}
+                )
+                ORDER BY smemo.seq ASC
+                LIMIT 1
+            ) AS nextScheduleStrfId
         FROM schedule s
         JOIN sche_memo sm
             ON s.schedule_id = sm.schedule_memo_id
@@ -367,9 +383,10 @@
 
     <select id="selStrfLatAndLng">
         SELECT
-            lat
+            strf_id
+            , lat
             , lng
         FROM stay_tour_restaur_fest
-        WHERE strf_id = #{strf}
+        WHERE strf_id IN (#{prevStrfId}, #{nextStrfId});
     </select>
 </mapper>

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
+import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -22,15 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -185,44 +183,37 @@ public class TripService {
 //        return ResultResponse.success();
 //    }
 
-    public ResponseWrapper<List<PubTransPathVo>> getTransPort() throws IOException {
-        String startLat = "35.858798";
-        String startLng = "128.523111";
-        String endLat = "35.865417";
-        String endLng = "128.593601";
-//        String enKey = URLEncoder.encode(odsayApiConst.getParamApiKeyValue(), StandardCharsets.UTF_8);
-//        String urlPath = odsayApiConst.getBaseUrl()
-//                + odsayApiConst.getSearchPubTransPathUrl()
-//                + "?" + odsayApiConst.getParamApiKeyName() + "=" + enKey
-//                + "&" + odsayApiConst.getParamStartLatName() + "=" + startLat
-//                + "&" + odsayApiConst.getParamStartLngName() + "=" + startLng
-//                + "&" + odsayApiConst.getParamEndLatName() + "=" + endLat
-//                + "&" + odsayApiConst.getParamEndLngName() + "=" + endLng;
+    public ResponseWrapper<List<FindPathRes>> getTransPort(FindPathReq req) { // 길찾기
 
-
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add(odsayApiConst.getParamApiKeyName(), odsayApiConst.getParamApiKeyValue());
-        formData.add(odsayApiConst.getParamStartLatName(), startLat);
-        formData.add(odsayApiConst.getParamStartLngName(), startLng);
-        formData.add(odsayApiConst.getParamEndLatName(), endLat);
-        formData.add(odsayApiConst.getParamEndLngName(), endLng);
-
-        String json = webClient.post()
-                .uri(odsayApiConst.getSearchPubTransPathUrl())
-                .body(BodyInserters.fromFormData(formData))
-                .retrieve() //통신 시도
-                .bodyToMono(String.class) // 결과물을 String변환
-                .block(); //비동기 > 동기
-        log.info("json = {}", json);
+        String json = httpPostRequestReturnJson(req);
 
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
-            List<PubTransPathVo> res =  objectMapper.convertValue(jsonNode.at("/result/path")
+            PubTransPathVo pathVo =  objectMapper.convertValue(jsonNode.at("/result")
                     , new TypeReference<>() {});
-            log.info("res = {}", res);
+            log.info("pathVo = {}", pathVo);
+            if(pathVo.getPath() == null) {
+                return new ResponseWrapper<>(ResponseCode.WRONG_XY_VALUE.getCode(), null);
+            }
+            List<FindPathRes> res = new ArrayList<>();
+            for (PathTypeVo pathList : pathVo.getPath()) { // path 리스트
+                FindPathRes path = new FindPathRes(); // res에 담을 객체 생성
+                PathInfoVo info = pathList.getInfo();
+                String pathName = Optional.ofNullable(PathType.getKeyByValue(pathList.getPathType())).orElse(PathType.WALK).getName();
+                path.setPathType(pathName);
+                path.setTotalTime(info.getTotalTime());
+                path.setTotalDistance(info.getTotalDistance());
+                if(pathVo.getSearchType() == 0) { // 도시내 이동
+                    path.setPayment(pathList.getInfo().getPayment());
+                } else { // 도시와 도시간 이동
+                    path.setPayment(pathList.getInfo().getTotalPayment());
+                }
+                res.add(path);
+            }
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
         }
     }
 
@@ -254,18 +245,53 @@ public class TripService {
     * */
     @Transactional
     public ResultResponse deleteSchedule(long scheduleId) {
-        int distance = 100000;
-        int duration = 100;
-        int pathType = 2;
-        long tripId = tripMapper.selScheduleByScheduleId(scheduleId);
-        ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId);
-        StrfLatAndLngDto prevLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId()); // 이걸로 API 요청
 
-        tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq());
-        tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), distance, duration, pathType);
-        tripMapper.deleteSchedule(scheduleId);
-        tripMapper.deleteScheMemo(scheduleId);
-        return ResultResponse.success();
+        long tripId = tripMapper.selScheduleByScheduleId(scheduleId); // 삭제할 일정의 여행 ID
+        ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 삭제할 일정
+        if(!scheduleDto.isNotFirst()) { // 첫번째 일정일때는 다음일정의 거리, 시간, 이동수단을 null 로 바꾸고 끝.
+            tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq()); // ScheMemo 의 시퀀스 변경
+            tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), 0, 0, 0); // 삭제한 일정의 다음 일정 정보 수정
+            tripMapper.deleteSchedule(scheduleId); // schedule 삭제
+            tripMapper.deleteScheMemo(scheduleId); // ScheMemo 삭제
+            return ResultResponse.success();
+        }
+        List<StrfLatAndLngDto> prevAndNextStrfLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId()); // 이걸로 API 요청
+        FindPathReq params = new FindPathReq();
+        for(StrfLatAndLngDto strfLatAndLngDto : prevAndNextStrfLatAndLng) {
+            if(strfLatAndLngDto.getStrfId() == scheduleDto.getPrevScheduleStrfId()) {
+                params.setStartLngSX(strfLatAndLngDto.getLng());
+                params.setStartLatSY(strfLatAndLngDto.getLat());
+            } else {
+                params.setEndLngEX(strfLatAndLngDto.getLng());
+                params.setEndLatEY(strfLatAndLngDto.getLat());
+            }
+        }
+
+        String json = httpPostRequestReturnJson(params);
+
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            PubTransPathVo pathVo =  objectMapper.convertValue(jsonNode.at("/result")
+                    , new TypeReference<>() {});
+            log.info("pathVo = {}", pathVo);
+            if(pathVo.getPath() == null) {
+                return ResultResponse.severError();
+            }
+
+            PathTypeVo firstPath = pathVo.getPath().get(0);
+            int pathType = firstPath.getPathType();
+            int distance = firstPath.getInfo().getTotalDistance();
+            int duration = firstPath.getInfo().getTotalTime();
+
+            tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq()); // ScheMemo 의 시퀀스 변경
+            tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), distance, duration, pathType); // 삭제한 일정의 다음 일정 정보 수정
+            tripMapper.deleteSchedule(scheduleId); // schedule 삭제
+            tripMapper.deleteScheMemo(scheduleId); // ScheMemo 삭제
+            return ResultResponse.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultResponse.severError();
+        }
     }
 
     @Transactional
@@ -305,5 +331,22 @@ public class TripService {
                 Integer.parseInt(endAt.substring(8, 10)));
 
         return ChronoUnit.DAYS.between(startDate, endDate) + 1;
+    }
+
+    private String httpPostRequestReturnJson(FindPathReq req) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add(odsayApiConst.getParamApiKeyName(), odsayApiConst.getParamApiKeyValue());
+        formData.add(odsayApiConst.getParamStartLatName(), req.getStartLatSY());
+        formData.add(odsayApiConst.getParamStartLngName(), req.getStartLngSX());
+        formData.add(odsayApiConst.getParamEndLatName(), req.getEndLatEY());
+        formData.add(odsayApiConst.getParamEndLngName(), req.getEndLngEX());
+
+        return webClient.post()
+                .uri(odsayApiConst.getSearchPubTransPathUrl())
+                .body(BodyInserters.fromFormData(formData))
+                .retrieve() //통신 시도
+                .bodyToMono(String.class) // 결과물을 String변환
+                .block(); //비동기 > 동기
+        // log.info("json = {}", json);
     }
 }
