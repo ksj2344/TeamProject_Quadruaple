@@ -62,12 +62,6 @@ public class TripController {
         return tripService.getIncomplete(strfId);
     }
 
-//    @PostMapping("/add")
-//    @Operation(summary = "상품 담기", description = "선택한 여행의 일차에 상품(일정) 추가")
-//    public ResultResponse postIncomplete(@RequestBody PostStrfScheduleReq req) {
-//        return tripService.postIncomplete(req);
-//    }
-
     @GetMapping("/transport/get")
     @Operation(summary = "길 찾기", description = "출발지와 목적지 사이의 대중 교통(시외버스, 시내버스, 열차, 지하철 등)과 거리, 시간, 금액 정보 불러오기")
     public ResponseWrapper<List<FindPathRes>> getTransPort(@ParameterObject @ModelAttribute FindPathReq req) {
@@ -78,6 +72,11 @@ public class TripController {
     @Operation(summary = "일정 등록", description = "선택한 상품과 이동정보를 DB 에 저장")
     public ResultResponse postSchedule(@RequestBody PostScheduleReq req) {
         return tripService.postSchedule(req);
+    }
+
+    @PatchMapping("/schedule")
+    public ResultResponse patchSeq(@RequestBody PatchSeqReq req) {
+        return tripService.patchSeq(req);
     }
 
     @DeleteMapping("/schedule")

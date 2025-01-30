@@ -59,8 +59,11 @@
 
     <select id="selScheduleDetail" resultMap="scheduleForDay">
         SELECT
-            sm.`day` AS day
+            sm.schedule_memo_id AS scheduleMemoId
+            , sm.category AS scheOrMemo
+            , sm.`day` AS day
             , sm.seq AS seq
+            , sm.trip_id AS tripId
             , s.distance AS distance
             , s.duration AS duration
             , s.strf_id AS strfId
@@ -70,28 +73,36 @@
             , strf.address AS address
             , strf.lat AS lat
             , strf.lng as lng
+            , m.title AS title
+            , m.content AS content
         FROM sche_memo sm
         LEFT JOIN schedule s
             ON sm.schedule_memo_id = s.schedule_id
-        JOIN stay_tour_restaur_fest strf
+        LEFT JOIN stay_tour_restaur_fest strf
             ON strf.strf_id = s.strf_id
+        LEFT JOIN memo m
+            ON m.memo_id = sm.schedule_memo_id
         WHERE sm.trip_id = #{tripId}
-            AND sm.category = "SCHE"
     </select>
 
     <resultMap id="scheduleForDay" type="com.green.project_quadruaple.trip.model.dto.TripDetailDto">
         <id column="day" property="day"/>
         <collection property="schedules" ofType="com.green.project_quadruaple.trip.model.dto.ScheduleDto">
             <id column="seq" property="seq"/>
+            <result column="scheOrMemo" property="scheOrMemo"/>
+            <result column="scheduleMemoId" property="scheduleMemoId"/>
             <result column="distance" property="distance"/>
             <result column="duration" property="duration"/>
             <result column="strfId" property="strfId"/>
             <result column="strfTitle" property="strfTitle"/>
+            <result column="tripId" property="tripId"/>
             <result column="category" property="category"/>
             <result column="address" property="address"/>
             <result column="lat" property="lat"/>
             <result column="lng" property="lng"/>
             <result column="pathType" property="pathType"/>
+            <result column="title" property="title"/>
+            <result column="content" property="content"/>
         </collection>
     </resultMap>
 
@@ -268,6 +279,7 @@
             , s.distance AS distance
             , s.duration AS duration
             , s.pathtype AS pathType
+            , s.strf_id AS strfId
             , sm.trip_id AS tripId
             , sm.seq AS seq
             , EXISTS (
@@ -383,10 +395,72 @@
 
     <select id="selStrfLatAndLng">
         SELECT
-            strf_id
-            , lat
-            , lng
+            strf_id,
+            lat,
+            lng
         FROM stay_tour_restaur_fest
-        WHERE strf_id IN (#{prevStrfId}, #{nextStrfId});
+        <where>
+            <if test="prevStrfId != null">
+                strf_id = #{prevStrfId}
+            </if>
+            <if test="nextStrfId != null">
+                <if test="prevStrfId != null">
+                    OR
+                </if>
+                strf_id = #{nextStrfId}
+            </if>
+        </where>
+    </select>
+
+    <!-- patchSeq -->
+    <update id="updateSeq">
+        UPDATE sche_memo
+        SET seq = #{destSeq}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <update id="updateBetweenSeq">
+        <choose>
+            <when test="ahead">
+                UPDATE sche_memo
+                SET seq = seq + 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{destSeq} AND #{originSeq}
+            </when>
+            <otherwise>
+                UPDATE sche_memo
+                SET seq = seq - 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{originSeq} AND #{destSeq}
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateDay">
+        UPDATE sche_memo
+        SET day = #{destDay}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <select id="selScheMemoIdByTripIdAndSeq">
+        SELECT
+            (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = #{tripId}
+                AND seq &lt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq DESC
+            LIMIT 1) AS lowSeqId
+            , (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = 1
+                AND seq &gt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq ASC
+            LIMIT 1) AS highSeqId
+        FROM sche_memo
+        LIMIT 1
     </select>
 </mapper>

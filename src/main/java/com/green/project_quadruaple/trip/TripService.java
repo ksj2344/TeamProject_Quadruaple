@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.trip;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,10 +82,25 @@ public class TripService {
     public ResponseWrapper<TripDetailRes> getTrip(long tripId) {
         ScheCntAndMemoCntDto scamcdDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId);
+        long totalDistance = 0L;
+        long totalDuration = 0L;
+        for (TripDetailDto detailDto : tripDetailDto) {
+            for (ScheduleDto schedule : detailDto.getSchedules()) {
+                Long distance = schedule.getDistance();
+                Long duration = schedule.getDuration();
+                if(distance == null || duration == null) {
+                    continue;
+                }
+                totalDistance += distance;
+                totalDuration += duration;
+            }
+        }
         TripDetailRes res = new TripDetailRes();
         res.setScheduleCnt(scamcdDto.getScheduleCnt());
         res.setMemoCnt(scamcdDto.getMemoCnt());
         res.setDays(tripDetailDto);
+        res.setTotalDistance(totalDistance);
+        res.setTotalDuration(totalDuration);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
@@ -183,7 +197,10 @@ public class TripService {
 //        return ResultResponse.success();
 //    }
 
-    public ResponseWrapper<List<FindPathRes>> getTransPort(FindPathReq req) { // 길찾기
+    /*
+    * 길찾기
+    * */
+    public ResponseWrapper<List<FindPathRes>> getTransPort(FindPathReq req) {
 
         String json = httpPostRequestReturnJson(req);
 
@@ -238,6 +255,95 @@ public class TripService {
     }
 
     /*
+    * 일정메모 순서 변경
+    * */
+    @Transactional
+    public ResultResponse patchSeq(PatchSeqReq req) {
+        long tripId = req.getTripId();
+        long scheduleId = req.getScheduleId();
+        int originSeq = req.getOriginSeq();
+        int destSeq = req.getDestSeq();
+        Integer destDay = req.getDestDay();
+        boolean ahead = false;
+
+        try {
+            ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId);
+            boolean notFirst = scheduleDto.isNotFirst();
+
+            if(originSeq > destSeq) {
+                // 목적지 seq 가 기존 seq 보다 작은 값일 경우 앞으로 이동으로 간주.
+                // 기존 seq-1 과 목적지 seq 사이의 seq 를 전부 +1
+                ahead = true;
+                originSeq -= 1;
+            } else {
+                // 반대의 경우, 기존 seq+1 과 목적지 seq 사이의 seq 를 전부 -1
+                originSeq += 1;
+            }
+            tripMapper.updateBetweenSeq(tripId, originSeq, destSeq, ahead);
+            tripMapper.updateSeq(scheduleId, destSeq);
+            if(destDay != null) { // destDay 가 있다면 DB 수정
+                tripMapper.updateDay(scheduleId, destDay);
+            }
+
+            /*
+            * 기본 로직
+            * 1. (완료)A의 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
+            * 2. A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
+            * 3. A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
+            *
+            * A의 원래 자리가 첫 일정이라면 (위치가 변동된 일정은 A)
+            * 1-1. A의 원래 자리의 다음 일정 거리, 시간, 수단을 NULL 로 변경
+            *
+            * A의 원래 자리가 마지막 일정이라면
+            * 1-1. 변경 없음
+            *
+            * A의 변경된 위치가 첫 일정이라면
+            * 2-1. 변경 없음
+            *
+            * A의 변경된 위치가 마지막 일정이라면
+            * 3-1. 변경 없음
+            * */
+
+            FindPathReq findPathReq;
+            if(!notFirst) { // 원래 자리가 첫 일정이라면
+                tripMapper.updateSchedule(false, scheduleDto.getNextScheduleId(), 0, 0, 0);
+            } else if (scheduleDto.getNextScheduleStrfId() != null) { // 원래 자리가 마지막 일정이 아니라면
+//                // 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
+                setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
+            }
+//
+//            // 여기서 부터는 목적지의 변경
+            scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 변경된 위치의 정보로 새로 불러옴
+            if(!scheduleDto.isNotFirst()) {
+                tripMapper.updateSchedule(false, scheduleDto.getScheduleMemoId(), 0, 0, 0);
+            } else if(scheduleDto.getNextScheduleStrfId() != null) {
+                // A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
+                setSchedulePath(true, scheduleDto.getStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
+//
+//                // A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
+                setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getStrfId(), scheduleId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return ResultResponse.success();
+    }
+
+    private void setSchedulePath(boolean isNotFirst, long prevScheduleStrfId, long nextScheduleStrfId, long nextScheduleId) {
+        List<StrfLatAndLngDto> strfLatAndLngDtoList = tripMapper.selStrfLatAndLng(prevScheduleStrfId, nextScheduleStrfId);
+        FindPathReq findPathReq = new FindPathReq();
+        setOdsayParams(findPathReq, strfLatAndLngDtoList, prevScheduleStrfId);
+        String json = httpPostRequestReturnJson(findPathReq);
+        PathTypeVo firstPath = getFirstPathType(json);
+        int pathType = firstPath.getPathType();
+        int distance = firstPath.getInfo().getTotalDistance();
+        int duration = firstPath.getInfo().getTotalTime();
+        tripMapper.updateSchedule(isNotFirst, nextScheduleId, distance, duration, pathType);
+    }
+
+    /*
+    * 일정 삭제
     * 1. 만약 첫번째 일정을 삭제한다면 다음으로 첫번째 일정이 되는 일정의 시간, 거리, 이동수단을 null 로 바꿔야함
     * 2. 삭제하는 일정의 seq 보다 seq가 높은 일정+메모들의 seq 를 모두 -1 해주어야함
     * 3. sche_memo 의 category 가 SCHE 인 가장 가까운 seq 의 일정은 거리, 시간, 이동수단을 삭제하는 일정의 이전 일정과 다시 맞추어야함
@@ -257,28 +363,11 @@ public class TripService {
         }
         List<StrfLatAndLngDto> prevAndNextStrfLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId()); // 이걸로 API 요청
         FindPathReq params = new FindPathReq();
-        for(StrfLatAndLngDto strfLatAndLngDto : prevAndNextStrfLatAndLng) {
-            if(strfLatAndLngDto.getStrfId() == scheduleDto.getPrevScheduleStrfId()) {
-                params.setStartLngSX(strfLatAndLngDto.getLng());
-                params.setStartLatSY(strfLatAndLngDto.getLat());
-            } else {
-                params.setEndLngEX(strfLatAndLngDto.getLng());
-                params.setEndLatEY(strfLatAndLngDto.getLat());
-            }
-        }
-
+        setOdsayParams(params, prevAndNextStrfLatAndLng, scheduleDto.getPrevScheduleStrfId());
         String json = httpPostRequestReturnJson(params);
 
         try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            PubTransPathVo pathVo =  objectMapper.convertValue(jsonNode.at("/result")
-                    , new TypeReference<>() {});
-            log.info("pathVo = {}", pathVo);
-            if(pathVo.getPath() == null) {
-                return ResultResponse.severError();
-            }
-
-            PathTypeVo firstPath = pathVo.getPath().get(0);
+            PathTypeVo firstPath = getFirstPathType(json);
             int pathType = firstPath.getPathType();
             int distance = firstPath.getInfo().getTotalDistance();
             int duration = firstPath.getInfo().getTotalTime();
@@ -348,5 +437,32 @@ public class TripService {
                 .bodyToMono(String.class) // 결과물을 String변환
                 .block(); //비동기 > 동기
         // log.info("json = {}", json);
+    }
+
+    private void setOdsayParams(FindPathReq params, List<StrfLatAndLngDto> LatLngDtoList, long prevScheduleStrfId) {
+        for(StrfLatAndLngDto strfLatAndLngDto : LatLngDtoList) {
+            if(strfLatAndLngDto.getStrfId() == prevScheduleStrfId) {
+                params.setStartLngSX(strfLatAndLngDto.getLng());
+                params.setStartLatSY(strfLatAndLngDto.getLat());
+            } else {
+                params.setEndLngEX(strfLatAndLngDto.getLng());
+                params.setEndLatEY(strfLatAndLngDto.getLat());
+            }
+        }
+    }
+
+    private PathTypeVo getFirstPathType(String json) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            PubTransPathVo pathVo =  objectMapper.convertValue(jsonNode.at("/result")
+                    , new TypeReference<>() {});
+            log.info("pathVo = {}", pathVo);
+            if(pathVo.getPath() == null) {
+                throw new RuntimeException();
+            }
+            return pathVo.getPath().get(0);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

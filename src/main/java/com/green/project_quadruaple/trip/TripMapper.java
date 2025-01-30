@@ -52,5 +52,11 @@ public interface TripMapper {
     // deleteTripUser
     Long selTripById(long tripId);
     void disableTripUser(long tripId, long userId);
-    List<StrfLatAndLngDto> selStrfLatAndLng(long prevStrfId, long nextStrfId);
+    List<StrfLatAndLngDto> selStrfLatAndLng(Long prevStrfId, Long nextStrfId);
+
+    // patchSeq
+    void updateSeq(long scheduleMemoId, int destSeq);
+    void updateBetweenSeq(long tripId, long originSeq, long destSeq, boolean ahead);
+    void updateDay(long scheduleMemoId, int destDay);
+    LowAndHighSeqDto selScheMemoIdByTripIdAndSeq(long tripId, int seq);
 }
