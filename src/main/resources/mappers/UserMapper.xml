@@ -83,5 +83,31 @@
         </set>
         WHERE email = #{email}
     </update>
+    
+    <!-- 임시 비밀번호 -->
+    <insert id="temporaryPw">
+        INSERT INTO temporary_pw (user_id, tp_pw)
+        VALUES (#{userId}, #{tpPw})
+            ON DUPLICATE KEY
+        UPDATE tp_pw = VALUES(tp_pw)
+    </insert>
+
+    <select id="checkUserId">
+        SELECT user_id AS userId
+          FROM user
+         WHERE email = #{email}
+    </select>
+
+    <update id="updTemporaryPw">
+        UPDATE temporary_pw
+           SET tp_pw = #{tpPw}
+         WHERE user_id = #{userId}
+    </update>
+
+    <update id="changePwByTemporaryPw">
+        UPDATE user
+           SET pw = #{tpPw}
+         WHERE user_id = #{userId}
+    </update>
 
 </mapper>

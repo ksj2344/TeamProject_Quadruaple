@@ -13,13 +13,13 @@ import lombok.ToString;
 @Schema
 public class BookingListGetRes {
     private long bookingId;
-    private String visitAt;
-    private String message;
     private String checkIn;
     private String checkOut;
     private long menuId;
-    private String checkInFormatted;
-    private String checkOutFormatted;
     private int menuPrice;
     private String strfTitle;
+    private String strfPic;
+    private int reviewStatus;
+    private String bookingStatus; // "progress" 또는 "completed"
+
 }

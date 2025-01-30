@@ -1,11 +1,10 @@
-package com.green.project_quadruaple.picmanager;
+package com.green.project_quadruaple.datamanager;
 
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.home.res.MyPageRes;
-import com.green.project_quadruaple.picmanager.model.StrfPicReq;
+import com.green.project_quadruaple.datamanager.model.StrfPicReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -16,9 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Log4j2
 @Service
