@@ -18,5 +18,8 @@ public class BookingListGetRes {
     private long menuId;
     private int menuPrice;
     private String strfTitle;
+    private String strfPic;
+    private int reviewStatus;
+    private String bookingStatus; // "progress" 또는 "completed"
 
 }

@@ -10,10 +10,10 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class Paging {
-    @Schema(example = "6")
-    private int size;
     @Schema(example = "1")
     private int page;
+    @Schema(example = "6")
+    private int size;
     @JsonIgnore
     private int startIdx;
 
