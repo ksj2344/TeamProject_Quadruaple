@@ -1,12 +1,13 @@
 package com.green.project_quadruaple.booking;
 
-import com.green.project_quadruaple.booking.model.BookingListGetReq;
-import com.green.project_quadruaple.booking.model.BookingListGetRes;
+import com.green.project_quadruaple.booking.model.*;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface BookingMapper {
-    BookingListGetRes bookingList (BookingListGetReq req);
+    List<BookingListGetRes> getBooking(BookingListGetReq req);
 
-
+    BookingPostRes postBooking(BookingPostReq req);
 }
