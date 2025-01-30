@@ -60,7 +60,7 @@ public class StrfSelRes {
     @Schema(description = "평점 평균")
     private int ratingAvg;
     @Schema(description = "찜 여부")
-    private boolean wishIn;
+    private int wishIn;
     @Schema(description = "평점 개수")
     private int ratingCnt;
     @Schema(description = "최근 본 목록 비활성화")
