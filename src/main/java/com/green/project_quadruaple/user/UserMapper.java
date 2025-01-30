@@ -25,4 +25,10 @@ public interface UserMapper {
     UserUpdateRes checkPassword(long signedUserId, String pw);
     void changePassword(long signedUserId, String newPw);
     int updUser(UserUpdateReq req);
+
+    // 임시 비밀번호
+    int temporaryPw(TemporaryPwDto temporaryPwDto);
+    long checkUserId(String email);
+    int updTemporaryPw(TemporaryPwDto temporaryPwDto);
+    int changePwByTemporaryPw(TemporaryPwDto temporaryPwDto);
 }

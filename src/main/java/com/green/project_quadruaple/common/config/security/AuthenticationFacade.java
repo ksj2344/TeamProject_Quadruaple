@@ -7,7 +7,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationFacade {
-    public static long getSignedUserId(){
-        return ((JwtUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getSignedUserId();
+    public static long getSignedUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof JwtUser) {
+            JwtUser jwtUser = (JwtUser) principal;
+            return jwtUser.getSignedUserId();
+        } else {
+            throw new IllegalStateException("Authentication principal is not of type JwtUser");
+        }
     }
 }

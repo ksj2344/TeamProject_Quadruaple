@@ -6,11 +6,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
-@Schema(title = "예약 완료 목록 조회")
-public class BookingCompleteGetReq {
-
+@Schema
+public class BookingListResponse {
+    private List<BookingListGetRes> beforeList;
+    private List<BookingListGetRes> afterList;
 }

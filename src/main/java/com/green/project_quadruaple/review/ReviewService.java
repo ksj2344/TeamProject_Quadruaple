@@ -1,100 +1,95 @@
 package com.green.project_quadruaple.review;
 
-import com.green.project_quadruaple.common.model.Constants;
-import com.green.project_quadruaple.review.model.ReviewDto;
-import com.green.project_quadruaple.review.model.ReviewSelReq;
-import com.green.project_quadruaple.review.model.ReviewSelRes;
-import com.green.project_quadruaple.strf.model.StrfPicSel;
+import com.green.project_quadruaple.common.MyFileUtils;
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.review.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-    @Autowired
-    private ReviewMapper reviewMapper;
-    public ReviewDto getReview(ReviewSelReq req) {
-        ReviewDto dto = reviewMapper.getReview(req);
-        dto.getStrfId();
-//        if (dto == null) {
-//            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
-//        }
-//        if (dto.getStrfId() != req.getStrfId()) {
-//            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
-//        }
-        List<ReviewSelRes> reviewSelRes = dto.getRes();
-        if (reviewSelRes == null) {
-            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
+    private final ReviewMapper reviewMapper;
+    private final MyFileUtils myFileUtils;
+
+    public List<ReviewSelRes> getReview(ReviewSelReq req) {
+        log.info("Received strfId: " + req.getStrfId());
+//        ReviewSelRes res = reviewMapper.getReview(req.getStrfId());
+//        res.getStrfId();
+        List<ReviewSelRes> res = reviewMapper.getReview(req);
+        if (req.getStartIdx()<0){
+            res = new ArrayList<>();
+            return res;
         }
-        dto.setRes(reviewSelRes);
-        return dto;
+
+        return res;
+    }
+//    public List<FeedGetRes> getFeedList4(FeedGetReq p) {
+//        List<FeedWithPicCommentDto> dtoList = feedMapper.selFeedWithPicAndCommentLimit4List(p);
+//        List<FeedGetRes> list = new ArrayList<>(dtoList.size());
+//        for(FeedWithPicCommentDto item : dtoList) {
+//            list.add(new FeedGetRes(item));
+//        }
+//        return list;
+//    }
+
+    @Transactional
+    public void postRating(ReviewPostDto dto) {
+        reviewMapper.postRating(dto);
+        long reviewId = dto.getReviewId();
+
+        // 2. 사진 저장 및 파일명 변경
+        List<MultipartFile> reviewPics = dto.getPics();
+        if (reviewPics != null && !reviewPics.isEmpty()) {
+            List<String> savedFileNames = new ArrayList<>();
+            String uploadFolder = "review/" + reviewId; // 저장할 폴더 경로
+
+            for (MultipartFile pic : reviewPics) {
+                if (!pic.isEmpty()) {
+                    try {
+                        // 랜덤 파일명 생성
+                        String savedFileName = myFileUtils.makeRandomFileName(pic);
+                        String savePath = uploadFolder + "/" + savedFileName; // 파일 저장 경로
+
+                        // 파일 저장
+                        myFileUtils.transferTo(pic, savePath);
+
+                        // DB에 저장할 파일명 리스트
+                        savedFileNames.add(savedFileName);
+                    } catch (Exception e) {
+                        throw new RuntimeException("파일 저장 실패: " + e.getMessage());
+                    }
+                }
+            }
+
+            // 3. DB에 저장
+            if (!savedFileNames.isEmpty()) {
+                reviewMapper.postReviewPics(reviewId, savedFileNames);
+            }
+        }
     }
 
-        /*
-        // 리뷰 목록 가져오기 (페이징 처리된 목록)
-        List<ReviewDto> reviewList = reviewMapper.getReview(req);
-        if (reviewList.isEmpty()) {
-            return new ArrayList<>();
+    public ResponseWrapper<ReviewUpdRes> updateReview(ReviewUpdReq req) {
+        int updatedRows = reviewMapper.patchReview(req);
+
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("리뷰 수정 실패: 해당 리뷰를 찾을 수 없거나 수정 권한이 없습니다.");
         }
 
-        // 리뷰 ID 리스트 가져오기
-        List<Long> reviewIds = reviewList.stream()
-                .map(ReviewDto::getReviewId)
-                .collect(Collectors.toList());
+        ReviewUpdRes res = new ReviewUpdRes();
+        res.setReviewId(req.getReviewId());
 
-        // 리뷰 사진 정보 가져오기
-        List<StrfPicSel> strfPicSelList = reviewMapper.selReviewPicsByReviewIds(reviewIds);
-
-        // 리뷰 ID별로 사진 목록 매핑
-        Map<Long, List<String>> picMap = strfPicSelList.stream()
-                .collect(Collectors.groupingBy(
-                        StrfPicSel::getStrfId,
-                        Collectors.mapping(StrfPicSel::getPic, Collectors.toList())
-                ));
-
-        // 리뷰 목록에 사진 추가
-        for (ReviewDto review : reviewList) {
-            review.setReviewPics(picMap.getOrDefault(review.getReviewId(), Collections.emptyList()));
-        }
-
-        // 리뷰 목록을 ReviewDto로 변환
-        List<ReviewDto> reviewDtoList = reviewList.stream()
-                .map(reviewSelRes -> {
-                    ReviewDto dto = new ReviewDto();
-                    dto.setReviewId(reviewSelRes.getReviewId());
-                    dto.setContent(reviewSelRes.getContent());
-                    dto.setRating(reviewSelRes.getRating());
-                    dto.setWriterUserId(reviewSelRes.getWriterUserId());
-                    dto.setWriterUserName(reviewSelRes.getWriterUserName());
-                    dto.setWriterUserPic(reviewSelRes.getWriterUserPic());
-                    dto.setUserWriteReviewCnt(reviewSelRes.getUserWriteReviewCnt());
-                    dto.setReviewWriteDate(reviewSelRes.getReviewWriteDate());
-                    dto.setReviewPics(reviewSelRes.getReviewPics());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        // 더보기 항목 추가
-        boolean hasMore = reviewList.size() > Constants.getDefault_page_size();
-        if (hasMore) {
-            reviewDtoList = reviewDtoList.subList(0, Constants.getDefault_page_size());
-            ReviewDto moreItem = new ReviewDto();
-            moreItem.setMoreReview(true);
-            reviewDtoList.add(moreItem);
-        }
-
-        return reviewDtoList;
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-         */
+
 }

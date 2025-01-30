@@ -8,20 +8,28 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResultResponse;
+import com.green.project_quadruaple.user.exception.CustomException;
+import com.green.project_quadruaple.user.exception.UserErrorCode;
 import com.green.project_quadruaple.user.mail.MailService;
 import com.green.project_quadruaple.user.model.*;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.SignatureException;
 import java.time.Duration;
 import java.util.*;
 
@@ -35,6 +43,7 @@ public class UserService {
     private final TokenProvider jwtTokenProvider;
     private final CookieUtils cookieUtils;
     private final AuthenticationFacade authenticationFacade;
+    private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
@@ -102,7 +111,7 @@ public class UserService {
 
         // AT, RT
         JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(15));
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
@@ -136,14 +145,25 @@ public class UserService {
     //-------------------------------------------------
     // 마이페이지 조회
     public UserInfoDto infoUser() {
-        long signedUserId = authenticationFacade.getSignedUserId();
-        UserInfo userInfo = userMapper.selUserInfo(signedUserId);
-        return UserInfoDto.builder()
-                .signedUserId(signedUserId)
-                .name(userInfo.getName())
-                .email(userInfo.getEmail())
-                .profilePIc(userInfo.getProfilePIc())
-                .build();
+        try {
+            // 토큰에서 사용자 ID 가져오기
+            long signedUserId = authenticationFacade.getSignedUserId();
+
+            // 사용자 정보 조회
+            UserInfo userInfo = userMapper.selUserInfo(signedUserId);
+            return UserInfoDto.builder()
+                    .signedUserId(signedUserId)
+                    .name(userInfo.getName())
+                    .email(userInfo.getEmail())
+                    .profilePIc(userInfo.getProfilePIc())
+                    .build();
+        } catch (ExpiredJwtException e) {
+            // 토큰 만료 에러 처리
+            throw new CustomException(UserErrorCode.EXPIRED_TOKEN);
+        } catch (MalformedJwtException e) {
+            // 유효하지 않은 토큰 에러 처리
+            throw new CustomException(UserErrorCode.INVALID_TOKEN);
+        }
     }
 
     //-------------------------------------------------
@@ -196,4 +216,113 @@ public class UserService {
                 .pw(req.getNewPw())  // 새로운 비밀번호가 없으면 null일 수 있으므로 그대로 반환
                 .build();
     }
-} //
+
+    //-------------------------------------------------
+    // 임시 비밀번호
+    public int temporaryPw(TemporaryPwDto temporaryPwDto) {
+        long userId = userMapper.checkUserId(temporaryPwDto.getEmail());
+        if (userId == 0) {
+            throw new RuntimeException("해당 이메일에 등록된 사용자 정보가 없습니다.");
+        }
+        temporaryPwDto.setUserId(userId);
+
+        char[] upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+        char[] numbers = "0123456789".toCharArray();
+        char[] specialCharacters = "!@#$%^&*".toCharArray();
+        char[] allCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*".toCharArray();
+
+        StringBuilder tmpPasswordBuilder = new StringBuilder();
+        Random random = new Random();
+
+        // 각 조건을 만족하도록 하나씩 추가
+        tmpPasswordBuilder.append(upperCaseLetters[random.nextInt(upperCaseLetters.length)]);
+        tmpPasswordBuilder.append(numbers[random.nextInt(numbers.length)]);
+        tmpPasswordBuilder.append(specialCharacters[random.nextInt(specialCharacters.length)]);
+
+        // 나머지 5개 문자는 무작위로 추가
+        for (int i = 0; i < 5; i++) {
+            tmpPasswordBuilder.append(allCharacters[random.nextInt(allCharacters.length)]);
+        }
+
+        // 문자 배열로 변환하여 섞음
+        char[] passwordArray = tmpPasswordBuilder.toString().toCharArray();
+        for (int i = 0; i < passwordArray.length; i++) {
+            int randomIndex = random.nextInt(passwordArray.length);
+            char temp = passwordArray[i];
+            passwordArray[i] = passwordArray[randomIndex];
+            passwordArray[randomIndex] = temp;
+        }
+
+        // 최종 임시 비밀번호 생성
+        String tmpPassword = new String(passwordArray);
+        temporaryPwDto.setTpPw(tmpPassword);
+
+        String tmpPasswordOriginal = temporaryPwDto.getTpPw();
+        String hashedPassword = passwordEncoder.encode(tmpPasswordOriginal);
+        temporaryPwDto.setTpPw(hashedPassword);
+
+        int result = userMapper.temporaryPw(temporaryPwDto);
+        int updResult = userMapper.updTemporaryPw(temporaryPwDto);
+        int changeResult = userMapper.changePwByTemporaryPw(temporaryPwDto);
+
+        if(updResult == 1) {
+            MimeMessage message = javaMailSender.createMimeMessage();
+
+            try {
+                message.setFrom(FROM_ADDRESS);
+                message.setRecipients(MimeMessage.RecipientType.TO, String.valueOf(temporaryPwDto.getEmail()));
+                message.setSubject("임시 비밀번호 안내입니다.");
+                String body = "<!DOCTYPE html>" +
+                        "<html lang=\"ko\">" +
+                        "<head>" +
+                        "  <meta charset=\"UTF-8\" />" +
+                        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />" +
+                        "  <title>임시 비밀번호 안내</title>" +
+                        "</head>" +
+                        "<body style=\"margin: 0; padding: 0; font-family: 'Arial', sans-serif; background-color: #f9f9f9;\">" +
+                        "  <table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\" style=\"max-width: 600px; background-color: #ffffff; border-collapse: collapse;\">" +
+                        "    <tr>" +
+                        "      <td align=\"center\" style=\"padding: 20px; border-bottom: 3px solid #0dd1fd;\">" +
+                        "        <h1 style=\"font-size: 24px; color: #000000; margin: 0;\">" +
+                        "          임시 비밀번호 안내" +
+                        "        </h1>" +
+                        "      </td>" +
+                        "    </tr>" +
+                        "    <tr>" +
+                        "      <td align=\"center\" style=\"padding: 20px; color: #616161; font-size: 14px; line-height: 1.6;\">" +
+                        "        <p>안녕하세요. QUADRUPLE 임시 비밀번호가 생성되었습니다.</p>" +
+                        "        <p>아래의 임시 비밀번호로 로그인해 주세요.</p>" +
+                        "      </td>" +
+                        "    </tr>" +
+                        "    <tr>" +
+                        "      <td align=\"center\" style=\"padding: 20px;\">" +
+                        "        <div style=\"display: inline-block; background-color: rgba(148, 221, 255, 0.47); color: #02aed5; font-size: 28px; font-weight: bold; padding: 15px 20px; border-radius: 8px;\">" +
+                        "          " + tmpPasswordOriginal +  // 임시 비밀번호 삽입
+                        "        </div>" +
+                        "      </td>" +
+                        "    </tr>" +
+                        "    <tr>" +
+                        "      <td align=\"center\" style=\"padding: 20px; color: #616161; font-size: 12px; line-height: 1.4;\">" +
+                        "        <p>• 위 내용을 요청하지 않았는데 본 메일을 받으셨다면 고객 센터에 문의해 주세요.</p>" +
+                        "      </td>" +
+                        "    </tr>" +
+                        "    <tr>" +
+                        "      <td align=\"center\" style=\"padding: 20px; font-size: 10px; color: #9e9e9e; line-height: 1.4;\">" +
+                        "        <p>본 메일은 QUADRUPLE에서 발송한 메일이며 발신전용입니다. 관련 문의 사항은 고객센터로 연락주시기 바랍니다.</p>" +
+                        "        <p>© 2024 QUADRUPLE. All rights reserved.</p>" +
+                        "      </td>" +
+                        "    </tr>" +
+                        "  </table>" +
+                        "</body>" +
+                        "</html>";
+                message.setText(body,"UTF-8", "html");
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+            javaMailSender.send(message);
+        }
+
+        return updResult;
+    }
+
+}
