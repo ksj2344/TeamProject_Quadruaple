@@ -23,8 +23,8 @@ public class ReviewSelReq extends Paging {
     private long strfId;
 
 
-    public ReviewSelReq(Integer size, Integer page , long strfId) {
-        super(size, page);
+    public ReviewSelReq(Integer page, Integer size , long strfId) {
+        super(page, size);
         this.strfId = strfId;
     }
 }
