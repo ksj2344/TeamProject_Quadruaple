@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.common.config.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,8 +41,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     log.warn("Authentication is null.");
                 }
-            } catch (Exception e) {
-                request.setAttribute("exception", e);
+            } catch (ExpiredJwtException e) {
+                request.setAttribute("exception", "ExpiredJwtException");
                 log.error("Error during authentication", e);
             }
         }
