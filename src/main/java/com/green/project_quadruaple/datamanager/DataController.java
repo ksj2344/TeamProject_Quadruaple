@@ -16,29 +16,30 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("data")
 @Tag(name = "사용자", description = "기능용x 더미데이터이미지용")
 public class DataController {
     private final DataService dataService;
 
-    @PostMapping
+    @PostMapping("strf")
     @Operation(summary = "strf사진넣기", description = "post-man에서 하셔야함")
     public ResponseEntity<?> insPicToStrf(@RequestPart List<MultipartFile> pics, @RequestPart StrfIdGetReq p){
         return dataService.insPicToStrf(pics, p);
     }
 
-    @DeleteMapping
+    @DeleteMapping("strf")
     @Operation(summary = "strf사진지우기", description = "카테고리, 원한다면 제목과 범위도")
     public ResponseEntity<?> delPicToStrf(@RequestBody StrfIdGetReq p){
         return dataService.delPicToStrf(p);
     }
 
-    @PostMapping
+    @PostMapping("menu")
     @Operation(summary = "Menu넣기", description = "post-man에서 하셔야함")
     public ResponseEntity<?> insMenu(@RequestPart List<MultipartFile> pics, @RequestPart MenuReq p){
         return dataService.insPicToStrf(pics, p);
     }
 
-    @DeleteMapping
+    @DeleteMapping("menu")
     @Operation(summary = "menu지우기", description = "카테고리, 원한다면 제목과 범위도")
     public ResponseEntity<?> delMenu(@RequestBody StrfIdGetReq p){
         return dataService.delMenu(p);

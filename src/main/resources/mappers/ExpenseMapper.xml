@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.expense.ExpenseMapper">
+
+    <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
+        INSERT INTO daily_expense
+        SET `for`=#{forText}
+    </insert>
+
+    <insert id="insPaidUser">
+        INSERT INTO paid_user
+        SET de_id=#{deId}
+        , price=#{price}
+        , trip_user_id
+        =(SELECT trip_user_id
+        FROM trip_user
+        WHERE user_id=#{userId}
+        AND trip_id=#{tripId})
+    </insert>
+
+    <insert id="insPaidUserSamePrice">
+        INSERT INTO paid_user
+        SET de_id=#{deId}
+        , price=#{price}
+        , trip_user_id
+        IN (SELECT trip_user_id
+        FROM trip_user
+        WHERE trip_id=#{tripId}
+        AND user_id IN
+        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+            #{userId}
+        </foreach>
+        )
+    </insert>
+</mapper>
