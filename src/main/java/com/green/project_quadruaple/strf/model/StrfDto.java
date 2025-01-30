@@ -38,7 +38,7 @@ public class StrfDto {
     private String inquiredAt;
     private String recentCheckStatus;
 
-    private boolean wishIn;
+    private int wishIn;
 
     private List<Amenity> amenities;
     private List<StrfPicSel> strfPics;

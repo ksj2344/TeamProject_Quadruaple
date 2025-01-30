@@ -30,6 +30,13 @@ public class StrfService {
             updatedResList = Collections.emptyList();
         }
         dto.setRes(updatedResList);
+
+        if (req.getUserId() > 0){
+            strfMapper.strfUpsert(req.getUserId(), req.getStrfId());
+        } else {
+            throw new IllegalArgumentException("Invalid user ID: " + req.getUserId());
+        }
+
         return dto;
     }
 
