@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.green.project_quadruaple.datamanager.PicMapper">
+<mapper namespace="com.green.project_quadruaple.datamanager.DataMapper">
 
     <insert id="insStrfPic">
         INSERT INTO strf_pic
@@ -16,7 +16,12 @@
         SELECT strf_id
         FROM stay_tour_restaur_fest
         WHERE category =#{category}
-        AND strf_id BETWEEN #{startId} AND #{endId}
+        <if test="startId != null and endId != null">
+            AND strf_id BETWEEN #{startId} AND #{endId}
+        </if>
+        <if test="strfTitle != null and strfTitle != '' ">
+            AND title LIKE '%#{strfTitle}%'
+        </if>
     </select>
 
     <delete id="delStrfIdPic">
@@ -29,7 +34,18 @@
 
     <insert id="insMenu">
         INSERT INTO menu
-        (title, price, menu_pic)
+        (strf_id,title, price, menu_pic)
         VALUES
+        <foreach collection="menuData" item="menu" separator=",">
+            (#{menu})
+        </foreach>
     </insert>
+
+    <delete id="delMenu">
+        DELETE FROM menu
+        WHERE strf_id IN
+        <foreach collection="strfIds" item="strfId" open="(" close=")" separator=",">
+            #{strfId}
+        </foreach>
+    </delete>
 </mapper>
