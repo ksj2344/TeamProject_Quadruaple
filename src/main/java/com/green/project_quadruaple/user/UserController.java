@@ -103,4 +103,15 @@ public class UserController {
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userUpdateRes));
     }
+
+    // 임시 비밀번호 발급
+    @PostMapping("password")
+    @Operation(summary = "임시 비밀번호 전송")
+    public ResponseEntity<?> temporaryPassword(@RequestBody TemporaryPwDto temporaryPwDto) {
+        int result = userService.temporaryPw(temporaryPwDto);
+        if (result < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
 }
