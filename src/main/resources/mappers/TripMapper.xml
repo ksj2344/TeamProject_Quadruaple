@@ -278,6 +278,7 @@
             s.schedule_id AS scheduleId
             , s.distance AS distance
             , s.duration AS duration
+            , sm.category AS scheOrMemo
             , s.pathtype AS pathType
             , s.strf_id AS strfId
             , sm.trip_id AS tripId
@@ -330,7 +331,7 @@
                 JOIN schedule s
                 ON s.schedule_id = smemo.schedule_memo_id
                 WHERE smemo.category = 'SCHE'
-                AND smemo.trip_id = 1
+                AND smemo.trip_id = #{tripId}
                 AND smemo.seq &gt; (
                 SELECT seq
                 FROM sche_memo
@@ -339,10 +340,10 @@
                 ORDER BY smemo.seq ASC
                 LIMIT 1
             ) AS nextScheduleStrfId
-        FROM schedule s
-        JOIN sche_memo sm
+        FROM sche_memo sm
+        LEFT JOIN schedule s
             ON s.schedule_id = sm.schedule_memo_id
-        WHERE schedule_id = #{scheduleId}
+        WHERE sm.schedule_memo_id = #{scheduleId}
     </select>
 
     <update id="updateSeqScheMemo"> <!-- 다음 일정들의 seq 값 -1 -->
