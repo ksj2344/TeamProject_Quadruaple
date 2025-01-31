@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.review.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +41,10 @@ public class ReviewController {
 
     @PostMapping
     @Operation(summary = "리뷰 등록")
-    public ResponseEntity<?> postRating(@RequestPart(value = "pics", required = false) List<MultipartFile> pics
-                                        ,@Valid @ModelAttribute ReviewPostDto dto) {
+    public ResponseEntity<?> postRating(@RequestPart List<MultipartFile> pics
+                                        ,@Valid @RequestPart ReviewPostReq p) {
 
-        // 리뷰 DTO에 사진 추가
-        dto.setPics(pics);
-
-        // 서비스 호출
-        reviewService.postRating(dto);
-
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), dto));
+        return reviewService.postRating(pics,p);
     }
 
     @PutMapping
