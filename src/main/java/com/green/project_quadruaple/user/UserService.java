@@ -325,4 +325,17 @@ public class UserService {
         return updResult;
     }
 
+    public boolean checkTempPassword(String email) {
+        Map<String, String> pwData = userMapper.getPwAndTempPw(email);
+
+        if (pwData == null) {
+            return false; // 데이터가 없는 경우 false 반환
+        }
+
+        String pw = pwData.get("pw");
+        String tpPw = pwData.get("tp_pw");
+
+        return pw != null && pw.equals(tpPw); // 같으면 true 반환
+    }
+
 }
