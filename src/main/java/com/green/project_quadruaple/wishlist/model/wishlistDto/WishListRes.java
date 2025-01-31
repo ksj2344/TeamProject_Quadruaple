@@ -1,19 +1,21 @@
 package com.green.project_quadruaple.wishlist.model.wishlistDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
+@Data
 @AllArgsConstructor
-@ToString
+@NoArgsConstructor
 public class WishListRes {
-    private final long strfId;
-    private final String category;
-    private final String strfPic;
-    private final String title;
-    private final String locationTitle;
-    private final int ratingCnt;
-    private final double averageRating;
-    private final int wishCnt;
+    private long strfId;         // 찜 항목 ID
+    private String category;     // 찜 항목 카테고리
+    private String title;        // 찜 항목 제목
+    private String locationTitle; // 위치 이름
+    private double ratingCnt;    // 평가 점수
+    private double averageRating; // 평균 점수
+    private int reviewCnt;       // 리뷰 수
+    private Integer wishCnt;    // 찜 개수
+    private String strfPic;       // 상품 이미지
+
+
+
 }
