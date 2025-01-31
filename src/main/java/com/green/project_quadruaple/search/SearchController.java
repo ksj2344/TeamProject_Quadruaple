@@ -1,12 +1,7 @@
 package com.green.project_quadruaple.search;
 
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.search.model.LocationResponse;
-import com.green.project_quadruaple.search.model.SearchPageReq;
-import com.green.project_quadruaple.search.model.SearchPageRes;
-import com.green.project_quadruaple.search.model.SearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 
 
 @RestController
