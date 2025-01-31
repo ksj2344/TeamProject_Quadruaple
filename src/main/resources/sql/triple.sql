@@ -13,7 +13,7 @@ CREATE TABLE user(
 
 # 임시 비밀번호
 CREATE TABLE temporary_pw (
-user_id BIGINT PRIMARY key
+user_id BIGINT not null PRIMARY key
 , tp_pw VARCHAR(300) NOT NULL
 , created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 , FOREIGN KEY(user_id) REFERENCES user(user_id)
