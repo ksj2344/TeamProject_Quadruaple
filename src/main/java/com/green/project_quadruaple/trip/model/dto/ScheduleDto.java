@@ -10,32 +10,23 @@ import lombok.ToString;
 @ToString
 public class ScheduleDto {
 
+    private long scheduleMemoId;
+    private String scheOrMemo;
     private int seq;
-    private long distance;
-    private int duration;
-    private long strfId;
+    private Long distance;
+    private Long duration;
+    private Long strfId;
     private String strfTitle;
     private String category;
     private String address;
     private String lat;
     private String lng;
-    private String pathType;
+    private Integer pathType;
+    private long tripId;
+    private String title;
+    private String content;
+    private boolean isNotFirst;
+    private Long nextScheduleId;
+    private Long prevScheduleStrfId;
+    private Long nextScheduleStrfId;
 }
-
-/*
-* "schedules" : [
-        {
-          "seq" : 1,
-          "strfId" : 1,
-          "strfTitle" : "차이나 타운",
-          "category" : "관광",
-          "address" : "인천 중구",
-          "lat" : 37.5664707,
-          "lng" : 127.0039404,
-          "distance" : 13920 or null,
-          "duration" : 35 or null,
-          "pathType" : "BUS" or null,
-        },
-        ...
-      ]
-* */

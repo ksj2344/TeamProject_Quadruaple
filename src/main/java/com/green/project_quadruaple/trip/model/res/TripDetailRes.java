@@ -15,7 +15,7 @@ import java.util.List;
 public class TripDetailRes {
 
     private long totalDistance;
-    private int totalDuration;
+    private long totalDuration;
     private int scheduleCnt;
     private int memoCnt;
     private List<TripDetailDto> days;
