@@ -11,5 +11,6 @@ import lombok.ToString;
 public class PathInfoVo {
     private final int totalTime;
     private final int payment;
-    private final double totalDistance;
+    private final int totalDistance;
+    private final int totalPayment;
 }
