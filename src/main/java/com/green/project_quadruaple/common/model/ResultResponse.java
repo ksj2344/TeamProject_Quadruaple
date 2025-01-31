@@ -30,6 +30,10 @@ public class ResultResponse {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public static ResultResponse notFound() {return new ResultResponse(ResponseCode.NOT_FOUND.getCode());}
 
+    // 잘못된 요청
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static ResultResponse badRequest() {return new ResultResponse(ResponseCode.BAD_REQUEST.getCode());}
+
     // 인증실패
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public static ResultResponse unauthorized() {

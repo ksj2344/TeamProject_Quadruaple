@@ -59,8 +59,11 @@
 
     <select id="selScheduleDetail" resultMap="scheduleForDay">
         SELECT
-            sm.`day` AS day
+            sm.schedule_memo_id AS scheduleMemoId
+            , sm.category AS scheOrMemo
+            , sm.`day` AS day
             , sm.seq AS seq
+            , sm.trip_id AS tripId
             , s.distance AS distance
             , s.duration AS duration
             , s.strf_id AS strfId
@@ -70,28 +73,36 @@
             , strf.address AS address
             , strf.lat AS lat
             , strf.lng as lng
+            , m.title AS title
+            , m.content AS content
         FROM sche_memo sm
         LEFT JOIN schedule s
             ON sm.schedule_memo_id = s.schedule_id
-        JOIN stay_tour_restaur_fest strf
+        LEFT JOIN stay_tour_restaur_fest strf
             ON strf.strf_id = s.strf_id
+        LEFT JOIN memo m
+            ON m.memo_id = sm.schedule_memo_id
         WHERE sm.trip_id = #{tripId}
-            AND sm.category = "SCHE"
     </select>
 
     <resultMap id="scheduleForDay" type="com.green.project_quadruaple.trip.model.dto.TripDetailDto">
         <id column="day" property="day"/>
         <collection property="schedules" ofType="com.green.project_quadruaple.trip.model.dto.ScheduleDto">
             <id column="seq" property="seq"/>
+            <result column="scheOrMemo" property="scheOrMemo"/>
+            <result column="scheduleMemoId" property="scheduleMemoId"/>
             <result column="distance" property="distance"/>
             <result column="duration" property="duration"/>
             <result column="strfId" property="strfId"/>
             <result column="strfTitle" property="strfTitle"/>
+            <result column="tripId" property="tripId"/>
             <result column="category" property="category"/>
             <result column="address" property="address"/>
             <result column="lat" property="lat"/>
             <result column="lng" property="lng"/>
             <result column="pathType" property="pathType"/>
+            <result column="title" property="title"/>
+            <result column="content" property="content"/>
         </collection>
     </resultMap>
 
@@ -237,9 +248,219 @@
         WHERE trip_id = #{tripId}
     </insert>
 
-    <insert id="insScheduleStrf">
+    <insert id="insSchedule">
         INSERT INTO schedule
         SET schedule_id = #{scheMemoId}
-        , strf_id = #{strfId}
+        <if test="distance != null">
+            , distance = #{distance}
+        </if>
+        <if test="time != null">
+            , duration = #{time}
+        </if>
+        <if test="pathTypeValue != null">
+            , pathtype = #{pathTypeValue}
+        </if>
+            , strf_id = #{strfId}
     </insert>
+
+    <!--    일정 삭제 -->
+    <select id="selScheduleByScheduleId">
+        SELECT
+            sm.trip_id
+        FROM schedule s
+        JOIN sche_memo sm
+            ON s.schedule_id = sm.schedule_memo_id
+        WHERE s.schedule_id = #{scheduleId}
+    </select>
+
+    <select id="selScheduleAndScheMemoByScheduleId"> <!-- 삭제할 일정 정보가져오기 -->
+        SELECT
+            s.schedule_id AS scheduleId
+            , s.distance AS distance
+            , s.duration AS duration
+            , s.pathtype AS pathType
+            , s.strf_id AS strfId
+            , sm.trip_id AS tripId
+            , sm.seq AS seq
+            , EXISTS (
+                SELECT 1
+                FROM sche_memo sm
+                WHERE sm.trip_id = #{tripId}
+                    AND sm.category = 'SCHE'
+                    AND sm.seq &lt; (
+                        SELECT smemo.seq
+                        FROM sche_memo smemo
+                        WHERE smemo.schedule_memo_id = #{scheduleId}
+                        )
+                    ) AS isNotFirst
+            , (
+                SELECT
+                    smemo.schedule_memo_id
+                FROM sche_memo smemo
+                WHERE smemo.category = 'SCHE'
+                    AND smemo.trip_id = #{tripId}
+                    AND smemo.seq &gt; (
+                        SELECT seq
+                        FROM sche_memo
+                        WHERE schedule_memo_id = #{scheduleId}
+                    )
+                ORDER BY smemo.seq ASC
+                LIMIT 1
+                ) AS nextScheduleId
+            , (
+                SELECT
+                    s.strf_id
+                FROM sche_memo smemo
+                JOIN schedule s
+                    ON s.schedule_id = smemo.schedule_memo_id
+                WHERE smemo.category = 'SCHE'
+                    AND smemo.trip_id = #{tripId}
+                    AND smemo.seq &lt; (
+                        SELECT seq
+                        FROM sche_memo
+                        WHERE schedule_memo_id = #{scheduleId}
+                        )
+                ORDER BY smemo.seq DESC
+                LIMIT 1
+            ) AS prevScheduleStrfId
+            , (
+                SELECT
+                    s.strf_id
+                FROM sche_memo smemo
+                JOIN schedule s
+                ON s.schedule_id = smemo.schedule_memo_id
+                WHERE smemo.category = 'SCHE'
+                AND smemo.trip_id = 1
+                AND smemo.seq &gt; (
+                SELECT seq
+                FROM sche_memo
+                WHERE schedule_memo_id = #{scheduleId}
+                )
+                ORDER BY smemo.seq ASC
+                LIMIT 1
+            ) AS nextScheduleStrfId
+        FROM schedule s
+        JOIN sche_memo sm
+            ON s.schedule_id = sm.schedule_memo_id
+        WHERE schedule_id = #{scheduleId}
+    </select>
+
+    <update id="updateSeqScheMemo"> <!-- 다음 일정들의 seq 값 -1 -->
+        UPDATE sche_memo
+        SET seq = seq - 1
+        WHERE trip_id = #{tripId}
+        AND seq > #{seq}
+    </update>
+
+    <update id="updateSchedule"> <!-- 다음 일정의 거리, 시간 수정 -->
+        <choose>
+            <when test="isNotFirst">
+                UPDATE schedule
+                SET distance = #{distance}
+                , duration = #{duration}
+                , pathtype = #{pathType}
+                WHERE schedule_id = #{nextScheduleId}
+            </when>
+            <otherwise>
+                UPDATE schedule
+                SET distance = NULL
+                , duration = NULL
+                , pathtype = NULL
+                WHERE schedule_id = #{nextScheduleId}
+            </otherwise>
+        </choose>
+    </update>
+
+    <delete id="deleteSchedule"> <!-- 일정 삭제 -->
+        DELETE FROM schedule
+        WHERE schedule_id = #{scheduleId}
+    </delete>
+
+    <delete id="deleteScheMemo"> <!-- 일정메모 삭제 -->
+        DELETE FROM sche_memo
+        WHERE schedule_memo_id = #{scheduleId}
+    </delete>
+
+    <!-- 구성원 삭제 -->
+    <select id="selTripById">
+        SELECT
+            manager_id
+        FROM trip
+        WHERE trip_id = #{tripId}
+    </select>
+
+    <update id="disableTripUser">
+
+    </update>
+
+    <select id="selStrfLatAndLng">
+        SELECT
+            strf_id,
+            lat,
+            lng
+        FROM stay_tour_restaur_fest
+        <where>
+            <if test="prevStrfId != null">
+                strf_id = #{prevStrfId}
+            </if>
+            <if test="nextStrfId != null">
+                <if test="prevStrfId != null">
+                    OR
+                </if>
+                strf_id = #{nextStrfId}
+            </if>
+        </where>
+    </select>
+
+    <!-- patchSeq -->
+    <update id="updateSeq">
+        UPDATE sche_memo
+        SET seq = #{destSeq}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <update id="updateBetweenSeq">
+        <choose>
+            <when test="ahead">
+                UPDATE sche_memo
+                SET seq = seq + 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{destSeq} AND #{originSeq}
+            </when>
+            <otherwise>
+                UPDATE sche_memo
+                SET seq = seq - 1
+                WHERE trip_id = #{tripId}
+                    AND seq BETWEEN #{originSeq} AND #{destSeq}
+            </otherwise>
+        </choose>
+    </update>
+
+    <update id="updateDay">
+        UPDATE sche_memo
+        SET day = #{destDay}
+        WHERE schedule_memo_id = #{scheduleMemoId}
+    </update>
+
+    <select id="selScheMemoIdByTripIdAndSeq">
+        SELECT
+            (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = #{tripId}
+                AND seq &lt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq DESC
+            LIMIT 1) AS lowSeqId
+            , (SELECT
+                schedule_memo_id
+            FROM sche_memo
+            WHERE trip_id = 1
+                AND seq &gt; #{seq}
+                AND category = 'SCHE'
+            ORDER BY seq ASC
+            LIMIT 1) AS highSeqId
+        FROM sche_memo
+        LIMIT 1
+    </select>
 </mapper>
