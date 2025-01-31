@@ -2,37 +2,76 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.wishlist.model.WishlistMapper">
-    <insert id="insertWishList" parameterType="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq">
-        INSERT INTO wishlist (strf_id)
-        VALUES (#{strfId})
-    </insert>
 
-    <select id="selectWishList" resultMap="WishListResMap">
-        SELECT
-        w.strf_id AS strfId,
-        w.category AS category,
-        w.strf_pic AS strfPic,
-        w.title AS title,
-        w.location_title AS locationTitle,
-        w.rating_cnt AS ratingCnt,
-        w.average_rating AS averageRating,
-        w.wish_cnt AS wishCnt
-        FROM wishlist w
-        WHERE w.category IN
-        <foreach item="item" index="index" collection="category" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        LIMIT #{page}, 10
+    <!-- 위시리스트 존재 여부 확인 -->
+    <select id="isWishListExists" parameterType="map" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM wishlist
+        WHERE user_id = #{userId}
+        AND strf_id = #{strfId}
+        )
     </select>
 
-    <resultMap id="WishListResMap" type="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes">
-        <result property="strfId" column="strf_id"/>
+    <!-- 위시리스트 추가 -->
+    <insert id="insertWishList" parameterType="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq">
+        INSERT INTO wishlist (user_id, strf_id)
+        VALUES (#{userId}, #{strfId})
+    </insert>
+
+    <!-- 위시리스트 삭제 -->
+    <delete id="deleteWishList" parameterType="map">
+        DELETE FROM wishlist
+        WHERE user_id = #{userId}
+        AND strf_id = #{strfId}
+    </delete>
+
+    <!-- 위시리스트 조회 -->
+    <select id="findWishList" resultMap="wishListResultMap">
+        SELECT
+            w.strf_id AS strfId,
+            p.category AS category,
+            sp.pic_name AS strfPic,
+            p.title AS title,
+            p.address AS locationTitle,
+            0 AS ratingCnt,
+            0.0 AS averageRating,
+            0 AS reviewCnt,
+            COUNT(w.strf_id) AS wishCnt
+        FROM
+        wishlist w
+        JOIN
+        stay_tour_restaur_fest p ON w.strf_id = p.strf_id
+        LEFT JOIN
+        strf_pic sp ON p.strf_id = sp.strf_id -- strf_pic
+        WHERE
+        w.user_id = #{userId}
+        <if test="categoryList != null">
+            AND p.category IN
+            <foreach collection="categoryList" item="category" open="(" separator="," close=")">
+                #{category}
+            </foreach>
+        </if>
+        GROUP BY
+        w.strf_id,
+        p.category,
+        sp.pic_name,
+        p.title,
+        p.address
+        LIMIT
+        #{offset}, 10;
+    </select>
+
+    <resultMap id="wishListResultMap" type="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes">
+        <result property="strfId" column="strfId"/>
         <result property="category" column="category"/>
-        <result property="strfPic" column="strf_pic"/>
+        <result property="strfPic" column="strfPic"/>
         <result property="title" column="title"/>
-        <result property="locationTitle" column="location_title"/>
-        <result property="ratingCnt" column="rating_cnt"/>
-        <result property="averageRating" column="average_rating"/>
-        <result property="wishCnt" column="wish_cnt"/>
+        <result property="locationTitle" column="locationTitle"/>
+        <result property="ratingCnt" column="ratingCnt"/>
+        <result property="averageRating" column="averageRating"/>
+        <result property="reviewCnt" column="reviewCnt"/>
+        <result property="wishCnt" column="wishCnt"/>
     </resultMap>
+
 </mapper>

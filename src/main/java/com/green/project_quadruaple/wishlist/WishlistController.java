@@ -2,39 +2,52 @@ package com.green.project_quadruaple.wishlist;
 
 
 
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
-import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-@RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RestController
+@RequestMapping("wish-list")
 public class WishlistController {
+    private final AuthenticationFacade authenticationFacade;
 
-    private final WishlistService wishListService;
+    private final WishlistService wishlistService;
 
-    @Operation(summary = "위시리스트 추가", description = "위시리스트에 항목을 추가합니다.")
-    @PostMapping("/wish-list")
-    public ResponseEntity<String> postWishList(@RequestBody WishListReq wishListReq) {
-        wishListService.addWishList(wishListReq);
-        return ResponseEntity.ok("Wishlist added successfully");
+    public WishlistController(WishlistService wishlistService) {
+        this.wishlistService = wishlistService;
     }
-    @Operation(summary = "위시리스트 조회", description = "사용자의 위시리스트를 조회합니다.")
-    @GetMapping("/wish-list")
+
+    @PostMapping
+    public ResponseEntity<String> toggleWishList(@RequestBody WishListReq wishListReq) {
+        long userId = AuthenticationFacade.getSignedUserId();
+        String resultMessage = wishlistService.toggleWishList(userId, wishListReq);
+        return ResponseEntity.ok(resultMessage);
+    }
+
+    /*// GET - 찜 목록 조회
+    @GetMapping
     public ResponseEntity<List<WishListRes>> getWishList(
-            @RequestParam(value = "category", required = false) List<String> category,
+            @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "page", defaultValue = "1") int page) {
-        List<WishListRes> wishList = wishListService.getWishList(category, page);
-        return ResponseEntity.ok(wishList);
+        long userId = AuthenticationFacade.getSignedUserId();
+        List<WishListRes> wishLists = wishlistService.getWishList(userId, category, page);
+        return ResponseEntity.ok(wishLists);
+    }*/
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "userId") Long userId
+    ) {
+        Map<String, Object> response = wishlistService.getWishListWithPagingNew(userId, categoryList, page);
+        return ResponseEntity.ok(response);
     }
 }
+
 
 
