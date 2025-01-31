@@ -83,6 +83,7 @@ CREATE TABLE trip_user(
     , trip_id BIGINT NOT NULL
     , user_id BIGINT NOT NULL
     , created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+    , `disable` TINYINT NOT NULL DEFAULT '0'
     , FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
 );
