@@ -52,7 +52,7 @@ public class UserService {
     public int signUp(MultipartFile pic, UserSignUpReq p) {
         String email = p.getEmail();
 
-        //이메일 인증 여부
+        // 이메일 인증 여부
         if (!checkEmail(email)) {
             return 0;
         }
@@ -63,18 +63,33 @@ public class UserService {
             return 0;
         }
 
-        // 프로필 사진 처리
-        String savedPicName = pic != null ? myFileUtils.makeRandomFileName(pic) : null;
+        // 비밀번호 해싱
         String hashedPassword = passwordEncoder.encode(p.getPw());
-        p.setProfilePic(savedPicName);
         p.setPw(hashedPassword);
 
         try {
             int result = userMapper.insUser(p);
             if (result > 0) {
-                long userId = p.getUserId();
+                long userId = p.getUserId(); // DB에 삽입 후 userId 값 가져오기
                 p.setUserId(userId);
                 userMapper.insUserRole(p);
+
+                // 프로필 사진 처리 (없어도 회원가입 가능하도록 수정)
+                String savedPicName = null;
+                if (pic != null && !pic.isEmpty()) {
+                    savedPicName = myFileUtils.makeRandomFileName(pic);
+                    p.setProfilePic(savedPicName);
+
+                    String middlePath = String.format("user/%s", userId);
+                    myFileUtils.makeFolders(middlePath);
+                    String filePath = String.format("%s/%s", middlePath, savedPicName);
+
+                    try {
+                        myFileUtils.transferTo(pic, filePath);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         } catch (Exception e) {
             return 0;
@@ -82,6 +97,8 @@ public class UserService {
 
         return 1;
     }
+
+
 
     public boolean checkDuplicatedEmail(String email) {
         boolean isDuplicated = userMapper.isEmailDuplicated(email);
@@ -111,7 +128,7 @@ public class UserService {
 
         // AT, RT
         JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(30));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
