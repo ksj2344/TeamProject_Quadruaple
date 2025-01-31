@@ -407,3 +407,56 @@ CREATE TABLE trip_like(
     , FOREIGN KEY(trip_review_id) REFERENCES trip_review(trip_review_id)
     , PRIMARY KEY(user_id,trip_review_id)
 );
+
+
+# 상품 여행 일정 유저 view
+CREATE VIEW strf_trip_user_from_schedule AS
+SELECT A.*, T.trip_id, T.title AS tripTitle, T.manager_id, T.start_at AS tripStartAt, SP.pic_name AS strfPic
+        , T.end_at AS tripEndAt, T.created_at AS TripCreatedAt, S.schedule_id, S.distance, S.duration, S.pathtype,
+       U.user_id, U.profile_pic, U.name, U.email, U.pw, U.state, U.created_at AS userCreateAt
+FROM stay_tour_restaur_fest A
+         LEFT JOIN strf_pic SP
+                   ON SP.strf_id=A.strf_id
+         LEFT JOIN `schedule` S
+                   ON S.strf_id=A.strf_id
+         LEFT JOIN sche_memo SM
+                   ON SM.schedule_memo_id=S.schedule_id
+         left JOIN trip T
+                   ON T.trip_id=SM.trip_id
+         LEFT JOIN trip_user TU
+                   ON TU.trip_id=T.trip_id
+         LEFT JOIN user U
+                   ON U.user_id=TU.user_id;
+
+# 상품 여행 지역 view
+CREATE VIEW strf_trip_from_location AS
+SELECT A.*, T.trip_id, T.title AS tripTitle, T.manager_id, T.start_at AS tripStartAt, SP.pic_name AS strfPic
+     , T.end_at AS tripEndAt, T.created_at AS TripCreatedAt
+     , LD.location_id, LD.detail_title, L.title AS locationTitle, L.location_pic
+FROM stay_tour_restaur_fest AS A
+         LEFT JOIN strf_pic SP
+                   ON SP.strf_id=A.strf_id
+         left JOIN location_detail AS LD
+                   ON LD.location_detail_id=A.location_detail_id
+         left JOIN location AS L
+                   ON L.location_id=LD.location_id
+         left JOIN trip_location TL
+                   ON TL.location_id=L.location_id
+         left JOIN trip T
+                   ON T.trip_id=TL.trip_id;
+
+# 일정 view
+CREATE VIEW schedule_with_model AS
+SELECT S.schedule_id, S.distance, S.duration, S.pathtype, S.strf_id, S.updated_at
+     , SM.trip_id, SM.`day`, SM.seq, SM.created_at
+FROM sche_memo SM
+         JOIN `schedule` S
+              on SM.schedule_memo_id=S.schedule_id;
+
+# 메모 view
+CREATE VIEW memo_with_model AS
+SELECT M.memo_id, M.title, M.content, M.updated_at, M.trip_user_id
+     , SM.trip_id, SM.`day`, SM.seq, SM.created_at
+FROM sche_memo SM
+         JOIN memo M
+              on SM.schedule_memo_id=M.memo_id;
