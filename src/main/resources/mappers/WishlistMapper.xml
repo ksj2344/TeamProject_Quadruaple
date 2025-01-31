@@ -26,7 +26,7 @@
         AND strf_id = #{strfId}
     </delete>
 
-    <!-- 위시리스트 조회 -->
+    <!--&lt;!&ndash; 위시리스트 조회 &ndash;&gt;
     <select id="findWishList" resultMap="wishListResultMap">
         SELECT
             w.strf_id AS strfId,
@@ -43,7 +43,7 @@
         JOIN
         stay_tour_restaur_fest p ON w.strf_id = p.strf_id
         LEFT JOIN
-        strf_pic sp ON p.strf_id = sp.strf_id -- strf_pic
+        strf_pic sp ON p.strf_id = sp.strf_id &#45;&#45; strf_pic
         WHERE
         w.user_id = #{userId}
         <if test="categoryList != null">
@@ -60,6 +60,41 @@
         p.address
         LIMIT
         #{offset}, 10;
+    </select>-->
+
+    <!--위시리스트 페이징 처리 된 쿼리 -->
+    <select id="findWishList" parameterType="map" resultMap="wishListResultMap">
+        SELECT
+        w.strf_id AS strfId,
+        p.category AS category,
+        sp.pic_name AS strfPic,
+        p.title AS title,
+        p.address AS locationTitle,
+        0 AS ratingCnt,
+        0 AS averageRating,
+        0 AS reviewCnt,
+        COUNT(w.strf_id) AS wishCnt
+        FROM
+        wishList w
+        JOIN
+        stay_tour_restaur_fest p ON w.strf_id = p.strf_id
+        LEFT JOIN
+        strf_pic sp ON p.strf_id = sp.strf_id
+        WHERE
+        w.user_id = #{userId}
+        <if test="categoryList != null">
+            AND p.category IN
+            <foreach collection="categoryList" item="category" open="(" separator="," close=")">
+                #{category}
+            </foreach>
+        </if>
+        GROUP BY
+        w.strf_id,
+        p.category,
+        sp.pic_name,
+        p.title,
+        p.address
+        LIMIT #{offset}, 10
     </select>
 
     <resultMap id="wishListResultMap" type="com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes">

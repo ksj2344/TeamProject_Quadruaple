@@ -34,19 +34,19 @@ public class WishlistService {
         }
 
     }
-    // GET 요청을 처리할 getWishList 메서드 추가
-    /*public Map<String, Object> getWishListWithPaging(Long userId, List<String> categoryList, int page) {
-        int offset = (page - 1) * 10; // 페이징 계산
+
+    public Map<String, Object> getWishListWithPagingNew(Long userId, List<String> categoryList, int page) {
+        int offset = (page - 1) * 10; // Offset 계산
         List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("isMore", wishLists.size() >= 10); // 10개 이상이면 다음 페이지 있음
+        result.put("isMore", wishLists.size() > 10); // 다음 페이지 확인
         result.put("wishList", wishLists);
 
         return result;
-    }*/
-    public Map<String, Object> getWishListWithPagingNew(Long userId, List<String> categoryList, int page) {
+    }
+
+    /*public Map<String, Object> getWishListWithPagingNew(Long userId, List<String> categoryList, int page) {
         int offset = (page - 1) * 10;
 
         List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset);
@@ -56,7 +56,19 @@ public class WishlistService {
         result.put("wishList", wishLists);
 
         return result;
-    }
+    }*/
+    /*// 페이징 처리가 포함된 위시리스트 가져오기
+    public Map<String, Object> getWishListWithPaging(Long userId, List<String> categoryList, int page) {
+        int pageSize = 10; // 기본 페이지 사이즈 설정
+        int offset = (page - 1) * pageSize; // 페이징 계산
 
+        // 위시리스트 데이터 가져오기
+        List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset, pageSize);
 
+        Map<String, Object> result = new HashMap<>();
+        result.put("isMore", wishLists.size() == pageSize); // 다음 페이지 존재 여부 확인
+        result.put("wishlist", wishLists); // 현재 페이지의 데이터
+
+        return result;
+    }*/
 }

@@ -25,15 +25,6 @@ public class WishlistController {
         return ResponseEntity.ok(resultMessage);
     }
 
-    /*// GET - 찜 목록 조회
-    @GetMapping
-    public ResponseEntity<List<WishListRes>> getWishList(
-            @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "page", defaultValue = "1") int page) {
-        long userId = AuthenticationFacade.getSignedUserId();
-        List<WishListRes> wishLists = wishlistService.getWishList(userId, category, page);
-        return ResponseEntity.ok(wishLists);
-    }*/
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getWishListNew(
@@ -44,6 +35,31 @@ public class WishlistController {
         Map<String, Object> response = wishlistService.getWishListWithPagingNew(userId, categoryList, page);
         return ResponseEntity.ok(response);
     }
+
+   /* // 기존
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "userId") Long userId
+    ) {
+        Map<String, Object> response = wishlistService.getWishListWithPagingNew(userId, categoryList, page);
+        return ResponseEntity.ok(response);
+    }*/
+
+    // 페이징 처리된 위시리스트 가져오기
+    /*@GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        // 인증된 사용자 ID 가져오기
+        Long userId = authenticationFacade.getSignedUserId();
+
+        // 위시리스트 서비스 호출
+        Map<String, Object> response = wishlistService.getWishListWithPaging(userId, categoryList, page);
+
+        return ResponseEntity.ok(response);
+    }*/
 }
 
 

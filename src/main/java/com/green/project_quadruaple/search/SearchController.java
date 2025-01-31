@@ -46,6 +46,7 @@ public class SearchController {
     }
 
 
+
     /*@GetMapping
     public ResponseEntity<Map<String, Object>> getTripLocation(
             @RequestParam(value = "search_word", required = false) String searchWord) {

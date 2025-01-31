@@ -23,4 +23,9 @@ public interface WishlistMapper {
             List<String> categoryList,
             int offset
     );
+    // 위시리스트 조회 쿼리
+    /*List<WishListRes> findWishList(@Param("userId") Long userId,
+                                   @Param("categoryList") List<String> categoryList,
+                                   @Param("offset") int offset,
+                                   @Param("pageSize") int pageSize);*/
 }
