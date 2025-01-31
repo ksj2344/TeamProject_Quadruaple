@@ -10,7 +10,8 @@ import lombok.ToString;
 @Setter
 @ToString
 public class UserUpdateReq {
-    private long userId;
+    @JsonIgnore
+    private long signedUserId;
     private String email;
     private String name;
     private String pw;

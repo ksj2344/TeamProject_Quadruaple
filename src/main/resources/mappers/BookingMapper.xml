@@ -2,6 +2,178 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.booking.BookingMapper">
+    <select id="getBooking">
+        SELECT
+        a.booking_id AS bookingId,
+        a.actual_paid AS finalPayment ,
+        <!-- a.final_payment AS finalPayment, -->
+        c.title AS strfTitle,
+        d.pic_name AS strfPic,
+        CONCAT(
+        DATE_FORMAT(a.check_in, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_in)
+        WHEN 1 THEN '일' WHEN 2 THEN '월' WHEN 3 THEN '화' WHEN 4 THEN '수'
+        WHEN 5 THEN '목' WHEN 6 THEN '금' WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_in, ') %H:%i')
+        ) AS checkIn,
+        CONCAT(
+        DATE_FORMAT(a.check_out, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_out)
+        WHEN 1 THEN '일' WHEN 2 THEN '월' WHEN 3 THEN '화' WHEN 4 THEN '수'
+        WHEN 5 THEN '목' WHEN 6 THEN '금' WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_out, ') %H:%i')
+        ) AS checkOut,
+        IF(e.review_id IS NULL, 0, 1) AS reviewStatus,
+        CASE
+        WHEN a.check_out > NOW() THEN 'progress'  -- 진행 중인 예약
+        ELSE 'completed'  -- 완료된 예약
+        END AS bookingStatus
+        FROM booking a
+        JOIN menu b
+        ON a.menu_id = b.menu_id
+        JOIN stay_tour_restaur_fest c
+        ON b.strf_id = c.strf_id
+        LEFT JOIN strf_pic d
+        ON b.strf_id = d.strf_id
+        LEFT JOIN review e
+        ON e.strf_id = b.strf_id
+        WHERE a.user_id = #{userId}
+        GROUP BY a.booking_id, c.title, a.check_in, a.check_out, a.actual_paid
+        ORDER BY a.check_out DESC;
+    </select>
+
+    <delete id="delTripLocation">
+        DELETE FROM trip_location
+        WHERE location_id IN (
+        <foreach collection="locationList" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+        AND trip_id = #{tripId}
+    </delete>
 
 
+    <insert id="postBooking">
+        INSERT INTO booking a
+        SET booking_id = #{bookingId}
+        , check_in = #{checkIn}
+        , check_out = #{checkOut}
+        , user_id = #{userId}
+        , message = #{message}
+        , menu_id = #{menuId}
+        , final_payment = #{finalPayment}
+    </insert>
+
+    <select id="postBookingInfo">
+        SELECT c.title AS strfName , d.pic_name AS picName, b.price
+        FROM booking a
+        JOIN menu b
+        ON a.menu_id = b.menu_id
+        JOIN stay_tour_ restaur_fest c
+        ON b.strf_id = c.strf_id
+        JOIN strf_pic d
+        ON b.strf_id = d.strf_id
+        WHERE booking_id = #{bookingId}
+    </select>
+
+
+    <insert id="patchBooking">
+        INSERT INTO booking a
+        SET a.strf_id = #{strfId}
+        , a.check_in = #{checkIn}
+        , a.check_out = #{checkOut}
+        , a.final_payment = #{finalPayment}
+        , a.message = #{message}
+        , b.title = #{strfName}
+        JOIN stay_tour_restaur_fest b
+        ON a.strf_id = b.strf_id
+        WHERE a.booking_id = #{bookingId}
+    </insert>
+
+
+
+    <!--
+    <select id="bookingList">
+        SELECT a.booking_id AS bookingId , a.final_payment
+        , c.title as strfTitle , d.pic_name AS strfPic
+        , CONCAT(DATE_FORMAT(a.check_in, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_in)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_in, ') %H:%i')
+        ) AS checkIn
+        , CONCAT(DATE_FORMAT(a.check_out, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_out)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_out, ') %H:%i')
+        ) AS checkOut
+
+        , DATE_FORMAT(c.check_in, "yyyy-MM-dd (%W) %HH:mm") AS checkIn
+        , DATE_FORMAT(c.check_out, "yyyy-MM-dd (%W) %HH:mm") AS checkOut
+
+        FROM booking a
+        JOIN menu b
+        ON a.menu_id = b.menu_id
+        JOIN stay_tour_restaur_fest c
+        ON b.strf_id = c.strf_id
+        JOIN strf_pic d
+        ON b.strf_id = d.strf_id
+        WHERE a.user_id = #{userId}
+        AND a.check_out <![CDATA[ > ]]> NOW();
+    </select>
+    <select id="bookingCompleteList">
+        SELECT
+        SELECT a.booking_id AS bookingId , a.final_payment
+        , c.title as strfTitle , d.pic_name AS strfPic ,
+        CONCAT(DATE_FORMAT(a.check_in, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_in)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_in, ') %H:%i')
+        ) AS checkIn
+        , CONCAT(DATE_FORMAT(a.check_out, '%Y-%m-%d ('),
+        CASE DAYOFWEEK(a.check_out)
+        WHEN 1 THEN '일'
+        WHEN 2 THEN '월'
+        WHEN 3 THEN '화'
+        WHEN 4 THEN '수'
+        WHEN 5 THEN '목'
+        WHEN 6 THEN '금'
+        WHEN 7 THEN '토'
+        END,
+        DATE_FORMAT(a.check_out, ') %H:%i')
+        ) AS checkOut
+        IF(d.review_id IS NULL, 0, 1) AS reviewStatus
+        FROM booking a
+        JOIN menu b
+        ON a.menu_id = b.menu_id
+        JOIN stay_tour_restaur_fest c
+        ON b.strf_id = c.strf_id
+        LEFT JOIN review d
+        ON d.booking_id = a.booking_id
+        WHERE a.user_id = #{userId}
+        AND a.check_out <![CDATA[ <= ]]> NOW();
+    </select>
+-->
 </mapper>

@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.strf.model;
+package com.green.project_quadruaple.booking.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -10,6 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Schema
-public class ReviewList {
+@Schema(title = "예약 목록 조회")
+public class BookingListGetReq {
+    private long userId;
 }

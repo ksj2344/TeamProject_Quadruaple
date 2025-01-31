@@ -49,22 +49,22 @@
 
     <!-- 마이페이지 조회-->
     <select id="selUserInfo">
-        SELECT user_id AS userId, email, name, profile_pic AS profilePic
+        SELECT user_id AS signedUserId, email, name, profile_pic AS profilePic
           FROM user
-         WHERE user_id = #{userId}
+         WHERE user_id = #{signedUserId}
     </select>
 
     <!-- 비밀번호 확인 -->
     <select id="checkPassword">
-        SELECT user_id AS userId, pw
+        SELECT user_id AS signedUserId, pw
           FROM user
-         WHERE user_id = #{userId}
+         WHERE user_id = #{signedUserId}
     </select>
 
     <update id="changePassword">
         UPDATE user
-           SET pw = #{pw}
-         WHERE user_id = #{userId}
+           SET pw = #{newPw}
+         WHERE user_id = #{signedUserId}
     </update>
 
     <!-- 마이페이지 수정 -->
@@ -82,6 +82,32 @@
         </if>
         </set>
         WHERE email = #{email}
+    </update>
+    
+    <!-- 임시 비밀번호 -->
+    <insert id="temporaryPw">
+        INSERT INTO temporary_pw (user_id, tp_pw)
+        VALUES (#{userId}, #{tpPw})
+            ON DUPLICATE KEY
+        UPDATE tp_pw = VALUES(tp_pw)
+    </insert>
+
+    <select id="checkUserId">
+        SELECT user_id AS userId
+          FROM user
+         WHERE email = #{email}
+    </select>
+
+    <update id="updTemporaryPw">
+        UPDATE temporary_pw
+           SET tp_pw = #{tpPw}
+         WHERE user_id = #{userId}
+    </update>
+
+    <update id="changePwByTemporaryPw">
+        UPDATE user
+           SET pw = #{tpPw}
+         WHERE user_id = #{userId}
     </update>
 
 </mapper>

@@ -9,17 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("wish-list")
 public class WishlistController {
+
     private final AuthenticationFacade authenticationFacade;
-
     private final WishlistService wishlistService;
-
-    public WishlistController(WishlistService wishlistService) {
-        this.wishlistService = wishlistService;
-    }
 
     @PostMapping
     public ResponseEntity<String> toggleWishList(@RequestBody WishListReq wishListReq) {
@@ -48,6 +45,5 @@ public class WishlistController {
         return ResponseEntity.ok(response);
     }
 }
-
 
 

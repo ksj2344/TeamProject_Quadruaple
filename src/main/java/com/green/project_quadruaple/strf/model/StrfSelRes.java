@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
 @Getter
 @Setter
 @ToString
@@ -33,9 +34,9 @@ public class StrfSelRes {
     @Schema(description = "종료일")
     private String endAt;
     @Schema(description = "운영 시작 시간")
-    private String open;
+    private String openCheck;
     @Schema(description = "운영 종료 시간")
-    private String close;
+    private String closeCheck;
     @Schema(description = "휴무일")
     private String restDate;
     @Schema(description = "상품 설명")
@@ -49,15 +50,7 @@ public class StrfSelRes {
     @Schema(description = "편의시설")
     private String amenityId;
     @Schema(description = "편의이름")
-    private String amenityTitle;
-    @Schema(description = "메뉴 가격")
-    private String menuPrice;
-    @Schema(description = "메뉴 ID")
-    private String menuId;
-    @Schema(description = "메뉴 이름")
-    private String menuTitle;
-    @Schema(description = "메뉴 사진")
-    private String menuPic;
+    private String amenityTitles;
     @Schema(description = "사업자 이름")
     private String hostName;
     @Schema(description = "사업자 사진")
@@ -67,11 +60,12 @@ public class StrfSelRes {
     @Schema(description = "평점 평균")
     private int ratingAvg;
     @Schema(description = "찜 여부")
-    private boolean wishIn;
+    private int wishIn;
     @Schema(description = "평점 개수")
     private int ratingCnt;
     @Schema(description = "최근 본 목록 비활성화")
     private int recentCheck;
     @Schema(description = "최근 본 목록에서 상품 조회 시간")
     private String inquiredAt;
+    private String recentCheckStatus;
 }

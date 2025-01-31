@@ -11,6 +11,14 @@ CREATE TABLE user(
     , created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+# 임시 비밀번호
+CREATE TABLE temporary_pw (
+user_id BIGINT NOT NULL
+, tp_pw VARCHAR(300) NOT NULL
+, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+, FOREIGN KEY(user_id) REFERENCES user(user_id)
+);
+
 # 사업자 번호
 CREATE TABLE business_num(
                              busi_num varchar(20) PRIMARY KEY
@@ -47,8 +55,8 @@ CREATE TABLE stay_tour_restaur_fest(
     , tell varchar(50)
     , start_at date
     , end_at date
-    , `open` time
-    , `close` time
+    , `open_check` time
+    , `close_check` time
     , rest_date varchar(100)
     , `explain` varchar(600)
     , `detail` text
@@ -75,6 +83,7 @@ CREATE TABLE trip_user(
     , trip_id BIGINT NOT NULL
     , user_id BIGINT NOT NULL
     , created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+    , `disable` TINYINT NOT NULL DEFAULT '0'
     , FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
 );
@@ -139,14 +148,13 @@ CREATE TABLE menu(
 
 # 예약
 CREATE TABLE booking(
-                        booking_id BIGINT PRIMARY KEY AUTO_INCREMENT
+    booking_id BIGINT PRIMARY KEY AUTO_INCREMENT
     , message VARCHAR(500) NOT NULL
-    , visit_at DATETIME NOT NULL
-    , actual_paid int NOT NULL
-    , check_in DATE NOT NULL
-    , check_out DATE NOT NULL
+    , check_in DATETIME NOT NULL
+    , check_out DATETIME NOT NULL
     , user_id BIGINT NOT NULL
     , menu_id BIGINT NOT NULL
+    , final_payment int not null
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
     , FOREIGN KEY(menu_id) REFERENCES menu (menu_id)
 );
@@ -168,19 +176,17 @@ CREATE TABLE amenipoint(
 
 # 가계부
 CREATE TABLE `daily_expense` (
-                                 de_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
-    , trip_id BIGINT NOT NULL
-    , `for` varchar(100) NOT NULL
-    , FOREIGN KEY (trip_id) REFERENCES trip(trip_id)
+    de_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT
+    , `for` varchar(200) NOT NULL
 );
 
 # 결제인원
 CREATE TABLE `paid_user` (
-                             user_id BIGINT NOT NULL
+     trip_user_id BIGINT NOT NULL
     , de_id BIGINT NOT NULL
     , price int NOT NULL
-    , PRIMARY KEY(user_id, de_id)
-    , FOREIGN KEY (user_id) REFERENCES user(user_id)
+    , PRIMARY KEY(trip_user_id, de_id)
+    , FOREIGN KEY (trip_user_id) REFERENCES trip_user(trip_user_id)
     , FOREIGN KEY (de_id) REFERENCES `daily_expense`(de_id)
 );
 
