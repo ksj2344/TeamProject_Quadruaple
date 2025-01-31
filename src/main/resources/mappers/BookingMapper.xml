@@ -44,23 +44,23 @@
     <insert id="postBooking">
         INSERT INTO booking a
         SET booking_id = #{bookingId}
-        , check_in = #{checkIn}
-        , check_out = #{checkOut}
-        , user_id = #{userId}
-        , message = #{message}
-        , menu_id = #{menuId}
-        , final_payment = #{finalPayment}
+            , check_in = #{checkIn}
+            , check_out = #{checkOut}
+            , user_id = #{userId}
+            , message = #{message}
+            , menu_id = #{menuId}
+            , final_payment = #{finalPayment}
     </insert>
 
     <select id="postBookingInfo">
         SELECT c.title AS strfName , d.pic_name AS picName, b.price
         FROM booking a
         JOIN menu b
-        ON a.menu_id = b.menu_id
+            ON a.menu_id = b.menu_id
         JOIN stay_tour_ restaur_fest c
-        ON b.strf_id = c.strf_id
+            ON b.strf_id = c.strf_id
         JOIN strf_pic d
-        ON b.strf_id = d.strf_id
+            ON b.strf_id = d.strf_id
         WHERE booking_id = #{bookingId}
     </select>
 
