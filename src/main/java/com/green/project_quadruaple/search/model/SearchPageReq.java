@@ -11,4 +11,5 @@ public class SearchPageReq {
     private String searchText; // 검색어
     private int page; // 페이지 번호
     private int pageSize; // 페이지 당 데이터 수
+    private String searchWord; // 검색 키워드
 }

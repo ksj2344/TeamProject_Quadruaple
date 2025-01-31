@@ -1,15 +1,15 @@
 package com.green.project_quadruaple.wishlist.model.wishlistDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
+import java.util.List;
+
+@Data
 @AllArgsConstructor
-@ToString
+@NoArgsConstructor
 public class WishListReq {
-    private final long strfId;
-
+    private long userId;     // 사용자 ID (자동 설정됨)
+    private long strfId;     // 찜할 항목의 ID
 
 
 }

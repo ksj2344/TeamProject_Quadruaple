@@ -2,39 +2,64 @@ package com.green.project_quadruaple.wishlist;
 
 
 
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
-import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RestController
+@RequestMapping("wish-list")
 public class WishlistController {
 
-    private final WishlistService wishListService;
+    private final AuthenticationFacade authenticationFacade;
+    private final WishlistService wishlistService;
 
-    @Operation(summary = "위시리스트 추가", description = "위시리스트에 항목을 추가합니다.")
-    @PostMapping("/wish-list")
-    public ResponseEntity<String> postWishList(@RequestBody WishListReq wishListReq) {
-        wishListService.addWishList(wishListReq);
-        return ResponseEntity.ok("Wishlist added successfully");
+    @PostMapping
+    public ResponseEntity<String> toggleWishList(@RequestBody WishListReq wishListReq) {
+        long userId = AuthenticationFacade.getSignedUserId();
+        String resultMessage = wishlistService.toggleWishList(userId, wishListReq);
+        return ResponseEntity.ok(resultMessage);
     }
-    @Operation(summary = "위시리스트 조회", description = "사용자의 위시리스트를 조회합니다.")
-    @GetMapping("/wish-list")
-    public ResponseEntity<List<WishListRes>> getWishList(
-            @RequestParam(value = "category", required = false) List<String> category,
+
+
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "userId") Long userId
+    ) {
+        Map<String, Object> response = wishlistService.getWishListWithPagingNew(userId, categoryList, page);
+        return ResponseEntity.ok(response);
+    }
+
+   /* // 기존
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "userId") Long userId
+    ) {
+        Map<String, Object> response = wishlistService.getWishListWithPagingNew(userId, categoryList, page);
+        return ResponseEntity.ok(response);
+    }*/
+
+    // 페이징 처리된 위시리스트 가져오기
+    /*@GetMapping
+    public ResponseEntity<Map<String, Object>> getWishListNew(
+            @RequestParam(value = "categoryList", required = false) List<String> categoryList,
             @RequestParam(value = "page", defaultValue = "1") int page) {
-        List<WishListRes> wishList = wishListService.getWishList(category, page);
-        return ResponseEntity.ok(wishList);
-    }
+        // 인증된 사용자 ID 가져오기
+        Long userId = authenticationFacade.getSignedUserId();
+
+        // 위시리스트 서비스 호출
+        Map<String, Object> response = wishlistService.getWishListWithPaging(userId, categoryList, page);
+
+        return ResponseEntity.ok(response);
+    }*/
 }
 
 
