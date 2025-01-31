@@ -14,6 +14,7 @@
         WHEN a.updated_at IS NOT NULL THEN a.updated_at
         ELSE a.created_at
         END AS reviewWriteDate
+
         FROM review a
         LEFT JOIN review_pic b
         ON a.review_id = b.review_id
@@ -50,8 +51,8 @@
     <insert id="postReviewPic">
         INSERT INTO review_pic (title , review_id)
         VALUES
-        <foreach collection="pics" item="pic" separator=",">
-            (#{pic}, #{reviewId}
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            #{pic}, #{reviewId}
         </foreach>
     </insert>
 
