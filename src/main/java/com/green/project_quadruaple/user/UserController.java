@@ -46,7 +46,7 @@ public class UserController {
 
     //아이디 중복 체크
     @GetMapping("sign-up")
-    @Operation(summary = "아이디 중복 체크")
+    @Operation(summary = "아이디 중복 체크", description = "false면 중복 있음, true면 중복 없음")
     public ResponseEntity<?> checkDuplicatedEmail(@RequestParam String email) {
         boolean result = userService.checkDuplicatedEmail(email);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
