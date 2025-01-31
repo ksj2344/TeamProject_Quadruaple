@@ -11,11 +11,11 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class BookingPostReq {
+
     @JsonIgnore
     private long bookingId;
     private String checkIn;
     private String checkOut;
     private int finalPayment;
-
 
 }
