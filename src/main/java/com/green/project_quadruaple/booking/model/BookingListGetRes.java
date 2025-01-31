@@ -17,6 +17,7 @@ public class BookingListGetRes {
     private String checkOut;
     private long menuId;
     private int menuPrice;
+    private int finalPayment;
     private String strfTitle;
     private String strfPic;
     private int reviewStatus;

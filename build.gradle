@@ -37,6 +37,9 @@ dependencies {
     // model 객체 stream 매핑
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
+    // templates - html 불러오는 gradle
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
 
     // Database
     runtimeOnly 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
