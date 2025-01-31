@@ -202,6 +202,8 @@ public class TripService {
     * */
     public ResponseWrapper<List<FindPathRes>> getTransPort(FindPathReq req) {
 
+        log.info("odsayConst.getBaseUrl = {}", odsayApiConst.getBaseUrl());
+        log.info("odsayConst.getSearchPubTransPathUrl = {}", odsayApiConst.getSearchPubTransPathUrl());
         String json = httpPostRequestReturnJson(req);
 
         try {
@@ -431,7 +433,7 @@ public class TripService {
         formData.add(odsayApiConst.getParamEndLngName(), req.getEndLngEX());
 
         return webClient.post()
-                .uri(odsayApiConst.getSearchPubTransPathUrl())
+                .uri("")
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve() //통신 시도
                 .bodyToMono(String.class) // 결과물을 String변환
