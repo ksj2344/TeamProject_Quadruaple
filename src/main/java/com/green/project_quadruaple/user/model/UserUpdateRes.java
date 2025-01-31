@@ -11,5 +11,6 @@ import lombok.ToString;
 @ToString
 public class UserUpdateRes {
     private final long signedUserId;
+    @JsonIgnore
     private final String pw;
 }
