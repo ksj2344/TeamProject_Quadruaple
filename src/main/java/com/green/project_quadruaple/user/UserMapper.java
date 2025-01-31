@@ -3,6 +3,7 @@ package com.green.project_quadruaple.user;
 import com.green.project_quadruaple.user.model.*;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Mapper
@@ -31,4 +32,5 @@ public interface UserMapper {
     long checkUserId(String email);
     int updTemporaryPw(TemporaryPwDto temporaryPwDto);
     int changePwByTemporaryPw(TemporaryPwDto temporaryPwDto);
+    Map<String, String> getPwAndTempPw(String email);
 }
