@@ -95,23 +95,39 @@ public class UserController {
     //마이페이지 수정
     @PatchMapping()
     @Operation(summary = "마이페이지 수정")
-    public ResponseEntity<?> updateUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
+    public ResponseEntity<?> patchUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
         log.info("updateUserInfo > UserUpdateReq > p: {}", p);
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
         if (userUpdateRes == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userUpdateRes));
+        return  ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userUpdateRes));
     }
 
     // 임시 비밀번호 발급
     @PostMapping("password")
     @Operation(summary = "임시 비밀번호 전송")
-    public ResponseEntity<?> temporaryPassword(@RequestBody TemporaryPwDto temporaryPwDto) {
+    public ResponseEntity<?> resetPassword(@RequestBody TemporaryPwDto temporaryPwDto) {
         int result = userService.temporaryPw(temporaryPwDto);
         if (result < 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
+    //임시 비밀번호 발급 여부
+    @GetMapping("check-temp-password")
+    @Operation(summary = "임시 비밀번호 발급 여부", description = "임시 비밀번호 발급 받았으면 true, 임시 비밀번호에서 다시 수정했으면 false")
+    public ResponseEntity<Map<String, Object>> checkTempPassword(@RequestParam String email) {
+        boolean isSame = userService.checkTempPassword(email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isSame", isSame);
+
+        if (isSame) {
+            response.put("message", "임시 비밀번호를 변경해주세요.");
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

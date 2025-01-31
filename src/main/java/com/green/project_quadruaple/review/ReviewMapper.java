@@ -10,7 +10,8 @@ import java.util.List;
 public interface ReviewMapper {
     List<ReviewSelRes> getReview(ReviewSelReq req);
 
-    void postRating(ReviewPostDto dto);
+    int postRating(ReviewPostReq p);
+    int postReviewPic(ReviewPicDto p);
     void postReviewPics(@Param("reviewId") long reviewId , @Param("pics") List<String> pics);
 
     int patchReview(ReviewUpdReq req);

@@ -7,6 +7,8 @@ import com.green.project_quadruaple.common.model.ResultResponse;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class ReviewPostRes extends ResultResponse {
@@ -14,6 +16,8 @@ public class ReviewPostRes extends ResultResponse {
         super(ResponseCode.OK.getCode());
     }
 
-    @JsonProperty("review_id")
     private long reviewId;
+
+    private List<String> pics;
+
 }

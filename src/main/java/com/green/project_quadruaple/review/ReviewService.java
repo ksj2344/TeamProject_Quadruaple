@@ -2,14 +2,21 @@ package com.green.project_quadruaple.review;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.review.model.*;
+import com.green.project_quadruaple.user.exception.CustomException;
+import com.green.project_quadruaple.user.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +27,7 @@ import java.util.List;
 public class ReviewService {
     private final ReviewMapper reviewMapper;
     private final MyFileUtils myFileUtils;
+    private final AuthenticationFacade authenticationFacade;
 
     public List<ReviewSelRes> getReview(ReviewSelReq req) {
         log.info("Received strfId: " + req.getStrfId());
@@ -33,49 +41,43 @@ public class ReviewService {
 
         return res;
     }
-//    public List<FeedGetRes> getFeedList4(FeedGetReq p) {
-//        List<FeedWithPicCommentDto> dtoList = feedMapper.selFeedWithPicAndCommentLimit4List(p);
-//        List<FeedGetRes> list = new ArrayList<>(dtoList.size());
-//        for(FeedWithPicCommentDto item : dtoList) {
-//            list.add(new FeedGetRes(item));
-//        }
-//        return list;
-//    }
 
     @Transactional
-    public void postRating(ReviewPostDto dto) {
-        reviewMapper.postRating(dto);
-        long reviewId = dto.getReviewId();
+    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
+        p.setReviewId(authenticationFacade.getSignedUserId());
+        p.getContent();
 
-        // 2. 사진 저장 및 파일명 변경
-        List<MultipartFile> reviewPics = dto.getPics();
-        if (reviewPics != null && !reviewPics.isEmpty()) {
-            List<String> savedFileNames = new ArrayList<>();
-            String uploadFolder = "review/" + reviewId; // 저장할 폴더 경로
-
-            for (MultipartFile pic : reviewPics) {
-                if (!pic.isEmpty()) {
-                    try {
-                        // 랜덤 파일명 생성
-                        String savedFileName = myFileUtils.makeRandomFileName(pic);
-                        String savePath = uploadFolder + "/" + savedFileName; // 파일 저장 경로
-
-                        // 파일 저장
-                        myFileUtils.transferTo(pic, savePath);
-
-                        // DB에 저장할 파일명 리스트
-                        savedFileNames.add(savedFileName);
-                    } catch (Exception e) {
-                        throw new RuntimeException("파일 저장 실패: " + e.getMessage());
-                    }
-                }
-            }
-
-            // 3. DB에 저장
-            if (!savedFileNames.isEmpty()) {
-                reviewMapper.postReviewPics(reviewId, savedFileNames);
+        if (p.getReviewId() <= 0){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(),null));
+        }
+        int result = reviewMapper.postRating(p);
+        if (result==0){
+            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        long reviewId = p.getReviewId();
+        String middlePath = String.format("reviewId/%d",reviewId);
+        myFileUtils.makeFolders(middlePath);
+        List<String> picNameList = new ArrayList<>(pics.size());
+        for (MultipartFile pic : pics){
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            picNameList.add(savedPicName);
+            String filePath = String.format("%s/%s",middlePath,savedPicName);
+            try {
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                //폴더 삭제 처리
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
         }
+        ReviewPicDto reviewPicDto = new ReviewPicDto();
+        reviewPicDto.setReviewId(reviewId);
+        reviewPicDto.setPics(picNameList);
+        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),resultPics));
     }
 
     public ResponseWrapper<ReviewUpdRes> updateReview(ReviewUpdReq req) {

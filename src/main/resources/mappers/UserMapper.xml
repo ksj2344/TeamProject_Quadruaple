@@ -110,4 +110,12 @@
          WHERE user_id = #{userId}
     </update>
 
+    <select id="getPwAndTempPw">
+        SELECT A.pw, B.tp_pw
+          FROM user A
+         INNER JOIN temporary_pw B
+            ON A.user_id = B.user_id
+         WHERE A.email = #{email}
+    </select>
+
 </mapper>

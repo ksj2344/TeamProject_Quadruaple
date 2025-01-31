@@ -13,7 +13,7 @@ CREATE TABLE user(
 
 # 임시 비밀번호
 CREATE TABLE temporary_pw (
-user_id BIGINT NOT NULL
+user_id BIGINT PRIMARY key
 , tp_pw VARCHAR(300) NOT NULL
 , created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 , FOREIGN KEY(user_id) REFERENCES user(user_id)
@@ -110,10 +110,12 @@ CREATE TABLE sche_memo(
 # 메모
 CREATE TABLE memo(
                      memo_id BIGINT PRIMARY KEY
+    , trip_user_id bigint NOT null
     , title varchar(50) NOT NULL
     , content varchar(1000) NOT NULL
-    , updated_at datetime NOT NULL
+    , updated_at datetime
     , FOREIGN KEY(memo_id) REFERENCES sche_memo (schedule_memo_id)
+    , FOREIGN KEY(trip_user_id) REFERENCES trip_user(trip_user_id)
 );
 
 #일정
