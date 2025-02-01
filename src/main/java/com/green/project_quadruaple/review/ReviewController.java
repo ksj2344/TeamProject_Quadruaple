@@ -41,6 +41,7 @@ public class ReviewController {
     }
 
 
+
     @PostMapping
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postRating(@RequestPart List<MultipartFile> pics
