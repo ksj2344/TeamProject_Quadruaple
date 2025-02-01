@@ -40,6 +40,7 @@ public class ReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resList));
     }
 
+
     @PostMapping
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postRating(@RequestPart List<MultipartFile> pics
