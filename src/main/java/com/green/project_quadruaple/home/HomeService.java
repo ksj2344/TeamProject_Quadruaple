@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.home;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.home.res.*;
@@ -8,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -21,10 +24,20 @@ public class HomeService {
 
     //홈화면
     public ResponseEntity<ResponseWrapper<HomeRes>> getHome(){
-        long userId=authenticationFacade.getSignedUserId();
-        List<RecommendFest> recommendFests=homeMapper.getFestival(userId);
-        List<RecentStrf> recentStrfs=homeMapper.getRecent(userId);
-        List<RecommendStrf> recommendStrfs=homeMapper.getRecommend(userId);
+        List<RecommendFest> recommendFests=new ArrayList<>();
+        List<RecentStrf> recentStrfs=new ArrayList<>();
+        List<RecommendStrf> recommendStrfs=new ArrayList<>();
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(principal instanceof JwtUser){
+            Long userId=authenticationFacade.getSignedUserId();
+            recommendFests=homeMapper.getFestival(userId);
+            recentStrfs=homeMapper.getRecent(userId);
+            recommendStrfs=homeMapper.getRecommend(userId);
+        } else {
+            recommendFests=homeMapper.getFestivalWithOutUserId();
+            recommendStrfs=homeMapper.getRecommendWithOutUserId();
+        }
         List<PopularLocation> popularLocations=homeMapper.getPopularLocation();
 
         HomeRes homeRes=new HomeRes(recommendFests,popularLocations,recentStrfs,recommendStrfs);

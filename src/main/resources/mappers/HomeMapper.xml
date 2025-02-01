@@ -7,7 +7,7 @@
             A.strf_id AS strfId,
             SP.pic_name AS strfPic,
             A.title AS festTitle,
-            IF(NOW() BETWEEN A.start_at AND A.end_at, 0, 1) AS isOpen,
+            IF(NOW() BETWEEN A.start_at AND A.end_at, 1, 0) AS isOpen,
             A.start_at AS startAt,
             A.end_at AS endAt,
             LD.detail_title AS locationTitle,
@@ -25,6 +25,28 @@
         WHERE A.category = 'FEST' AND NOW() <![CDATA[ < ]]> A.end_at
         ORDER BY priority DESC,
         ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
+        LIMIT 10
+    </select>
+
+    <select id="getFestivalWithOutUserId">
+        SELECT
+        A.strf_id AS strfId,
+        SP.pic_name AS strfPic,
+        A.title AS festTitle,
+        IF(NOW() BETWEEN A.start_at AND A.end_at, 1, 0) AS isOpen,
+        A.start_at AS startAt,
+        A.end_at AS endAt,
+        LD.detail_title AS locationTitle
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        INNER JOIN location_detail LD ON A.location_detail_id = LD.location_detail_id
+        LEFT JOIN location L ON LD.location_id = L.location_id
+        LEFT JOIN trip_location TL ON TL.location_id = L.location_id
+        LEFT JOIN trip T ON T.trip_id = TL.trip_id
+        LEFT JOIN trip_user TU ON TU.trip_id = T.trip_id
+        WHERE A.category = 'FEST' AND NOW() <![CDATA[ < ]]> A.end_at
+                                              ORDER BY
+                                              ABS(TIMESTAMPDIFF(SECOND, A.start_at, NOW())) ASC
         LIMIT 10
     </select>
 
@@ -114,7 +136,21 @@
         ) AS TourData
     </select>
 
-
+    <select id="getRecommendWithOutUserId">
+        SELECT
+        A.strf_id AS strfId,
+        A.title AS strfTitle,
+        CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
+        A.category,
+        SP.pic_name AS strfPic,
+        A.`explain`
+        FROM stay_tour_restaur_fest A
+        LEFT JOIN location_detail LD ON LD.location_detail_id = A.location_detail_id
+        LEFT JOIN location L ON L.location_id = LD.location_id
+        LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        WHERE A.category !='FEST'
+        LIMIT 10
+    </select>
 
     <select id="getRecommend">
         SELECT
@@ -156,6 +192,7 @@
         AND A.category !='FEST'
         LIMIT 10
     </select>
+
 
     <resultMap id="userInfo" type="com.green.project_quadruaple.home.res.MyPageRes">
         <id property="name" column="name" />
