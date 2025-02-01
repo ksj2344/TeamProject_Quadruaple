@@ -20,7 +20,7 @@
             AND strf_id BETWEEN #{startId} AND #{endId}
         </if>
         <if test="strfTitle != null and strfTitle != '' ">
-            AND title LIKE '%#{strfTitle}%'
+            AND title LIKE '%${strfTitle}%'
         </if>
     </select>
 
