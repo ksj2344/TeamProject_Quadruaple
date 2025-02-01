@@ -11,16 +11,15 @@ public interface ReviewMapper {
     List<ReviewSelRes> getReview(ReviewSelReq req);
 
     int postRating(ReviewPostReq p);
-    int postReviewPic(ReviewPicDto p);
+    int postReviewPics(@Param("pics") List<ReviewPicDto> reviewPicList);
 
     int patchReview(ReviewUpdReq req);
-    int patchReviewPic(ReviewPicDto p);
+    int patchReviewPic(@Param("pics") List<ReviewPicDto> reviewPicList);
     List<String> getReviewPics(@Param("reviewId") long reviewId);
 
     int deleteReview (ReviewDelReq req);
     int deleteReviewPic(ReviewDelReq p);
 
-
-
+    List<MyReviewSelRes> getMyReviews(MyReviewSelReq req);
 
 }

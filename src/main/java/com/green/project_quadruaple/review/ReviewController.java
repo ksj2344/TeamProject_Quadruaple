@@ -41,6 +41,7 @@ public class ReviewController {
     }
 
 
+
     @PostMapping
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postRating(@RequestPart List<MultipartFile> pics
@@ -63,4 +64,10 @@ public class ReviewController {
 
         return reviewService.deleteReview(req);
     }
+
+//    @GetMapping("/my")
+//    @Operation(summary = "내가 작성한 리뷰 조회")
+//    public ResponseEntity<?> getMyReviews(@Valid @ModelAttribute MyReviewSelReq req) {
+//
+//    }
 }
