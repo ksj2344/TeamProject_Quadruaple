@@ -184,7 +184,7 @@ public class TripService {
     * shcedule 테이블에 상품(일정)을 저장. 이동수단과 거리는 미정
     * trip_location 테이블에 상품의 location 이 존재하지 않으면 저장.
     * */
-//    public ResultResponse postIncomplete(PostStrfScheduleReq req) {
+//    public ResultResponseUser postIncomplete(PostStrfScheduleReq req) {
 //        long tripId = req.getTripId();
 //        long strfId = req.getStrfId();
 //        Long existLocation = tripMapper.existLocation(tripId, strfId);
@@ -195,7 +195,7 @@ public class TripService {
 //        }
 //        tripMapper.insScheMemo(req);
 //        tripMapper.insSchedule(req);
-//        return ResultResponse.success();
+//        return ResultResponseUser.success();
 //    }
 
     /*

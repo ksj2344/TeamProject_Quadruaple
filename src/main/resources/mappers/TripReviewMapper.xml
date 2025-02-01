@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.project_quadruaple.tripreview.TripReviewMapper">
+    <!-- 여행기 등록 -->
+    <insert id="insTripReview" useGeneratedKeys="true" keyProperty="tripReviewId">
+        INSERT INTO trip_review
+           SET trip_review_id = #{tripReviewId}
+             , trip_id = #{tripId}
+             , user_id = #{userId}
+             , title = #{title}
+             , content = #{content}
+    </insert>
+
+    <insert id="insTripReviewPic">
+        INSERT INTO trip_review_pic
+        (trip_review_pic, trip_review_id)
+        VALUES
+        <foreach collection="tripReviewPic" item="pic" separator=",">
+            (#{pic}, #{tripReviewId})
+        </foreach>
+    </insert>
+
+    <!-- 여행기 추천 -->
+    <insert id="insTripLike">
+        INSERT INTO trip_like
+           SET user_id = #{userId}
+             , trip_review_id = #{tripReviewId}
+    </insert>
+
+    <delete id="delTripLike">
+        DELETE FROM trip_like
+         WHERE user_id = #{userId}
+           AND trip_review_id = #{tripReviewId}
+    </delete>
+
+    <select id="tripLikeCount">
+        SELECT COUNT(user_id)
+          FROM trip_like
+         WHERE trip_review_id = #{tripReviewId}
+    </select>
+</mapper>
