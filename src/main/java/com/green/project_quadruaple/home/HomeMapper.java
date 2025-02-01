@@ -13,9 +13,11 @@ public interface HomeMapper {
     List<RecentStrf> getRecent(long userId);
     List<RecommendStrf> getRecommend(long userId);
 
+    //home화면 without userId
+    List<RecommendFest> getFestivalWithOutUserId();
+    List<RecommendStrf> getRecommendWithOutUserId();
+
     //mypage 가져오기
     MyPageRes pushHamburger(long userId);
-
-   List<UserTripDto> selTest(long userId);
 
 }

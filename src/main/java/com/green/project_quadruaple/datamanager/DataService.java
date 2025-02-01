@@ -28,7 +28,7 @@ public class DataService {
 
 
     //strf 사진 등록
-    @Transactional
+    //@Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insPicToStrf (List<MultipartFile> pics, StrfIdGetReq p){
         List<Long> strfIds= dataMapper.selectStrfId(p);
         if(strfIds==null){
@@ -57,6 +57,7 @@ public class DataService {
                 }
             }
         }
+        log.info("picAndStrfId:{}",picAndStrfId.subList(0,3));
         int result= dataMapper.insStrfPic(picAndStrfId);
         if(result==0){
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -86,7 +87,7 @@ public class DataService {
     }
 
     //메뉴 데이터 넣기
-    @Transactional
+    //@Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insMenu (List<MultipartFile> pics, MenuReq p){
         StrfIdGetReq strfIdGetReq=new StrfIdGetReq(p.getCategory(),p.getStrfTitle(),p.getStartId(), p.getEndId());
         List<Long> strfIds=dataMapper.selectStrfId(strfIdGetReq);
@@ -116,6 +117,7 @@ public class DataService {
                 }
             }
         }
+        log.info("menuData 3rows:{}",menuData.subList(0,3));
         int result=dataMapper.insMenu(menuData);
         if(result==0){
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)

@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("data")
-@Tag(name = "사용자", description = "기능용x 더미데이터이미지용")
+@Tag(name = "더미데이터", description = "기능용x 더미데이터이미지용")
 public class DataController {
     private final DataService dataService;
 
@@ -36,6 +36,7 @@ public class DataController {
     @PostMapping("menu")
     @Operation(summary = "Menu넣기", description = "post-man에서 하셔야함")
     public ResponseEntity<?> insMenu(@RequestPart List<MultipartFile> pics, @RequestPart MenuReq p){
+        log.info("MenuReq:{}",p);
         return dataService.insPicToStrf(pics, p);
     }
 
