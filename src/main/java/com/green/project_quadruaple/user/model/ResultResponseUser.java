@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class ResultResponse<T> {
+public class ResultResponseUser<T> {
     @Schema(title = "결과 메시지")
     private String resultMessage;
     @Schema(title = "결과 내용")

@@ -25,9 +25,9 @@ public class UserSignUpReq {
             message = "비밀번호는 특수문자, 숫자, 영문자 중 두 가지 이상을 포함한 8자 이상 20자 이하여야 합니다.")
     private String pw;
     private String name;
+    @JsonIgnore
     private String profilePic;
     @JsonIgnore
     private int state;
     private List<UserRole> role = new ArrayList<>();
-    private boolean tmpPaasWord;
 }
