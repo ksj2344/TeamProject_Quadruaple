@@ -63,4 +63,10 @@ public class ReviewController {
 
         return reviewService.deleteReview(req);
     }
+
+//    @GetMapping("/my")
+//    @Operation(summary = "내가 작성한 리뷰 조회")
+//    public ResponseEntity<?> getMyReviews(@Valid @ModelAttribute MyReviewSelReq req) {
+//
+//    }
 }
