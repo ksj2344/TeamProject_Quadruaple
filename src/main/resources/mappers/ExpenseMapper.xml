@@ -33,4 +33,16 @@
         </foreach>
         )
     </insert>
+
+    <select id="selExpense">
+        SELECT U.user_id
+        FROM paid_user P
+        LEFT JOIN trip_user TU
+        ON TU.trip_user_id=P.trip_user_id
+        LEFT JOIN user U
+        ON U.user_id=TU.user_id
+        LEFT JOIN daily_expense D
+        ON D.de_id=P.de_id
+        where TU.trip_id = #{tripId}
+    </select>
 </mapper>

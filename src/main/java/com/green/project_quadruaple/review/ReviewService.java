@@ -30,14 +30,36 @@ public class ReviewService {
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
+
     public List<ReviewSelRes> getReview(ReviewSelReq req) {
+        List<ReviewSelRes> res = reviewMapper.getReview(req);
 
         if (req.getStartIdx() < 0) {
             return new ArrayList<>();
         }
 
-        return reviewMapper.getReview(req);
+        boolean hasMore = res.size() > req.getSize();
+
+        if (hasMore) {
+            res.remove(res.size() - 1); // 마지막 데이터를 제거하여 정확한 개수 유지
+        }
+
+        List<ReviewPicSel> list = new ArrayList<>();
+
+        res.forEach(review -> review.setMoreReview(hasMore));
+
+        return res;
     }
+
+//    public List<ReviewSelRes> getReview(ReviewSelReq req) {
+//        List<ReviewSelRes> res = reviewMapper.getReview(req);
+//        if (req.getStartIdx()<0){
+//            res = new ArrayList<>();
+//            return res;
+//        }
+//
+//        return reviewMapper.getReview(req);
+//    }
 
 //    @Transactional
 //    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
