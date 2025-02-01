@@ -5,10 +5,10 @@
 
     <insert id="insStrfPic">
         INSERT INTO strf_pic
-            (pic_name, strf_id)
+            (strf_id,pic_name)
         VALUES
-        <foreach collection="picAndStrfId" item="picAndstrfId" separator=",">
-            (#{picAndstrfId})
+        <foreach collection="picAndStrfIds" item="item" separator=",">
+            ( #{item.strfId}, #{item.picName} )
         </foreach>
     </insert>
 
@@ -37,7 +37,7 @@
         (strf_id,title, price, menu_pic)
         VALUES
         <foreach collection="menuData" item="menu" separator=",">
-            (#{menu})
+            (#{menu.strfId},#{menu.title},#{menu.price},#{menu.menuPic})
         </foreach>
     </insert>
 
