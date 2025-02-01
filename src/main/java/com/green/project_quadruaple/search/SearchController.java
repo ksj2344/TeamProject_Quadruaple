@@ -1,7 +1,10 @@
 package com.green.project_quadruaple.search;
 
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.LocationResponse;
+import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,7 +64,17 @@ public class SearchController {
         return ResponseEntity.ok(response);
     }*/
 
+    @GetMapping("/search/strf-list-basic")
+    public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(@RequestParam("trip_id") Long tripId, @RequestParam("last_index") int lastIdx) {
+        return searchService.getStrfListBasic(tripId, lastIdx);
+    }
 
-
-
+    @GetMapping("/search/strf-list-word")
+    public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListWithSearchWord(@RequestParam("trip_id") Long tripId,
+                                                                       @RequestParam("last_index") int lastIdx,
+                                                                       @RequestParam(required = false) String category,
+                                                                       @RequestParam(value = "search_word", required = false) String searchWord)
+    {
+        return searchService.getStrfListWithSearchWord(tripId, lastIdx, category, searchWord);
+    }
 }
