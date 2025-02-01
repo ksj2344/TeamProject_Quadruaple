@@ -20,6 +20,20 @@
         </foreach>
     </insert>
 
+    <!-- 여행기 수정 -->
+    <update id="updTripReview">
+        UPDATE trip_review
+        <set>
+            <if test=" title != null and title != '' " >
+                title = #{title}
+            </if>
+            <if test=" content != null and content != '' ">
+                , content = #{content}
+            </if>
+        </set>
+        WHERE trip_review_id = #{tripReviewId}
+    </update>
+
     <!-- 여행기 추천 -->
     <insert id="insTripLike">
         INSERT INTO trip_like
