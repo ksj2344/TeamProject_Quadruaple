@@ -2,6 +2,7 @@ package com.green.project_quadruaple.search;
 
 
 import com.green.project_quadruaple.search.model.LocationResponse;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,56 +13,40 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
-@RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/search") // 겹치지 않도록 설정
 public class SearchController {
+
     private final SearchService searchService;
 
-
-    @Operation(summary = "여행 지역 검색", description = "입력된 지역 이름으로 여행 지역 정보를 검색합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LocationResponse.class))),
-            @ApiResponse(responseCode = "404", description = "검색 결과 없음")
-    })
-    @GetMapping("/location")
-    public ResponseEntity<LocationResponse> getTripLocation(
-            @RequestParam(value = "search_word", required = true) String searchWord) {
-        LocationResponse response = searchService.getLocation(searchWord);
-        if ("404".equals(response.getCode())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-        return ResponseEntity.ok(response);
+    // 중복 생성자를 제거하고 아래처럼 정의
+    public SearchController(SearchService searchService) {
+        this.searchService = searchService;
     }
 
-
-
-    /*@GetMapping
-    public ResponseEntity<Map<String, Object>> getTripLocation(
-            @RequestParam(value = "search_word", required = false) String searchWord) {
-        long userId = AuthenticationFacade.getSignedUserId(); // JWT에서 유저 ID 추출
-        Map<String, Object> response = searchService.getTripLocation(userId, searchWord);
-        return ResponseEntity.ok(response);
-    }*/
-
-
     /*@GetMapping("/location")
-    public ResponseEntity<Map<String, Object>> getTripLocation(
-            @RequestParam(value = "search_word", required = true) String searchWord) {
-        Map<String, Object> response = searchService.getTripLocation(searchWord);
-
-        // HTTP 상태 코드 설정
-        if (response.get("code").equals(ResponseCode.NOT_FOUND.getCode())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
+        System.out.println("Received search_word: " + search_word);
+        List<LocationResponse> locations = searchService.getTripLocation(search_word);
+        System.out.println("Search results: " + locations);
+        if (locations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("검색 결과가 없습니다.");
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(locations);
     }*/
+    @GetMapping("/location")
+    public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
+        System.out.println("Received search_word: " + search_word); // 디버깅용 로그 추가
+        List<LocationResponse> locations = searchService.getTripLocation(search_word);
 
-
-
-
+        if (locations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("검색 결과가 없습니다.");
+        }
+        return ResponseEntity.ok(locations);
+    }
 }
+
+

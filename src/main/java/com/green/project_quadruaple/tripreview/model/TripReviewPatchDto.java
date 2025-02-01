@@ -1,15 +1,17 @@
 package com.green.project_quadruaple.tripreview.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @Setter
 @ToString
-public class TripReviewPostRes {
+public class TripReviewPatchDto {
     private long tripReviewId;
-    private List<String> tripReviewPic;
+    @JsonIgnore
+    private long userId;
+    private String title;
+    private String content;
 }

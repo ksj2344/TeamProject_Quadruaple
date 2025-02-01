@@ -17,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @Service
@@ -36,20 +38,23 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
 
         // ${file.directory}/strf/${strfId}/파일명
-
-        List<String> picAndStrfId=new ArrayList<>(pics.size()*strfIds.size());
+        List<Map<String, Object>> picAndStrfIds = new ArrayList<>(pics.size()*strfIds.size());
 
         for (int i = 0; i < strfIds.size(); i++) {
             String middlePath=String.format("strf/%d",strfIds.get(i));
             myFileUtils.makeFolders(middlePath);
             for(MultipartFile pic: pics){
+                Map<String, Object> map = new HashMap<>();
                 String savePicName=myFileUtils.makeRandomFileName(pic);
-                picAndStrfId.add(String.format("%s , %d",savePicName,strfIds.get(i)));
                 String filePath=String.format("%s/%s",middlePath,savePicName);
+                map.put("strfId",strfIds.get(i));
+                map.put("picName",savePicName);
+                picAndStrfIds.add(map);
                 try{
                     myFileUtils.transferTo(pic, filePath);
                 }catch(IOException e){
                     //폴더 삭제 처리
+                    log.error("파일 저장 실패: {}", filePath, e);
                     String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
                     myFileUtils.deleteFolder(delFolderPath,true);
                     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -57,10 +62,10 @@ public class DataService {
                 }
             }
         }
-        log.info("picAndStrfId:{}",picAndStrfId.subList(0,3));
-        int result= dataMapper.insStrfPic(picAndStrfId);
+        log.info("picAndStrfIds:{}",picAndStrfIds.subList(0,3));
+        int result= dataMapper.insStrfPic(picAndStrfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
@@ -76,7 +81,7 @@ public class DataService {
 
         int result= dataMapper.delStrfIdPic(strfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for(int i=0; i<strfIds.size(); i++){
@@ -96,7 +101,7 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
 
         // ${file.directory}/strf/${strfId}/menu/파일명
-        List<String> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
+        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
         List<MenuDto> menus=p.getMenus();
         for (long strfId:strfIds){
             String middlePath=String.format("strf/%d/menu",strfId);
@@ -104,12 +109,18 @@ public class DataService {
             for(int i=0; i<menus.size(); i++){
                 MenuDto menu=menus.get(i);
                 String savePicName=myFileUtils.makeRandomFileName(pics.get(i));
-                menuData.add(String.format("%d,%s,%d,%s",strfId,menu.getTitle(),menu.getPrice(),savePicName));
+                Map<String, Object> map = new HashMap<>();
+                map.put("strfId",strfId);
+                map.put("title",menu.getTitle());
+                map.put("price",menu.getPrice());
+                map.put("menuPic",savePicName);
+                menuData.add(map);
                 String filePath=String.format("%s/%s",middlePath,savePicName);
                 try{
                     myFileUtils.transferTo(pics.get(i), filePath);
                 }catch(IOException e){
                     //폴더 삭제 처리
+                    log.error("파일 저장 실패: {}", filePath, e);
                     String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
                     myFileUtils.deleteFolder(delFolderPath,true);
                     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -117,10 +128,10 @@ public class DataService {
                 }
             }
         }
-        log.info("menuData 3rows:{}",menuData.subList(0,3));
+        log.info("menuData 3rows:{}",menuData.subList(0,8));
         int result=dataMapper.insMenu(menuData);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
@@ -137,7 +148,7 @@ public class DataService {
 
         int result= dataMapper.delMenu(strfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for(int i=0; i<strfIds.size(); i++){

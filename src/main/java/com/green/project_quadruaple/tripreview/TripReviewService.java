@@ -3,8 +3,10 @@ package com.green.project_quadruaple.tripreview;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.tripreview.model.TripLikeDto;
+import com.green.project_quadruaple.tripreview.model.TripReviewPatchDto;
 import com.green.project_quadruaple.tripreview.model.TripReviewPostReq;
 import com.green.project_quadruaple.tripreview.model.TripReviewPostRes;
+import com.green.project_quadruaple.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,9 @@ public class TripReviewService {
     private final TripReviewMapper tripReviewMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
+    private final UserMapper userMapper;
 
+    // 여행기 등록
     public TripReviewPostRes postTripReview(List<MultipartFile> tripReviewPic, TripReviewPostReq req) {
         req.setUserId(authenticationFacade.getSignedUserId());
         tripReviewMapper.insTripReview(req);
@@ -65,6 +69,19 @@ public class TripReviewService {
 
         return tripReviewPostRes;
     }
+    // 여행기 수정
+    public int patchTripReview(TripReviewPatchDto dto) {
+        dto.setUserId(authenticationFacade.getSignedUserId());
+
+        int result = tripReviewMapper.updTripReview(dto);
+
+        if (result == 0) {
+            throw new RuntimeException("여행기 수정에 실패했습니다.");
+        }
+
+        return result;
+    }
+
 
     // 여행기 추천
     public int insTripLike(TripLikeDto like) {

@@ -3,6 +3,7 @@ package com.green.project_quadruaple.tripreview;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.tripreview.model.TripLikeDto;
+import com.green.project_quadruaple.tripreview.model.TripReviewPatchDto;
 import com.green.project_quadruaple.tripreview.model.TripReviewPostReq;
 import com.green.project_quadruaple.tripreview.model.TripReviewPostRes;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,13 +37,23 @@ public class TripReviewController {
     }
 
     //여행기 수정
+    @PatchMapping
+    @Operation(summary = "여행기 수정(진행 중)")
+    public ResponseEntity<?> patchTripReview(@RequestBody TripReviewPatchDto dto) {
+        int result = tripReviewService.patchTripReview(dto);
+
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
 
     //여행기 추천
     @PostMapping("like")
     @Operation(summary = "여행기 추천 등록")
     public ResponseEntity<?> insTripLike(@RequestBody TripLikeDto like) {
         int result = tripReviewService.insTripLike(like);
-        if (result < 0) {
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
@@ -52,7 +63,7 @@ public class TripReviewController {
     @Operation(summary = "여행기 추천 취소")
     public ResponseEntity<?> delTripLike(@RequestBody TripLikeDto like) {
         int result = tripReviewService.delTripLike(like);
-        if (result < 0) {
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
@@ -62,7 +73,7 @@ public class TripReviewController {
     @Operation(summary = "여행기 추천 수")
     public ResponseEntity<?> countLike(@RequestParam Long tripReviewId) {
         int result = tripReviewService.getTripLikeCount(tripReviewId);
-        if (result < 0) {
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
