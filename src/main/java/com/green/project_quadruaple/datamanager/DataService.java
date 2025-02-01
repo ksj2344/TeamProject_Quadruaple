@@ -54,6 +54,7 @@ public class DataService {
                     myFileUtils.transferTo(pic, filePath);
                 }catch(IOException e){
                     //폴더 삭제 처리
+                    log.error("파일 저장 실패: {}", filePath, e);
                     String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
                     myFileUtils.deleteFolder(delFolderPath,true);
                     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -64,7 +65,7 @@ public class DataService {
         log.info("picAndStrfIds:{}",picAndStrfIds.subList(0,3));
         int result= dataMapper.insStrfPic(picAndStrfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
@@ -80,7 +81,7 @@ public class DataService {
 
         int result= dataMapper.delStrfIdPic(strfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for(int i=0; i<strfIds.size(); i++){
@@ -119,6 +120,7 @@ public class DataService {
                     myFileUtils.transferTo(pics.get(i), filePath);
                 }catch(IOException e){
                     //폴더 삭제 처리
+                    log.error("파일 저장 실패: {}", filePath, e);
                     String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
                     myFileUtils.deleteFolder(delFolderPath,true);
                     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -129,7 +131,7 @@ public class DataService {
         log.info("menuData 3rows:{}",menuData.subList(0,8));
         int result=dataMapper.insMenu(menuData);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
@@ -146,7 +148,7 @@ public class DataService {
 
         int result= dataMapper.delMenu(strfIds);
         if(result==0){
-            ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for(int i=0; i<strfIds.size(); i++){
