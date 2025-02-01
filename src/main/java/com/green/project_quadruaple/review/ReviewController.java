@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,6 +40,7 @@ public class ReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resList));
     }
 
+
     @PostMapping
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postRating(@RequestPart List<MultipartFile> pics
@@ -48,15 +50,17 @@ public class ReviewController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateReview(@PathVariable long reviewId,
-                                          @RequestBody ReviewUpdReq req,
-                                          HttpServletRequest request) {
+    @Operation(summary = "리뷰 수정")
+    public ResponseEntity<?> updateReview(@RequestPart List<MultipartFile> pics
+            ,@Valid @RequestPart ReviewUpdReq p) {
 
-        long userId = (long) request.getAttribute("userId"); // 필터에서 저장된 userId 가져오기
-        req.setReviewId(reviewId);
-        req.setUserId(userId);
+        return reviewService.updateReview(pics,p);
+    }
 
-        ReviewUpdRes res = reviewService.updateReview(req).getData();
-        return ResponseEntity.ok(res);
+    @DeleteMapping
+    @Operation(summary = "리뷰 삭제")
+    public ResponseEntity<ResponseWrapper<Integer>> deleteReview (@ParameterObject @ModelAttribute ReviewDelReq req){
+
+        return reviewService.deleteReview(req);
     }
 }
