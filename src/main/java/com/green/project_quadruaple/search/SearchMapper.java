@@ -6,6 +6,7 @@ import com.green.project_quadruaple.search.model.SearchPageRes;
 import com.green.project_quadruaple.search.model.SearchResponse;
 import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

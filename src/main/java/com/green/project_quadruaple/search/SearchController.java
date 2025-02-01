@@ -1,17 +1,8 @@
 package com.green.project_quadruaple.search;
 
-
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.LocationResponse;
-import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +20,15 @@ public class SearchController {
     public SearchController(SearchService searchService) {
         this.searchService = searchService;
     }
+
+    /*@GetMapping
+    public ResponseEntity<Map<String, Object>> getTripLocation(
+            @RequestParam(value = "search_word", required = false) String searchWord) {
+        long userId = AuthenticationFacade.getSignedUserId(); // JWT에서 유저 ID 추출
+        Map<String, Object> response = searchService.getTripLocation(userId, searchWord);
+        return ResponseEntity.ok(response);
+    }*/
+
 
     /*@GetMapping("/location")
     public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
@@ -50,6 +50,7 @@ public class SearchController {
         }
         return ResponseEntity.ok(locations);
     }
+
 
     @GetMapping("/strf-list-basic")
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(@RequestParam("trip_id") Long tripId, @RequestParam("last_index") int lastIdx) {

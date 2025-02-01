@@ -6,21 +6,16 @@ import com.green.project_quadruaple.search.model.LocationResponse;
 import com.green.project_quadruaple.search.model.SearchPageReq;
 import com.green.project_quadruaple.search.model.SearchPageRes;
 import com.green.project_quadruaple.search.model.SearchResponse;
-import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
-import com.green.project_quadruaple.trip.TripMapper;
 import com.green.project_quadruaple.trip.model.Category;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,20 +43,6 @@ public class SearchService {
        System.out.println("Fetched locations: " + locations); // 디버깅용 로그 추가
        return locations;
    }
-
-
-    public LocationResponse getLocation(String searchWord) {
-        Map<String, Object> location = searchMapper.getTripLocation(searchWord);
-        if (location == null) {
-            return new LocationResponse("404", null, null, null); // 검색 결과 없음
-        }
-        return new LocationResponse(
-                "200",
-                (String) location.get("locationTitle"),
-                (String) location.get("locationPic"),
-                (Integer) location.get("locationId")
-        );
-    }
 
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(long tripId, int lastIdx) {
         if(tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);

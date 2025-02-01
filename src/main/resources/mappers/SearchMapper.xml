@@ -20,26 +20,6 @@
         <result property="locationId" column="location_id" />
     </resultMap>
 
-    <!--<select id="getTripLocation" resultType="java.util.HashMap">
-        SELECT
-        l.location_id AS locationId,
-        ld.detail_title AS locationTitle,
-        l.location_pic AS locationPic
-        FROM location l
-        JOIN location_detail ld ON l.location_id = ld.location_id
-        WHERE ld.detail_title = #{searchWord}
-    </select>-->
-
-    <select id="getTripLocation" resultType="java.util.HashMap">
-        SELECT
-        l.location_id AS locationId,
-        ld.detail_title AS locationTitle,
-        l.location_pic AS locationPic
-        FROM location l
-        JOIN location_detail ld ON l.location_id = ld.location_id
-        WHERE ld.detail_title = #{searchWord}
-    </select>
-
     <select id="selStrfShortInfoBasic">
         SELECT
         s.strf_id
