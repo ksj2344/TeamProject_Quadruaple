@@ -18,7 +18,7 @@ public class StrfSelReq {
     @NotNull
     @Schema(description = "상품 ID", example = "1")
     private long strfId;
-//    @JsonIgnore
+    @JsonIgnore
     private long userId;
 }
 

@@ -12,9 +12,15 @@ public interface ReviewMapper {
 
     int postRating(ReviewPostReq p);
     int postReviewPic(ReviewPicDto p);
-    void postReviewPics(@Param("reviewId") long reviewId , @Param("pics") List<String> pics);
 
     int patchReview(ReviewUpdReq req);
+    int patchReviewPic(ReviewPicDto p);
+    List<String> getReviewPics(@Param("reviewId") long reviewId);
 
     int deleteReview (ReviewDelReq req);
+    int deleteReviewPic(ReviewDelReq p);
+
+
+
+
 }

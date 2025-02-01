@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,18 +81,58 @@ public class ReviewService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),resultPics));
     }
 
-    public ResponseWrapper<ReviewUpdRes> updateReview(ReviewUpdReq req) {
-        int updatedRows = reviewMapper.patchReview(req);
-
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> updateReview(List<MultipartFile> pics, ReviewUpdReq p) {
+        // 리뷰 정보 업데이트
+        int updatedRows = reviewMapper.patchReview(p);
         if (updatedRows == 0) {
-            throw new IllegalArgumentException("리뷰 수정 실패: 해당 리뷰를 찾을 수 없거나 수정 권한이 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
-
-        ReviewUpdRes res = new ReviewUpdRes();
-        res.setReviewId(req.getReviewId());
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        long reviewId = p.getReviewId();
+        String middlePath = String.format("reviewId/%d", reviewId);
+        // 기존 리뷰 이미지 삭제
+        List<String> existingPics = reviewMapper.getReviewPics(reviewId);
+        for (String picName : existingPics) {
+            myFileUtils.deleteFolder(String.format("%s/%s", myFileUtils.getUploadPath(), middlePath, picName),true);
+        }
+        // 새로운 이미지 저장
+        List<String> picNameList = new ArrayList<>();
+        myFileUtils.makeFolders(middlePath);
+        for (MultipartFile pic : pics) {
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            picNameList.add(savedPicName);
+            String filePath = String.format("%s/%s", middlePath, savedPicName);
+            try {
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                // 폴더 삭제 및 롤백
+                myFileUtils.deleteFolder(String.format("%s/%s", myFileUtils.getUploadPath(), middlePath), true);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+        }
+        // 새로운 이미지 정보 저장
+        ReviewPicDto reviewPicDto = new ReviewPicDto();
+        reviewPicDto.setReviewId(reviewId);
+        reviewPicDto.setPics(picNameList);
+        reviewMapper.patchReviewPic(reviewPicDto);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), picNameList.size()));
     }
 
+
+    public ResponseEntity<ResponseWrapper<Integer>> deleteReview (ReviewDelReq req){
+        req.setUserId(authenticationFacade.getSignedUserId());
+
+        int affectedRowsPic = reviewMapper.deleteReviewPic(req);
+
+        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), req.getReviewId());
+        myFileUtils.deleteFolder(deletePath, true);
+
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),1));
+
+
+    }
 
 }

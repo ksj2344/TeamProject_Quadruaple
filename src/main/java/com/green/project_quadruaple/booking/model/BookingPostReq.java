@@ -16,6 +16,4 @@ public class BookingPostReq {
     private String checkIn;
     private String checkOut;
     private int finalPayment;
-
-
 }
