@@ -75,6 +75,7 @@ public class TripController {
     }
 
     @PatchMapping("/schedule")
+    @Operation(summary = "일정 순서 변경", description = "선택한 일정의 순서를 변경. 변경된 순서로 이동 시간, 거리, 수단을 추천 경로로 임의로 변경")
     public ResultResponse patchSeq(@RequestBody PatchSeqReq req) {
         return tripService.patchSeq(req);
     }

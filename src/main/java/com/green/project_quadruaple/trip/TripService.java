@@ -85,6 +85,7 @@ public class TripService {
         long totalDistance = 0L;
         long totalDuration = 0L;
         for (TripDetailDto detailDto : tripDetailDto) {
+            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
             for (ScheduleDto schedule : detailDto.getSchedules()) {
                 Long distance = schedule.getDistance();
                 Long duration = schedule.getDuration();
@@ -287,6 +288,11 @@ public class TripService {
                 tripMapper.updateDay(scheduleId, destDay);
             }
 
+            if(scheduleDto.getScheOrMemo().equals("MEMO")) {
+                log.info("메모 변경 완료");
+                return ResultResponse.success();
+            }
+
             /*
             * 기본 로직
             * 1. (완료)A의 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
@@ -305,7 +311,6 @@ public class TripService {
             * A의 변경된 위치가 마지막 일정이라면
             * 3-1. 변경 없음
             * */
-
             FindPathReq findPathReq;
             if(!notFirst) { // 원래 자리가 첫 일정이라면
                 tripMapper.updateSchedule(false, scheduleDto.getNextScheduleId(), 0, 0, 0);
@@ -329,6 +334,7 @@ public class TripService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        log.info("일정 순서 변경 완료");
         return ResultResponse.success();
     }
 
@@ -433,7 +439,7 @@ public class TripService {
         formData.add(odsayApiConst.getParamEndLngName(), req.getEndLngEX());
 
         return webClient.post()
-                .uri("")
+                .uri(odsayApiConst.getSearchPubTransPathUrl())
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve() //통신 시도
                 .bodyToMono(String.class) // 결과물을 String변환

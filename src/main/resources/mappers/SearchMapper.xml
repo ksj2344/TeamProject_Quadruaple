@@ -1,26 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.green.project_quadruaple.search.SearchMapper">
+<mapper namespace="com.green.project_quadruaple.search.model.SearchMapper">
 
-    <!-- 검색 기능 -->
-    <select id="searchPage" resultType="com.green.project_quadruaple.search.model.SearchPageRes">
-        SELECT *
-        FROM location_detail
-        WHERE location_name LIKE CONCAT('%', #{searchWord}, '%')
-    </select>
-
-    <!-- 검색 기본 페이지 정보 -->
-    <select id="getSearchPageInfo" resultType="com.green.project_quadruaple.search.model.SearchResponse">
+    <!-- 검색 결과 조회 -->
+    <select id="searchResults" resultMap="SearchResultMap" parameterType="map">
         SELECT
-        recent_list AS recentList,
-        hot_key_words AS hotKeyWords,
-        searched_txts AS searchedTxts
-        FROM search_page_info
-        LIMIT 1
+        s.strf_id AS strfId,
+        s.title AS title,
+        s.category AS category,
+        s.location AS location
+        FROM search_table s
+        WHERE s.category = #{category}
+        AND s.title LIKE CONCAT('%', #{searchText}, '%')
+        LIMIT #{page}, #{pageSize}
     </select>
+
+    <resultMap id="SearchResultMap" type="com.green.project_quadruaple.search.model.SearchResponse">
+        <result property="strfId" column="strf_id" />
+        <result property="title" column="title" />
+        <result property="category" column="category" />
+        <result property="location" column="location" />
+    </resultMap>
+
+    <!--<select id="getTripLocation" resultType="java.util.HashMap">
+        SELECT
+        l.location_id AS locationId,
+        ld.detail_title AS locationTitle,
+        l.location_pic AS locationPic
+        FROM location l
+        JOIN location_detail ld ON l.location_id = ld.location_id
+        WHERE ld.detail_title = #{searchWord}
+    </select>-->
+
+    <select id="getTripLocation" resultType="java.util.HashMap">
+        SELECT
+        l.location_id AS locationId,
+        ld.detail_title AS locationTitle,
+        l.location_pic AS locationPic
+        FROM location l
+        JOIN location_detail ld ON l.location_id = ld.location_id
+        WHERE ld.detail_title = #{searchWord}
+    </select>
+
 
 </mapper>
+
 
 
 
