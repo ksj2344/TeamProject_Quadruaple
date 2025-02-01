@@ -1,13 +1,13 @@
 package com.green.project_quadruaple.search.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 public class LocationResponse {
-    private String code;
-    private String locationTitle;
-    private String locationPic;
-    private Integer locationId;
+    private int locationId;    // location_id
+    private String locationTitle;      // title
+    private String locationPic; // location_pic
 }
