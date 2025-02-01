@@ -3,43 +3,42 @@
 
 <mapper namespace="com.green.project_quadruaple.review.ReviewMapper">
     <select id="getReview" resultMap="reviewPicResultMap">
-        SELECT
-        a.content , a.rating , a.review_id AS reviewId ,
-        GROUP_CONCAT(b.title ORDER BY b.title ASC) AS reviewPics ,
-        c.name AS writerUserName , c.profile_pic AS writerUserPic ,
-        a.strf_id AS strfId ,
+        SELECT a.content, a.rating, a.review_id AS reviewId,
+        c.name AS writerUserName, c.profile_pic AS writerUserPic,
+        a.strf_id AS strfId, a.user_id AS writerUserId,
         (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
-        a.user_id AS writerUserId ,
-        CASE
-        WHEN a.updated_at IS NOT NULL THEN a.updated_at
-        ELSE a.created_at
-        END AS reviewWriteDate
-
+        CASE WHEN a.updated_at IS NOT NULL THEN a.updated_at ELSE a.created_at END AS reviewWriteDate
         FROM review a
-        LEFT JOIN review_pic b
-        ON a.review_id = b.review_id
-        LEFT JOIN user c
-        ON a.user_id = c.user_id
+        LEFT JOIN user c ON a.user_id = c.user_id
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.review_id, a.content, a.rating, a.user_id, c.name, c.profile_pic, a.updated_at, a.created_at
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
     </select>
+
     <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
-        <id property="reviewId" column="reviewId" />
-        <result property="strfId" column="strfId" />
-        <result property="content" column="content" />
-        <result property="rating" column="rating" />
-        <result property="writerUserName" column="writerUserName" />
-        <result property="writerUserPic" column="writerUserPic" />
-        <result property="writerUserId" column="writerUserId" />
-        <result property="userWriteReviewCnt" column="userWriteReviewCnt" />
-        <result property="reviewWriteDate" column="reviewWriteDate" />
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <result property="writerUserId" column="writerUserId"/>
+        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
         <collection property="reviewPics" ofType="com.green.project_quadruaple.review.model.ReviewPicSel">
-            <result column="reviewPics" property="pic" />
+            <id column="reviewId" property="reviewId"/>
+            <result column="pic" property="pic"/>
         </collection>
+
     </resultMap>
-    
+
+    <insert id="postReviewPic">
+        INSERT INTO review_pic (title , review_id)
+        VALUES
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            #{pic}, #{reviewId}
+        </foreach>
+    </insert>
     <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
         INSERT INTO review
         SET content = #{content}
@@ -54,13 +53,43 @@
         </foreach>
     </insert>
     <!--
-    <insert id="postReviewPic">
-        INSERT INTO review_pic (title , review_id)
-        VALUES
-        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
-            #{pic}, #{reviewId}
-        </foreach>
-    </insert>
+ <select id="getReview" resultMap="reviewPicResultMap">
+        SELECT
+        a.content , a.rating , a.review_id AS reviewId ,
+        b.title AS reviewPics,
+        c.name AS writerUserName , c.profile_pic AS writerUserPic ,
+        a.strf_id AS strfId ,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        a.user_id AS writerUserId ,
+        CASE
+        WHEN a.updated_at IS NOT NULL THEN a.updated_at
+        ELSE a.created_at
+        END AS reviewWriteDate
+
+        FROM review a
+        LEFT JOIN review_pic b ON a.review_id = b.review_id
+        LEFT JOIN user c ON a.user_id = c.user_id
+        WHERE a.strf_id = #{strfId}
+
+        GROUP BY a.review_id, a.content, a.rating, a.user_id, c.name, c.profile_pic, a.updated_at, a.created_at
+
+    ORDER BY a.review_id DESC
+    LIMIT #{startIdx}, #{size}
+</select>
+<resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+<id property="reviewId" column="reviewId"/>
+<result property="strfId" column="strfId"/>
+<result property="content" column="content"/>
+<result property="rating" column="rating"/>
+<result property="writerUserName" column="writerUserName"/>
+<result property="writerUserPic" column="writerUserPic"/>
+<result property="writerUserId" column="writerUserId"/>
+<result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+<result property="reviewWriteDate" column="reviewWriteDate"/>
+<collection property="reviewPics" ofType="com.green.project_quadruaple.review.model.ReviewPicSel">
+    <result column="reviewPics" property="pic"/>
+</collection>
+</resultMap>
     -->
     <select id="getReviewPics" resultType="String">
         SELECT pic_name FROM review_pic WHERE review_id = #{reviewId}

@@ -1,59 +1,25 @@
 {
-  "code": "200 성공",
-  "data": {
-    "totalDistance": 0,
-    "totalDuration": 0,
-    "scheduleCnt": 6,
-    "memoCnt": 1,
-    "days": [
+  "code" : "200 성공",
+  "data" : {
+    "category" : "숙소" ,
+    "isMore" : "true" ,
+    "list" : [
       {
-        "day": 1,
-        "weather": null,
-        "schedules": [
-          {
-            "scheduleId": 22,
-            "scheOrMemo": "SCHE",
-            "seq": 1,
-            "distance": 0,
-            "duration": 0,
-            "strfId": 499,
-            "strfTitle": "경북대학교 캠퍼스",
-            "category": "TOUR",
-            "address": "대구광역시 북구 산격동 1370-1",
-            "lat": "35.8907065",
-            "lng": "128.6100194",
-            "pathType": 0,
-            "tripId": 0,
-            "title": null,
-            "content": null,
-            "nextScheduleId": 0,
-            "prevScheduleStrfId": 0,
-            "nextScheduleStrfId": 0,
-            "notFirst": false
-          },
-          {
-            "scheduleId": 25,
-            "scheOrMemo": "MEMO",
-            "seq": 4,
-            "distance": 0,
-            "duration": 0,
-            "strfId": 0,
-            "strfTitle": null,
-            "category": null,
-            "address": null,
-            "lat": null,
-            "lng": null,
-            "pathType": 0,
-            "tripId": 0,
-            "title": "여행3의 메모",
-            "content": "여행3의 메모 상세",
-            "nextScheduleId": 0,
-            "prevScheduleStrfId": 0,
-            "nextScheduleStrfId": 0,
-            "notFirst": false
-          }
-        ]
-      }
+        "strfId" : 1,
+        "title" : "숙소명",
+        "latit" : "37.5664707",
+        "longitude" : "127.0039404",
+        "picTitle" : "숙소.jpg",
+        "ratingCnt" : 2000,
+        "explain" : "숙소에 대한 간략한 설명",
+        "wishCnt" : 150,
+        "averageRating" : 3.2,
+        "wishIn" : false,
+        "ratingIn" : true,
+        "startAt" : null,
+        "endAt" : null
+      } ,
+      ...
     ]
   }
 }

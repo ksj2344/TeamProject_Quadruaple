@@ -30,18 +30,36 @@ public class ReviewService {
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
+
     public List<ReviewSelRes> getReview(ReviewSelReq req) {
-        log.info("Received strfId: " + req.getStrfId());
-//        ReviewSelRes res = reviewMapper.getReview(req.getStrfId());
-//        res.getStrfId();
         List<ReviewSelRes> res = reviewMapper.getReview(req);
-        if (req.getStartIdx()<0){
-            res = new ArrayList<>();
-            return res;
+
+        if (req.getStartIdx() < 0) {
+            return new ArrayList<>();
         }
+
+        boolean hasMore = res.size() > req.getSize();
+
+        if (hasMore) {
+            res.remove(res.size() - 1); // 마지막 데이터를 제거하여 정확한 개수 유지
+        }
+
+        List<ReviewPicSel> list = new ArrayList<>();
+
+        res.forEach(review -> review.setMoreReview(hasMore));
 
         return res;
     }
+
+//    public List<ReviewSelRes> getReview(ReviewSelReq req) {
+//        List<ReviewSelRes> res = reviewMapper.getReview(req);
+//        if (req.getStartIdx()<0){
+//            res = new ArrayList<>();
+//            return res;
+//        }
+//
+//        return reviewMapper.getReview(req);
+//    }
 
 //    @Transactional
 //    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
@@ -80,52 +98,52 @@ public class ReviewService {
 //        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),resultPics));
 //    }
-@Transactional
-public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
-    p.setReviewId(authenticationFacade.getSignedUserId());
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
+        p.setReviewId(authenticationFacade.getSignedUserId());
 
-    if (p.getReviewId() <= 0) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-    }
+        if (p.getReviewId() <= 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
 
-    int result = reviewMapper.postRating(p);
-    if (result == 0) {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-    }
-
-    long reviewId = p.getReviewId();
-    String middlePath = String.format("reviewId/%d", reviewId);
-    myFileUtils.makeFolders(middlePath);
-
-    // 리뷰 사진 리스트 생성 (리뷰 ID와 개별 사진을 매핑)
-    List<ReviewPicDto> reviewPicList = new ArrayList<>();
-
-    for (MultipartFile pic : pics) {
-        String savedPicName = myFileUtils.makeRandomFileName(pic);
-        String filePath = String.format("%s/%s", middlePath, savedPicName);
-        try {
-            myFileUtils.transferTo(pic, filePath);
-        } catch (IOException e) {
-            // 폴더 삭제 처리
-            myFileUtils.deleteFolder(String.format("%s/%s", myFileUtils.getUploadPath(), middlePath), true);
+        int result = reviewMapper.postRating(p);
+        if (result == 0) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
 
-        // ReviewPicDto 객체 생성 및 리스트에 추가
-        ReviewPicDto reviewPicDto = new ReviewPicDto();
-        reviewPicDto.setReviewId(reviewId);
-        reviewPicDto.setPic(savedPicName); // 개별 사진 하나만 저장
-        reviewPicList.add(reviewPicDto);
+        long reviewId = p.getReviewId();
+        String middlePath = String.format("reviewId/%d", reviewId);
+        myFileUtils.makeFolders(middlePath);
+
+        // 리뷰 사진 리스트 생성 (리뷰 ID와 개별 사진을 매핑)
+        List<ReviewPicDto> reviewPicList = new ArrayList<>();
+
+        for (MultipartFile pic : pics) {
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            String filePath = String.format("%s/%s", middlePath, savedPicName);
+            try {
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                // 폴더 삭제 처리
+                myFileUtils.deleteFolder(String.format("%s/%s", myFileUtils.getUploadPath(), middlePath), true);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+
+            // ReviewPicDto 객체 생성 및 리스트에 추가
+            ReviewPicDto reviewPicDto = new ReviewPicDto();
+            reviewPicDto.setReviewId(reviewId);
+            reviewPicDto.setPic(savedPicName); // 개별 사진 하나만 저장
+            reviewPicList.add(reviewPicDto);
+        }
+
+        // DB에 개별적으로 저장
+        int resultPics = reviewMapper.postReviewPics(reviewPicList);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
     }
-
-    // DB에 개별적으로 저장
-    int resultPics = reviewMapper.postReviewPics(reviewPicList);
-
-    return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
-}
 
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> updateReview(List<MultipartFile> pics, ReviewUpdReq p) {
