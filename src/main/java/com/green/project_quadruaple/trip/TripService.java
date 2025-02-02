@@ -253,7 +253,9 @@ public class TripService {
         long tripId = req.getTripId();
         long strfId = req.getStrfId();
         int seq = req.getSeq();
-        if(seq == 1 && (req.getDistance() != null || req.getTime() != null)) {
+
+        // seq 가 1인데 시간, 거리, 수단이 있으면 안됌.
+        if(seq == 1 && (req.getDistance() != null || req.getTime() != null || req.getPathType() != null)) {
             return ResultResponse.badRequest();
         }
 
