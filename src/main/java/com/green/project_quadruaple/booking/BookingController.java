@@ -8,10 +8,8 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("booking")
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookingController {
     private final BookingService bookingService;
 
-    @GetMapping()
+    @GetMapping
     @Operation(summary = "예약 목록 불러오기")
     public ResponseWrapper<BookingListResponse> getBooking(BookingListGetReq req) {
         return bookingService.getBooking(req);
@@ -28,7 +26,12 @@ public class BookingController {
 
     @PostMapping
     @Operation(summary = "예약 등록")
-    public ResponseWrapper<BookingPostRes> postBooking(BookingPostReq req) {
+    public ResponseWrapper<String> postBooking(@RequestBody BookingPostReq req) {
         return bookingService.postBooking(req);
+    }
+
+    @GetMapping("/pay-approve")
+    public String getBookingList(@RequestParam("pg_token") String pgToken) {
+        return bookingService.approve(pgToken);
     }
 }
