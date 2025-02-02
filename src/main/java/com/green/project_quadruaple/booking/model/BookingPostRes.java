@@ -9,15 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BookingPostRes extends ResultResponse {
-    public BookingPostRes() {
-        super(ResponseCode.OK.getCode());
-    }
-    @JsonProperty("booking_id")
-    private long bookingId;
+public class BookingPostRes {
 
-
-    private String strfId;
-    private String strfName;
-    private String message;
+    private String kakaoUrl;
 }
