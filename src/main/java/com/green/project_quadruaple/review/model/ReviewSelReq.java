@@ -22,7 +22,6 @@ public class ReviewSelReq extends Paging {
 //    @JsonProperty("strf_id")
     private long strfId;
 
-
     public ReviewSelReq(Integer page, Integer size , long strfId) {
         super(page, size);
         this.strfId = strfId;

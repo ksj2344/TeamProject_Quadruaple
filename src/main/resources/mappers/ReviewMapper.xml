@@ -7,14 +7,13 @@
         c.name AS writerUserName, c.profile_pic AS writerUserPic,
         a.strf_id AS strfId, a.user_id AS writerUserId,
         (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
-        CASE WHEN a.updated_at IS NOT NULL THEN a.updated_at ELSE a.created_at END AS reviewWriteDate
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
         FROM review a
         LEFT JOIN user c ON a.user_id = c.user_id
         WHERE a.strf_id = #{strfId}
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
     </select>
-
     <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
@@ -29,16 +28,17 @@
             <id column="reviewId" property="reviewId"/>
             <result column="pic" property="pic"/>
         </collection>
-
     </resultMap>
-
-    <insert id="postReviewPic">
-        INSERT INTO review_pic (title , review_id)
-        VALUES
-        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
-            #{pic}, #{reviewId}
+    <select id="getReviewPics">
+        SELECT review_id AS reviewId , title
+        FROM review_pic
+        WHERE review_id IN
+        <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
+            #{item}
         </foreach>
-    </insert>
+        ORDER BY review_id DESC
+    </select>
+
     <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
         INSERT INTO review
         SET content = #{content}
@@ -46,10 +46,12 @@
         , strf_id = #{strfId}
         , user_id = #{userId}
     </insert>
-    <insert id="postReviewPics">
-        <foreach collection="pics" item="pic" separator=";">
-            INSERT INTO review_pic (review_id, pic_name)
-            VALUES (#{pic.reviewId}, #{pic.pic});
+
+    <insert id="postReviewPic">
+        INSERT INTO review_pic (title , review_id)
+        VALUES
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            #{pic}, #{reviewId}
         </foreach>
     </insert>
     <!--
@@ -91,9 +93,7 @@
 </collection>
 </resultMap>
     -->
-    <select id="getReviewPics" resultType="String">
-        SELECT pic_name FROM review_pic WHERE review_id = #{reviewId}
-    </select>
+
     <update id="patchReview">
         UPDATE review
         SET content = #{content},
@@ -113,14 +113,11 @@
         WHERE review_id = #{reviewId}
         AND user_id = #{userId}
     </delete>
-    <delete id="deleteReviewAndPic">
-        DELETE a , b
-        FROM review a
-        LEFT JOIN review_pic b
-        ON a.review_id = b.review_id
+    <delete id="deleteReviewPic">
+        DELETE FROM review_pic
         WHERE review_id = #{reviewId}
-        AND user_id = #{userId}
     </delete>
+
 
     <select id="getMyReviews" resultMap="myReviewResultMap">
         SELECT
@@ -140,7 +137,7 @@
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
     </select>
-    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
         <result property="content" column="content"/>
