@@ -98,6 +98,156 @@
         WHERE t.trip_id = #{tripId}
     </select>
 
+
+    <select id="searchBasicList">
+        (
+        SELECT s.title AS searchTerm, 'recent' AS type, r.inquired_at AS inquiredAt
+        , NULL AS popularCount
+        FROM recent r
+        JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
+        WHERE r.user_id = #{userId} AND r.undo_recent = 0
+        )
+        UNION ALL
+        (
+        SELECT s.title AS searchTerm, 'popular' AS type,
+        NULL AS inquiredAt, COUNT(*) AS popularCount
+        FROM recent r
+        JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
+        WHERE r.inquired_at <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        GROUP BY s.title
+        )
+        ORDER BY
+        CASE WHEN type = 'recent' THEN inquiredAt END DESC,
+        CASE WHEN type = 'popular' THEN popularCount END DESC;
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="searchAllList">
+        SELECT
+        s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName ,
+        AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount, COUNT(w.user_id) AS wishlistCount,
+        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist,
+        GROUP_CONCAT(a.title) AS amenities
+        FROM stay_tour_restaur_fest s
+        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
+        JOIN location l ON ld.location_id = l.location_id
+        LEFT JOIN review r ON s.strf_id = r.strf_id
+        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
+        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
+        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
+        WHERE
+        <if test="searchWord != null">
+        s.title LIKE CONCAT('%', #{searchWord}, '%') OR
+        l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+        ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+        a.title LIKE CONCAT('%', #{searchWord}, '%')
+        </if>
+        <if test="category != null">
+        s.category LIKE CONCAT('%', #{searchWord}, '%') OR
+        </if>
+        GROUP BY s.strf_id
+        ORDER BY s.created_at DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="searchCategoryWithFilters">
+        SELECT s.strf_id AS strfId , s.title AS strfTitle , s.category, l.title AS locationName, AVG(r.rating) AS averageRating,
+        COUNT(r.review_id) AS reviewCount, COUNT(w.user_id) AS wishlistCount,
+        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist
+        FROM stay_tour_restaur_fest s
+        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
+        JOIN location l ON ld.location_id = l.location_id
+        LEFT JOIN review r ON s.strf_id = r.strf_id
+        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
+        JOIN amenipoint ap ON s.strf_id = ap.strf_id
+        WHERE s.category = #{category}
+        AND ap.amenity_id IN
+        <foreach item="amenityId" collection="amenityIds" open="(" separator="," close=")">
+            #{amenityId}
+        </foreach>
+        GROUP BY s.strf_id
+        ORDER BY s.created_at DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+
+    <!--
+    <select id="searchAllList">
+        SELECT s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName,
+        AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount, COUNT(w.user_id) AS wishlistCount,
+        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist,
+        GROUP_CONCAT(a.title) AS amenities,
+        (SELECT COUNT(*)
+        FROM stay_tour_restaur_fest s2
+        WHERE
+        <if test="searchWord != null">
+            (s2.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        <if test="category != null">
+            AND s2.category = #{category}
+        </if>
+        ) AS totalCount,
+        (SELECT COUNT(*)
+        FROM stay_tour_restaur_fest s2 WHERE s2.category = '숙소'
+        <if test="searchWord != null">
+            AND (s2.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        ) AS accommodationCount,
+        (SELECT COUNT(*)
+        FROM stay_tour_restaur_fest s2 WHERE s2.category = '음식점'
+        <if test="searchWord != null">
+            AND (s2.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        ) AS restaurantCount,
+        (SELECT COUNT(*)
+        FROM stay_tour_restaur_fest s2 WHERE s2.category = '관광'
+        <if test="searchWord != null">
+            AND (s2.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        ) AS touristCount,
+        (SELECT COUNT(*)
+        FROM stay_tour_restaur_fest s2 WHERE s2.category = '축제'
+        <if test="searchWord != null">
+            AND (s2.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        ) AS festivalCount
+        FROM stay_tour_restaur_fest s
+        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
+        JOIN location l ON ld.location_id = l.location_id
+        LEFT JOIN review r ON s.strf_id = r.strf_id
+        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
+        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
+        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
+        WHERE
+        <if test="searchWord != null">
+            (s.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%'))
+        </if>
+        <if test="category != null">
+            AND s.category = #{category}
+        </if>
+        GROUP BY s.strf_id
+        ORDER BY s.created_at DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+    -->
 </mapper>
 
 

@@ -1,8 +1,10 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.common.model.Paging;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.search.model.LocationResponse;
+import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
+import com.green.project_quadruaple.search.model.SearchBasicReq;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,4 +67,31 @@ public class SearchController {
     {
         return searchService.getStrfListWithSearchWord(tripId, lastIdx, category, searchWord);
     }
+
+
+
+
+    @PostMapping("/basic")
+    public ResponseWrapper<?> searchBasicList(@RequestBody SearchBasicReq request) {
+        return searchService.searchBasicList(request);
+    }
+
+    @GetMapping("/all")
+    public ResponseWrapper<?> searchAllList(@RequestParam(value = "search_word") String searchWord, @RequestParam String category,
+            @RequestParam(value = "user_id", required = false) Long userId, @ModelAttribute Paging paging) {
+
+        return searchService.searchAllList(searchWord, category, userId, paging);
+    }
+
+    @GetMapping("/category")
+    public ResponseWrapper<?> searchCategoryWithFilters(@RequestParam(value = "user_id", required = false) Long userId,
+             @RequestParam String category, @RequestParam("amenity_id") List<Long> amenityIds, @ModelAttribute Paging paging) {
+
+        return searchService.searchCategoryWithFilters(userId, category, amenityIds, paging);
+    }
+
+
+
+
+
 }

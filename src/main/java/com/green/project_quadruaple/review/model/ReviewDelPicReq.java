@@ -3,13 +3,12 @@ package com.green.project_quadruaple.review.model;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 @EqualsAndHashCode
-public class ReviewPicDto {
+public class ReviewDelPicReq {
     private long reviewId;
-    private List<String> pics;
 }
