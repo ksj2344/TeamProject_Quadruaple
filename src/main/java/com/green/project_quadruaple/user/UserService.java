@@ -187,6 +187,7 @@ public class UserService {
     // 마이페이지 수정
     public UserUpdateRes patchUser(MultipartFile profilePic, UserUpdateReq req) {
         long signedUserId = authenticationFacade.getSignedUserId();
+        req.setSignedUserId(signedUserId);
         UserUpdateRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
 
         if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
@@ -205,19 +206,20 @@ public class UserService {
         }
 
         if (profilePic != null && !profilePic.isEmpty()) {
-            String targetDir = "user/" + req.getEmail();
+            String targetDir = "user/" + req.getSignedUserId();
             myFileUtils.makeFolders(targetDir);
 
             String savedFileName = myFileUtils.makeRandomFileName(profilePic);
 
             // 기존 파일 삭제
-            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getEmail());
+            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getSignedUserId());
             myFileUtils.deleteFolder(deletePath, false);
 
             // 파일 저장
             String filePath = String.format("%s/%s", targetDir, savedFileName);
             try {
                 myFileUtils.transferTo(profilePic, filePath);
+                req.setProfilePic(savedFileName);
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }

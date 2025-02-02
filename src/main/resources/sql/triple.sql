@@ -156,6 +156,7 @@ CREATE TABLE booking(
     , user_id BIGINT NOT NULL
     , menu_id BIGINT NOT NULL
     , final_payment int not null
+    , approve tinyint not null default 0
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
     , FOREIGN KEY(menu_id) REFERENCES menu (menu_id)
 );
