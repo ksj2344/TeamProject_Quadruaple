@@ -76,6 +76,7 @@ public class SearchController {
         return searchService.searchBasicList(request);
     }
 
+
     @GetMapping("/all")
     public ResponseWrapper<?> searchAllList(@RequestParam(value = "search_word") String searchWord, @RequestParam String category,
             @RequestParam(value = "user_id", required = false) Long userId, @ModelAttribute Paging paging) {
