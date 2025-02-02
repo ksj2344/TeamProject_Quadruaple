@@ -233,7 +233,8 @@
     </select>
     
     <insert id="insTripLocation">
-        INSERT INTO trip_location
+
+        INSERT IGNORE INTO trip_location
         (trip_id, location_id)
         VALUES
         <foreach collection="idList" item="id" separator=",">
@@ -241,11 +242,12 @@
         </foreach>
     </insert>
 
+    <!-- 일정 등록 -->
     <insert id="insScheMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
-        INSERT INTO sche_memo (trip_id, `day`, seq, category)
-        SELECT #{tripId}, #{day}, IFNULL(MAX(seq), 0) + 1, 'SCHE'
-        FROM sche_memo
-        WHERE trip_id = #{tripId}
+        INSERT INTO sche_memo
+        (trip_id, `day`, seq, category)
+        VALUES
+        (#{tripId}, #{day}, #{seq}, 'SCHE')
     </insert>
 
     <insert id="insSchedule">
@@ -262,6 +264,26 @@
         </if>
             , strf_id = #{strfId}
     </insert>
+
+    <!-- 다음 일정의 ScheduleId, StrfId, lat, lng-->
+    <select id="selNextScheduleInfoByTripIdAndSeq">
+        SELECT
+            s.schedule_id
+            , sm.seq
+            , strf.strf_id
+            , strf.lat
+            , strf.lng
+        FROM schedule s
+        JOIN sche_memo sm
+            ON sm.schedule_memo_id = s.schedule_id
+        JOIN stay_tour_restaur_fest strf
+            ON s.strf_id = strf.strf_id
+        WHERE sm.trip_id = #{tripId}
+            AND sm.seq > #{seq}
+            AND sm.category = 'SCHE'
+        ORDER BY seq ASC
+        LIMIT 1
+    </select>
 
     <!--    일정 삭제 -->
     <select id="selScheduleByScheduleId">
@@ -348,9 +370,25 @@
 
     <update id="updateSeqScheMemo"> <!-- 다음 일정들의 seq 값 -1 -->
         UPDATE sche_memo
-        SET seq = seq - 1
+        SET seq = seq
+        <choose>
+            <when test="isDel">
+                -1
+            </when>
+            <otherwise>
+                +1
+            </otherwise>
+        </choose>
         WHERE trip_id = #{tripId}
-        AND seq > #{seq}
+        <choose>
+            <when test="isDel">
+                AND seq &gt; #{seq}
+            </when>
+            <otherwise>
+                AND seq &gt;= #{seq}
+            </otherwise>
+        </choose>
+
     </update>
 
     <update id="updateSchedule"> <!-- 다음 일정의 거리, 시간 수정 -->

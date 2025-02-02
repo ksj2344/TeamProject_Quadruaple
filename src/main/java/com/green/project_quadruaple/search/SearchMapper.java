@@ -5,6 +5,8 @@ import com.green.project_quadruaple.search.model.SearchPageReq;
 import com.green.project_quadruaple.search.model.SearchPageRes;
 import com.green.project_quadruaple.search.model.SearchResponse;
 import com.green.project_quadruaple.trip.model.dto.LocationDto;
+import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
+import com.green.project_quadruaple.trip.model.dto.LocationDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -15,4 +17,7 @@ import java.util.Map;
 public interface SearchMapper {
     List<LocationResponse> getTripLocation(@Param("search_word") String searchWord);
 
+    // 일정 추가 검색
+    List<StrfShortInfoDto> selStrfShortInfoBasic(long userId, List<Long> locationIdList, int startIdx, int size, String category, String searchWord);
+    List<Long> selLocationIdByTripId(long tripId);
 }
