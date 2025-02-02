@@ -39,8 +39,8 @@ public class TripReviewController {
     //여행기 수정
     @PatchMapping
     @Operation(summary = "여행기 수정(진행 중)")
-    public ResponseEntity<?> patchTripReview(@RequestBody TripReviewPatchDto dto) {
-        int result = tripReviewService.patchTripReview(dto);
+    public ResponseEntity<?> patchTripReview(@RequestPart(required = false) List<MultipartFile> tripReviewPic, @RequestPart TripReviewPatchDto dto) {
+        int result = tripReviewService.patchTripReview(tripReviewPic, dto);
 
         if (result == 0) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
