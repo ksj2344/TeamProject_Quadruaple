@@ -77,8 +77,8 @@
         <if test=" name != null and name != '' ">
             , name = #{name}
         </if>
-        <if test="profilePic != null">
-            , profilePic = #{profilePic}
+        <if test="profilePic != null  and profilePic != '' ">
+            , profile_pic = #{profilePic}
         </if>
         </set>
         WHERE email = #{email}
