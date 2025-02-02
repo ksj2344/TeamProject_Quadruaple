@@ -105,6 +105,9 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
+    /*
+    * 여행 수정
+    * */
     @Transactional
     public ResultResponse patchTrip(PatchTripReq req) {
         long tripId = req.getTripId();
@@ -237,23 +240,50 @@ public class TripService {
         }
     }
 
+    /*
+    * 일정 등록
+    * 1. trip_location 에 등록할 일정의 strf 의 location 이 없다면 등록.
+    * 2. 여행ID 가 일치하고 Seq 값이 postSche 보다 높은 일정들의 Seq 값을 1 증가
+    * 3. 등록할 일정(postSche)의 seq 보다 1 높은 일정(nextSche)을 가져오기. nextSche 가 null 이면 변경 없음.
+    * 4. 가져온 nextSche 의 strf 위경도(start)와 postSche 의 위경도(end)로 OdsayAPi 호출, 거리, 시간, 수단 불러오기
+    * 5. nextSche 의 거리, 시간, 수단을 가져온 API 값으로 update
+    * */
     @Transactional
     public ResultResponse postSchedule(PostScheduleReq req) {
         long tripId = req.getTripId();
         long strfId = req.getStrfId();
-        Long existLocation = tripMapper.existLocation(tripId, strfId);
-
-        if(existLocation == null) {
-            long locationId = tripMapper.selStrfLocationId(strfId);
-            tripMapper.insTripLocation(tripId, List.of(locationId));
+        int seq = req.getSeq();
+        if(seq == 1 && (req.getDistance() != null || req.getTime() != null)) {
+            return ResultResponse.badRequest();
         }
+
+        long locationId = tripMapper.selStrfLocationId(strfId);
+        tripMapper.insTripLocation(tripId, List.of(locationId)); // 등록할 일정의 상품 지역이 trip_locatin 에 등록되어 있지 않다면 등록
 
         PathType keyByName = PathType.getKeyByName(req.getPathType());
         if(keyByName != null) {
-            req.setPathTypeValue(keyByName.getValue());
+            req.setPathTypeValue(keyByName.getValue()); // 버스 -> 2 로 바꿈
         }
+
+        tripMapper.updateSeqScheMemo(tripId, seq, false); // 등록할 일정 보다 seq 가 높은 일정들의 seq+1
         tripMapper.insScheMemo(req);
         tripMapper.insSchedule(req);
+
+        ScheduleShortInfoDto nextScheInfo = tripMapper.selNextScheduleInfoByTripIdAndSeq(tripId, seq);
+        if (nextScheInfo == null) {
+            return ResultResponse.success();
+        }
+        // 4. 가져온 nextSche 의 strf 위경도(start)와 postSche 의 위경도(end)로 OdsayAPi 호출, 거리, 시간, 수단 불러오기
+        List<StrfLatAndLngDto> strfLatAndLngDtos = tripMapper.selStrfLatAndLng(strfId, nextScheInfo.getStrfId());
+        FindPathReq findPath = new FindPathReq();
+        setOdsayParams(findPath, strfLatAndLngDtos, strfId);
+        String json = httpPostRequestReturnJson(findPath);
+        PathTypeVo firstPathType = getFirstPathType(json);
+        PathInfoVo pathTypeInfo = firstPathType.getInfo();
+
+        // nextSche 의 거리, 시간, 수단을 가져온 API 값으로 update
+        tripMapper.updateSchedule(true, nextScheInfo.getScheduleId(), pathTypeInfo.getTotalDistance(), pathTypeInfo.getTotalTime(), firstPathType.getPathType());
+
         return ResultResponse.success();
     }
 
@@ -338,7 +368,10 @@ public class TripService {
         return ResultResponse.success();
     }
 
-    private void setSchedulePath(boolean isNotFirst, long prevScheduleStrfId, long nextScheduleStrfId, long nextScheduleId) {
+    /*
+    * 일정의 거리, 시간, 수단을 updatae
+    * */
+    private void setSchedulePath(boolean isNotFirst, Long prevScheduleStrfId, Long nextScheduleStrfId, Long nextScheduleId) {
         List<StrfLatAndLngDto> strfLatAndLngDtoList = tripMapper.selStrfLatAndLng(prevScheduleStrfId, nextScheduleStrfId);
         FindPathReq findPathReq = new FindPathReq();
         setOdsayParams(findPathReq, strfLatAndLngDtoList, prevScheduleStrfId);
@@ -359,28 +392,27 @@ public class TripService {
     * */
     @Transactional
     public ResultResponse deleteSchedule(long scheduleId) {
-
-        long tripId = tripMapper.selScheduleByScheduleId(scheduleId); // 삭제할 일정의 여행 ID
-        ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 삭제할 일정
-        if(!scheduleDto.isNotFirst()) { // 첫번째 일정일때는 다음일정의 거리, 시간, 이동수단을 null 로 바꾸고 끝.
-            tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq()); // ScheMemo 의 시퀀스 변경
-            tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), 0, 0, 0); // 삭제한 일정의 다음 일정 정보 수정
-            tripMapper.deleteSchedule(scheduleId); // schedule 삭제
-            tripMapper.deleteScheMemo(scheduleId); // ScheMemo 삭제
-            return ResultResponse.success();
-        }
-        List<StrfLatAndLngDto> prevAndNextStrfLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId()); // 이걸로 API 요청
-        FindPathReq params = new FindPathReq();
-        setOdsayParams(params, prevAndNextStrfLatAndLng, scheduleDto.getPrevScheduleStrfId());
-        String json = httpPostRequestReturnJson(params);
-
         try {
+            long tripId = tripMapper.selScheduleByScheduleId(scheduleId); // 삭제할 일정의 여행 ID
+            ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 삭제할 일정
+            if(!scheduleDto.isNotFirst()) { // 첫번째 일정일때는 다음일정의 거리, 시간, 이동수단을 null 로 바꾸고 끝.
+                tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq(), true); // ScheMemo 의 시퀀스 변경
+                tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), 0, 0, 0); // 삭제한 일정의 다음 일정 정보 수정
+                tripMapper.deleteSchedule(scheduleId); // schedule 삭제
+                tripMapper.deleteScheMemo(scheduleId); // ScheMemo 삭제
+                return ResultResponse.success();
+            }
+            List<StrfLatAndLngDto> prevAndNextStrfLatAndLng = tripMapper.selStrfLatAndLng(scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId()); // 이걸로 API 요청
+            FindPathReq params = new FindPathReq();
+            setOdsayParams(params, prevAndNextStrfLatAndLng, scheduleDto.getPrevScheduleStrfId());
+            String json = httpPostRequestReturnJson(params);
+
             PathTypeVo firstPath = getFirstPathType(json);
             int pathType = firstPath.getPathType();
             int distance = firstPath.getInfo().getTotalDistance();
             int duration = firstPath.getInfo().getTotalTime();
 
-            tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq()); // ScheMemo 의 시퀀스 변경
+            tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq(), true); // ScheMemo 의 시퀀스 변경
             tripMapper.updateSchedule(scheduleDto.isNotFirst(), scheduleDto.getNextScheduleId(), distance, duration, pathType); // 삭제한 일정의 다음 일정 정보 수정
             tripMapper.deleteSchedule(scheduleId); // schedule 삭제
             tripMapper.deleteScheMemo(scheduleId); // ScheMemo 삭제
@@ -430,6 +462,10 @@ public class TripService {
         return ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
 
+    /*
+    * String 형태의 JSON 데이터 가져오기
+    * A -> B 까지의 시간, 거리, 수단, 금액
+    * */
     private String httpPostRequestReturnJson(FindPathReq req) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add(odsayApiConst.getParamApiKeyName(), odsayApiConst.getParamApiKeyValue());
@@ -444,9 +480,11 @@ public class TripService {
                 .retrieve() //통신 시도
                 .bodyToMono(String.class) // 결과물을 String변환
                 .block(); //비동기 > 동기
-        // log.info("json = {}", json);
     }
 
+    /*
+    * FindPathReq 객체에 Odsay API 요청 파라미터 세팅
+    * */
     private void setOdsayParams(FindPathReq params, List<StrfLatAndLngDto> LatLngDtoList, long prevScheduleStrfId) {
         for(StrfLatAndLngDto strfLatAndLngDto : LatLngDtoList) {
             if(strfLatAndLngDto.getStrfId() == prevScheduleStrfId) {
@@ -459,6 +497,9 @@ public class TripService {
         }
     }
 
+    /*
+    * JSON 데이터의 첫번쨰 경로 가져오기
+    * */
     private PathTypeVo getFirstPathType(String json) {
         try {
             JsonNode jsonNode = objectMapper.readTree(json);

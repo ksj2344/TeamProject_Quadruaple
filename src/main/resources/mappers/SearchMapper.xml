@@ -20,6 +20,84 @@
         <result property="locationId" column="location_id" />
     </resultMap>
 
+    <select id="selStrfShortInfoBasic">
+        SELECT
+        s.strf_id
+        , s.category AS category
+        , s.title AS title
+        , s.lat AS lat
+        , s.lng AS lng
+        , s.`explain` AS `explain`
+        , sp.title AS picTitle
+        , COALESCE(w.wishlist_count, 0) AS wishCnt
+        , COALESCE(r1.review_count, 0) AS ratingCnt
+        , COALESCE(r1.avgRating, 0) AS avgRating
+        , CASE
+        WHEN uw.user_id IS NOT NULL THEN 1
+        ELSE 0
+        END AS wishIn
+        , CASE
+        WHEN r2.user_id IS NOT NULL THEN 1
+        ELSE 0
+        END AS ratingIn
+        , s.start_at
+        , s.end_at
+        FROM stay_tour_restaur_fest s
+        INNER JOIN location_detail ld
+        ON ld.location_detail_id = s.location_detail_id
+        LEFT JOIN (
+        SELECT strf_id, COUNT(*) AS wishlist_count
+        FROM wishlist
+        GROUP BY strf_id
+        ) w
+        ON s.strf_id = w.strf_id
+        LEFT JOIN st_pic sp
+        ON sp.strf_id = s.strf_id
+        LEFT JOIN (
+        SELECT
+        strf_id
+        , COUNT(*) AS review_count
+        , avg(rating) AS avgRating
+        FROM review
+        GROUP BY strf_id
+        ) r1
+        ON s.strf_id = r1.strf_id
+        LEFT JOIN (
+        SELECT strf_id, user_id
+        FROM wishlist
+        WHERE user_id = #{userId}
+        ) uw
+        ON s.strf_id = uw.strf_id
+        LEFT JOIN (
+        SELECT strf_id, user_id
+        FROM review
+        WHERE user_id = #{userId}
+        ) r2
+        ON s.strf_id = r2.strf_id
+        WHERE ld.location_id in
+        <foreach collection="locationIdList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        <if test="searchWord != null">
+            AND s.title LIKE '%${searchWord}%'
+        </if>
+        <if test="category != null">
+            AND s.category = #{category}
+        </if>
+        GROUP BY s.strf_id
+        ORDER BY avgRating DESC, wishIn DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+
+    <select id="selLocationIdByTripId">
+        SELECT
+        location_id AS locationId
+        FROM trip t
+        INNER JOIN trip_location tl
+        ON tl.trip_id = t.trip_id
+        WHERE t.trip_id = #{tripId}
+    </select>
+
 </mapper>
 
 
