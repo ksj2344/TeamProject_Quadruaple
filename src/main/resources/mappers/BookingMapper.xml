@@ -64,7 +64,6 @@
         WHERE booking_id = #{bookingId}
     </select>
 
-
     <insert id="patchBooking">
         INSERT INTO booking a
         SET a.strf_id = #{strfId}
@@ -76,6 +75,32 @@
         JOIN stay_tour_restaur_fest b
         ON a.strf_id = b.strf_id
         WHERE a.booking_id = #{bookingId}
+    </insert>
+
+
+    <!-- 예약 등록 -->
+    <select id="selExistUserCoupon">
+        SELECT
+        receive_id
+        FROM receive_coupon rc
+        WHERE rc.user_id = #{userId}
+        AND coupon_id = #{couponId}
+    </select>
+
+    <insert id="insBooking" useGeneratedKeys="true" keyProperty="bookingId">
+        INSERT INTO booking
+        (actual_paid, check_in, check_out, user_id, menu_id)
+        VALUES
+        <foreach collection="orderList" item="menuId" separator=",">
+            (#{actualPaid}, #{checkIn}, #{checkOut}, #{userId}, #{menuId.menuId})
+        </foreach>
+    </insert>
+
+    <insert id="insUsedCoupon">
+        INSERT INTO used_coupon
+        (receive_id, booking_id)
+        VALUES
+        (#{receiveId}, #{bookingId})
     </insert>
 
 
