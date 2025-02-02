@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,6 @@ public class TripReviewService {
     private final TripReviewMapper tripReviewMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
-    private final UserMapper userMapper;
 
     // 여행기 등록
     public TripReviewPostRes postTripReview(List<MultipartFile> tripReviewPic, TripReviewPostReq req) {
@@ -69,14 +69,56 @@ public class TripReviewService {
 
         return tripReviewPostRes;
     }
+
     // 여행기 수정
-    public int patchTripReview(TripReviewPatchDto dto) {
+    public int patchTripReview(List<MultipartFile> tripPic, TripReviewPatchDto dto) {
         dto.setUserId(authenticationFacade.getSignedUserId());
 
         int result = tripReviewMapper.updTripReview(dto);
-
         if (result == 0) {
             throw new RuntimeException("여행기 수정에 실패했습니다.");
+        }
+
+        if (tripPic != null && !tripPic.isEmpty()) {
+            // 기존 DB의 여행기 사진 삭제
+            tripReviewMapper.delTripReviewPic(dto.getTripReviewId());
+
+            String basePath = myFileUtils.getUploadPath(); // 기본 업로드 경로
+            String middlePath = String.format("tripReview/%d", dto.getTripReviewId());
+            String targetPath = String.format("%s/%s", basePath, middlePath); // 중복 경로 방지
+
+            myFileUtils.deleteFolder(targetPath, true);
+
+            File newFolder = new File(targetPath);
+            if (!newFolder.exists()) {
+                boolean created = newFolder.mkdirs();
+                if (!created) {
+                    throw new RuntimeException("여행기 사진 폴더 생성에 실패했습니다: " + targetPath);
+                }
+            }
+
+            List<String> picNameList = new ArrayList<>();
+
+
+            for (MultipartFile pic : tripPic) {
+                if (pic != null && !pic.isEmpty()) {
+                    String savedPicName = myFileUtils.makeRandomFileName(pic);
+                    picNameList.add(savedPicName);
+                    String filePath = String.format("%s/%s", middlePath, savedPicName); // 중복 경로 수정
+
+                    try {
+                        myFileUtils.transferTo(pic, filePath);
+                    } catch (IOException e) {
+                        throw new RuntimeException("여행기 사진 저장에 실패했습니다.", e);
+                    }
+                }
+            }
+
+            if (!picNameList.isEmpty()) {
+                tripReviewMapper.insTripReviewPic(dto.getTripReviewId(), picNameList);
+            } else {
+                System.out.println("저장할 사진이 없음!");
+            }
         }
 
         return result;
