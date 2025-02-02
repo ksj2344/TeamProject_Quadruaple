@@ -40,11 +40,13 @@ public interface TripMapper {
     Long existLocation(long tripId, long strfId);
     void insScheMemo(PostScheduleReq req);
     void insSchedule(PostScheduleReq req);
+    ScheduleShortInfoDto selNextScheduleInfoByTripIdAndSeq(Long tripId, Integer seq);
 
     // deleteSchedule
     long selScheduleByScheduleId(long scheduleId);
     ScheduleDto selScheduleAndScheMemoByScheduleId(long scheduleId, long tripId);
-    void updateSeqScheMemo(long tripId, int seq);
+
+    void updateSeqScheMemo(long tripId, int seq, boolean isDel);
     void updateSchedule(boolean isNotFirst, long nextScheduleId, int distance, int duration, int pathType);
     void deleteSchedule(long scheduleId);
     void deleteScheMemo(long scheduleId);
