@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.green.project_quadruaple.recent.RecentMapper">
+    <select id="recentList">
+    SELECT r.strf_id, s.title, r.inquired_at
+    FROM recent r
+    JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
+    WHERE r.user_id = #{userId} AND r.undo_recent = 0
+    ORDER BY r.inquired_at DESC;
+    </select>
+
+    <update id="recentHide">
+    UPDATE recent
+    SET undo_recent = 1
+    WHERE user_id = #{userId} AND strf_id = #{strfId};
+    </update>
+
+    <update id="recentAllHide">
+        DELETE FROM recent
+        SET undo_recent = 1
+        WHERE user_id = #{userId}
+    </update>
+</mapper>

@@ -16,7 +16,6 @@ public class ReviewSelRes extends ResultResponse {
         public ReviewSelRes() {
                 super(ResponseCode.OK.getCode());
         }
-
         @Schema(description = "리뷰 내용")
         private String content;
         @Schema(description = "평점", example = "5")
