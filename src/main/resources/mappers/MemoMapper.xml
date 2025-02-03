@@ -3,5 +3,61 @@
 
 <mapper namespace="com.green.project_quadruaple.memo.MemoMapper">
 
+    <resultMap id="MemoResultMap" type="com.green.project_quadruaple.memo.model.MemoDto">
+        <id property="memoId" column="memo_id"/>
+        <result property="tripId" column="trip_id"/>
+        <result property="day" column="day"/>
+        <result property="seq" column="seq"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+    </resultMap>
+
+    <select id="selectMemo" resultMap="MemoResultMap">
+        SELECT * FROM memo WHERE memo_id = #{memoId}
+    </select>
+
+    <!-- 1 진 <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
+        INSERT INTO memo (trip_id, day, seq, user_id)
+        VALUES (#{tripId}, #{day}, #{seq}, #{userId})
+    </insert>
+
+    <insert id="insertScMemo">
+        insert into memo (memo_id, title, content)
+        values (#{memoId}), #{title}, #{content}
+    </insert>-->
+
+    <!--gpt <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
+        INSERT INTO memo (title, content, updated_at)
+        VALUES (#{title}, #{content}, NOW())
+    </insert>
+
+    <insert id="insertScheMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="scheduleMemoId">
+        INSERT INTO sche_memo (trip_id, day, seq, category, created_at)
+        VALUES (#{tripId}, #{day}, #{seq}, 'MEMO', NOW())
+    </insert>-->
+
+    <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
+        INSERT INTO memo (trip_id, day, seq, user_id)
+        VALUES (#{tripId}, #{day}, #{seq}, #{userId})
+    </insert>
+
+    <!-- scMemo 삽입 -->
+    <insert id="insertScMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
+        INSERT INTO memo (memo_id, title, content)
+        VALUES (#{memoId}, #{title}, #{content})
+    </insert>
+
+
+    <update id="updateMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
+        UPDATE memo
+        SET title = #{title}, content = #{content}
+        WHERE memo_id = #{memoId}
+    </update>
+
+    <delete id="deleteMemo">
+        DELETE FROM memo WHERE memo_id = #{memoId}
+    </delete>
+
 
 </mapper>
