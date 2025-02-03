@@ -2,11 +2,10 @@ package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.tripreview.model.TripLikeDto;
-import com.green.project_quadruaple.tripreview.model.TripReviewPatchDto;
-import com.green.project_quadruaple.tripreview.model.TripReviewPostReq;
-import com.green.project_quadruaple.tripreview.model.TripReviewPostRes;
+import com.green.project_quadruaple.tripreview.model.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +33,31 @@ public class TripReviewController {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
+    }
+
+    //여행기 조회
+    @GetMapping("myTripReview")
+    @Operation(summary = "내 여행기 조회")
+    public ResponseEntity<?> getMyTripReview(@Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
+                                                 @RequestParam(defaultValue = "latest") String orderType) {
+        List<TripReviewGetDto> myTripReview = tripReviewService.getMyTripReviews(orderType);
+
+        if (myTripReview == null || myTripReview.size() == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), myTripReview));
+    }
+
+    @GetMapping("allTripReview")
+    @Operation(summary = "모든 여행기 조회")
+    public ResponseEntity<?> getAllTripReview(@Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
+                                                  @RequestParam(defaultValue = "latest") String orderType) {
+        List<TripReviewGetDto> allTripReview = tripReviewService.getAllTripReviews(orderType);
+
+        if (allTripReview == null || allTripReview.size() == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), allTripReview));
     }
 
     //여행기 수정
