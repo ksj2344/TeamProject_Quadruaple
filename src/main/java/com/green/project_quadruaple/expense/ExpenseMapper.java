@@ -1,7 +1,9 @@
 package com.green.project_quadruaple.expense;
 
-import com.green.project_quadruaple.expense.model.DeDto;
-import com.green.project_quadruaple.expense.model.ExpenseSameReq;
+import com.green.project_quadruaple.expense.model.dto.DeDto;
+import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
+import com.green.project_quadruaple.expense.model.req.DutchReq;
+import com.green.project_quadruaple.expense.model.req.ExpenseSameReq;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -14,5 +16,5 @@ public interface ExpenseMapper {
     //같은 가격 가계부 insert
     int insPaidUserSamePrice (ExpenseSameReq p);
 
-    //다른 가격 가계부 insert
+    List<DutchPaidUserDto> selDutchUsers (DutchReq p);
 }

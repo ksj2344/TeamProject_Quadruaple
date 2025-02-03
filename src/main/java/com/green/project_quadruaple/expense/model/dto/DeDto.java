@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.expense.model;
+package com.green.project_quadruaple.expense.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
