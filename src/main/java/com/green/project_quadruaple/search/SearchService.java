@@ -6,6 +6,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import com.green.project_quadruaple.trip.model.Category;
 import lombok.RequiredArgsConstructor;
@@ -46,13 +47,18 @@ public class SearchService {
         long signedUserId = 101L;
         int more = 1;
         try {
-            List<Long> locationIdList = searchMapper.selLocationIdByTripId(tripId);
+            List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() >= size) {
                 res.setMore(true);
             }
             res.setList(dto);
+            List<String> titleList = new ArrayList<>();
+            for(LocationIdAndTitleDto list : locationIdList) {
+                titleList.add(list.getLocationTitle());
+            }
+            res.setLocationTitleList(titleList);
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +76,7 @@ public class SearchService {
         long signedUserId = 101L;
         int more = 1;
         try {
-            List<Long> locationIdList = searchMapper.selLocationIdByTripId(tripId);
+            List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, categoryValue, searchWord);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() >= size) {
