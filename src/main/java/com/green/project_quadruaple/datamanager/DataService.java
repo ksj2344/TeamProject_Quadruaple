@@ -70,19 +70,21 @@ public class DataService {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                             .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
-            int cnt;
+            int strfCnt;
+            int menuCnt;
             try {
-                cnt=(int) myFileUtils.countFiles(sourcePath);
+                strfCnt=(int) myFileUtils.countFiles(sourcePath);
+                menuCnt=(int) myFileUtils.countFiles(sourcePath+"/menu");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            for(int i=0; i<cnt; i++){
+            for(int i=0; i<strfCnt; i++){
                 Map<String, Object> map = new HashMap<>();
                 map.put("strfId",strfId);
                 map.put("picName",String.format("%d.png",i+1));
                 picAndStrfIds.add(map);
             }
-            for(int i=0; i<menus.size(); i++){
+            for(int i=0; i<menuCnt; i++){
                 Map<String, Object> menuMap = new HashMap<>();
                 MenuDto menu=menus.get(i);
                 menuMap.put("strfId",strfId);
