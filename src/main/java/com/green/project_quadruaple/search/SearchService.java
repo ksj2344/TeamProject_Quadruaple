@@ -72,7 +72,10 @@ public class SearchService {
                                                                                 String searchWord)
     {
         if(tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
-        String categoryValue = Optional.ofNullable(Category.getKeyByName(category)).orElseThrow(RuntimeException::new).getValue();
+        String categoryValue = null;
+        if(category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
         long signedUserId = 101L;
         int more = 1;
         try {
@@ -91,45 +94,25 @@ public class SearchService {
     }
 
 
-
-
-    // 밑으로 상품 검색
-
-    public ResponseWrapper<List<SearchBasicRecentRes>> searchBasicRecent(Long userId) {
-       Long effectedUserId = (userId != null) ? userId : null;
-        List<SearchBasicRecentRes> res = searchMapper.searchBasicRecent(effectedUserId);
-        if (res.isEmpty()){
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-        }
+    public ResponseWrapper<List<SearchBasicRes>> searchBasicList(SearchBasicReq request) {
         try {
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+            List<SearchBasicRes> resList = searchMapper.searchBasicList(request);
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), resList);
         } catch (Exception e) {
+            log.error("Error fetching search basic list: ", e);
             return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
         }
     }
 
-    public ResponseWrapper<List<SearchBasicPopualarRes>> searchBasicPopular(){
-        List<SearchBasicPopualarRes> res = searchMapper.searchBasicPopular();
-        if (res.isEmpty()){
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-        }
+    public ResponseWrapper<List<SearchAllList>> searchAllList(String searchWord, String category, Long userId, Paging paging) {
         try {
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
-        } catch (Exception e) {
-            return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
-        }
-    }
+            List<SearchAllList> result = searchMapper.searchAllList(searchWord, category, userId, paging.getStartIdx(), paging.getSize());
 
+            boolean isMore = result.size() > paging.getSize();
+            if (isMore) {
+                result = result.subList(0, paging.getSize());
+            }
 
-
-    public ResponseWrapper<List<SearchAllList>> searchAllList(String searchWord , String category, Long userId, List<Long> amenityIds) {
-        Long effectiveUserId = (userId != null) ? userId : null;
-
-        List<Long> effectiveAmenityIds = (amenityIds != null && !amenityIds.isEmpty()) ? amenityIds : Collections.emptyList();
-
-        List<SearchAllList> result = searchMapper.searchAllList(searchWord ,category, effectiveUserId, effectiveAmenityIds);
-
-        try {
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -137,20 +120,20 @@ public class SearchService {
         }
     }
 
-//    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {
-//        try {
-//            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(searchWord ,category, userId,  amenityIds);
-//
-//            boolean isMore = result.size() > paging.getSize();
-//            if (isMore) {
-//                result = result.subList(0, paging.getSize());
-//            }
-//
-//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), result);
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-//        }
-//    }
+    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(Long userId, String category, List<Long> amenityIds, Paging paging) {
+        try {
+            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(userId, category, amenityIds, paging.getStartIdx(), paging.getSize());
+
+            boolean isMore = result.size() > paging.getSize();
+            if (isMore) {
+                result = result.subList(0, paging.getSize());
+            }
+
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+        }
+    }
 
 }
