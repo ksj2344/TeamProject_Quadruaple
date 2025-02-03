@@ -19,10 +19,10 @@ public interface UserMapper {
     // 로그인
     Optional<UserSelOne> selUserByEmail(UserSignInReq req);
 
-    // 마이페이지 조회
+    // 프로필 및 계정 조회
     UserInfo selUserInfo(long signedUserId);
 
-    // 마이페이지 수정
+    // 프로필 및 계정 수정
     UserUpdateRes checkPassword(long signedUserId, String pw);
     void changePassword(long signedUserId, String newPw);
     int updUser(UserUpdateReq req);
