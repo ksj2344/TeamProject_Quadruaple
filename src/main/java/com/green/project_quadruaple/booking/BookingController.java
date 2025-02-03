@@ -5,6 +5,7 @@ import com.green.project_quadruaple.booking.model.BookingListResponse;
 import com.green.project_quadruaple.booking.model.BookingPostReq;
 import com.green.project_quadruaple.booking.model.BookingPostRes;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class BookingController {
         return bookingService.postBooking(req);
     }
 
+    @Hidden
     @GetMapping("/pay-approve")
     public String getBookingList(@RequestParam("pg_token") String pgToken) {
         return bookingService.approve(pgToken);
