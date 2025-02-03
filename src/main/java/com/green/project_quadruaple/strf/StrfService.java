@@ -21,6 +21,7 @@ public class StrfService {
     private final StrfMapper strfMapper;
 
     public ResponseWrapper<StrfDto> getDetail(Long userId, Long strfId) {
+
         Long effectedUserId = userId != null ? userId : null;
         if (strfId == null){
             return null;
@@ -42,7 +43,6 @@ public class StrfService {
 
 
         dto.setRes(updatedResList);
-
         if (dto.getUserId() > 0){
             strfMapper.strfUpsert(dto.getUserId(), dto.getStrfId());
         } else {
