@@ -104,11 +104,9 @@ public class ReviewService {
             // 사진 이름 리스트에 추가
             picNameList.add(savedPicName);
         }
-
         // ReviewPicDto에 사진 이름 리스트 설정
         reviewPicDto.setPics(picNameList);
         reviewPicList.add(reviewPicDto); // 리스트에 추가
-
         // DB에 사진 저장
         int resultPics = reviewMapper.postReviewPic(reviewPicList);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
