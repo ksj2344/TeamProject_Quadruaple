@@ -56,6 +56,7 @@
     LEFT JOIN strf_pic l ON a.strf_id = l.strf_id
     LEFT JOIN wishlist w ON a.strf_id = w.strf_id AND w.user_id = #{userId}
 
+
     WHERE a.strf_id = #{strfId}
     AND (#{userId} IS NULL OR d.user_id = #{userId})
     GROUP BY
