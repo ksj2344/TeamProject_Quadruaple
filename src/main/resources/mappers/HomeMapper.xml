@@ -107,6 +107,7 @@
         WHERE
         R.user_id = #{userId} AND
         A.category IN ('STAY', 'RESTAUR', 'TOUR')
+        AND R.undo_recent = 0
         )
         SELECT *
         FROM (
