@@ -40,6 +40,21 @@
     </delete>
 
     <!-- 여행기 삭제 -->
+    <select id="selTripReviewByUserId">
+        SELECT *
+          FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+    </select>
+
+    <delete id="delTripReviewLikeByTripReviewId">
+        DELETE FROM trip_like
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
+
+    <delete id="delTripReview">
+        DELETE FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+    </delete>
 
     <!-- 여행기 추천 -->
     <insert id="insTripLike">

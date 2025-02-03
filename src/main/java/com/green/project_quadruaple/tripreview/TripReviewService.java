@@ -2,10 +2,7 @@ package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.tripreview.model.TripLikeDto;
-import com.green.project_quadruaple.tripreview.model.TripReviewPatchDto;
-import com.green.project_quadruaple.tripreview.model.TripReviewPostReq;
-import com.green.project_quadruaple.tripreview.model.TripReviewPostRes;
+import com.green.project_quadruaple.tripreview.model.*;
 import com.green.project_quadruaple.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,6 +122,21 @@ public class TripReviewService {
     }
 
     //여행기 삭제
+    public int deleteTripReview(long tripReviewId) {
+        long signedUserId = authenticationFacade.getSignedUserId();
+
+        TripReviewDeleteDto tripReviewDeleteDto = tripReviewMapper.selTripReviewByUserId(tripReviewId);
+
+        if (tripReviewDeleteDto == null || tripReviewDeleteDto.getUserId() != signedUserId) {
+            return 0;
+        }
+
+        tripReviewMapper.delTripReviewLikeByTripReviewId(tripReviewId);
+
+        tripReviewMapper.delTripReviewPic(tripReviewId);
+
+        return tripReviewMapper.delTripReview(tripReviewId);
+    }
 
 
     // 여행기 추천

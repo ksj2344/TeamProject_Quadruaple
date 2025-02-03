@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.tripreview.model.TripLikeDto;
+import com.green.project_quadruaple.tripreview.model.TripReviewDeleteDto;
 import com.green.project_quadruaple.tripreview.model.TripReviewPatchDto;
 import com.green.project_quadruaple.tripreview.model.TripReviewPostReq;
 import org.apache.ibatis.annotations.Mapper;
@@ -18,6 +19,9 @@ public interface TripReviewMapper {
     void delTripReviewPic(long tripReviewId);
 
     //여행기 delete
+    int delTripReview(long tripReviewId);
+    TripReviewDeleteDto selTripReviewByUserId(long tripReviewId);
+    void delTripReviewLikeByTripReviewId(long tripReviewId);
 
     //여행기 추천
     int insTripLike(TripLikeDto like);

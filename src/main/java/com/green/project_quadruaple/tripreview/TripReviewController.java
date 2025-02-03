@@ -49,6 +49,16 @@ public class TripReviewController {
     }
 
     //여행기 삭제
+    @DeleteMapping
+    @Operation(summary = "여행기 삭제")
+    public ResponseEntity<?> deleteTripReview(@RequestParam long tripReviewId) {
+        int result = tripReviewService.deleteTripReview(tripReviewId);
+
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(),null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
 
     //여행기 추천
     @PostMapping("like")
