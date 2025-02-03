@@ -80,7 +80,7 @@ public class TripService {
     }
 
     public ResponseWrapper<TripDetailRes> getTrip(long tripId) {
-        ScheCntAndMemoCntDto scamcdDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
+        ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId);
         long totalDistance = 0L;
         long totalDuration = 0L;
@@ -97,11 +97,16 @@ public class TripService {
             }
         }
         TripDetailRes res = new TripDetailRes();
-        res.setScheduleCnt(scamcdDto.getScheduleCnt());
-        res.setMemoCnt(scamcdDto.getMemoCnt());
+        res.setScheduleCnt(scAndMcAndTripInfoDto.getScheduleCnt());
+        res.setMemoCnt(scAndMcAndTripInfoDto.getMemoCnt());
+
         res.setDays(tripDetailDto);
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
+        res.setTripId(scAndMcAndTripInfoDto.getTripId());
+        res.setTitle(scAndMcAndTripInfoDto.getTitle());
+        res.setStartAt(scAndMcAndTripInfoDto.getStartAt());
+        res.setEndAt(scAndMcAndTripInfoDto.getEndAt());
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
@@ -347,19 +352,19 @@ public class TripService {
             if(!notFirst) { // 원래 자리가 첫 일정이라면
                 tripMapper.updateSchedule(false, scheduleDto.getNextScheduleId(), 0, 0, 0);
             } else if (scheduleDto.getNextScheduleStrfId() != null) { // 원래 자리가 마지막 일정이 아니라면
-//                // 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
+                // 원래 자리의 다음 일정 거리, 시간, 수단을 원래 자리의 이전 일정 위치로 계산.
                 setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
             }
-//
-//            // 여기서 부터는 목적지의 변경
+
+            // 여기서 부터는 목적지의 변경
             scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 변경된 위치의 정보로 새로 불러옴
             if(!scheduleDto.isNotFirst()) {
                 tripMapper.updateSchedule(false, scheduleDto.getScheduleMemoId(), 0, 0, 0);
             } else if(scheduleDto.getNextScheduleStrfId() != null) {
                 // A의 변경된 위치의 다음 일정의 거리, 시간, 수단을 재 계산
                 setSchedulePath(true, scheduleDto.getStrfId(), scheduleDto.getNextScheduleStrfId(), scheduleDto.getNextScheduleId());
-//
-//                // A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
+
+                // A의 변경된 위치의 이전 일정과 거리, 시간, 수단을 재 계산
                 setSchedulePath(true, scheduleDto.getPrevScheduleStrfId(), scheduleDto.getStrfId(), scheduleId);
             }
         } catch (Exception e) {

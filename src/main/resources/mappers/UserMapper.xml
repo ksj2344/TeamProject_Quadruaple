@@ -47,7 +47,7 @@
          WHERE email = #{email}
     </select>
 
-    <!-- 마이페이지 조회-->
+    <!-- 프로필 및 계정 조회-->
     <select id="selUserInfo">
         SELECT user_id AS signedUserId, email, name, profile_pic AS profilePic
           FROM user
@@ -67,7 +67,7 @@
          WHERE user_id = #{signedUserId}
     </update>
 
-    <!-- 마이페이지 수정 -->
+    <!-- 프로필 및 계정 수정 -->
     <update id="updUser">
         UPDATE user
         <set>

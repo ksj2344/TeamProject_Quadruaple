@@ -67,6 +67,12 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(p.getPw());
         p.setPw(hashedPassword);
 
+        String savedPicName = null;
+        if (pic != null && !pic.isEmpty()) {
+            savedPicName = myFileUtils.makeRandomFileName(pic);
+            p.setProfilePic(savedPicName);  // DB 저장 전에 profilePic 설정
+        }
+
         try {
             int result = userMapper.insUser(p);
             if (result > 0) {
@@ -74,12 +80,8 @@ public class UserService {
                 p.setUserId(userId);
                 userMapper.insUserRole(p);
 
-                // 프로필 사진 처리 (없어도 회원가입 가능하도록 수정)
-                String savedPicName = null;
-                if (pic != null && !pic.isEmpty()) {
-                    savedPicName = myFileUtils.makeRandomFileName(pic);
-                    p.setProfilePic(savedPicName);
-
+                // 프로필 사진 저장
+                if (savedPicName != null) {
                     String middlePath = String.format("user/%s", userId);
                     myFileUtils.makeFolders(middlePath);
                     String filePath = String.format("%s/%s", middlePath, savedPicName);
@@ -128,7 +130,7 @@ public class UserService {
 
         // AT, RT
         JwtUser jwtUser = new JwtUser(userSelOne.getUserId(), userSelOne.getRoles());
-        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofSeconds(30));
+        String accessToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofHours(6));
         String refreshToken = jwtTokenProvider.generateToken(jwtUser, Duration.ofDays(15));
 
         // RT를 쿠키에 담는다.
@@ -160,7 +162,7 @@ public class UserService {
     }
 
     //-------------------------------------------------
-    // 마이페이지 조회
+    // 프로필 및 계정 조회
     public UserInfoDto infoUser() {
         try {
             // 토큰에서 사용자 ID 가져오기
@@ -184,7 +186,7 @@ public class UserService {
     }
 
     //-------------------------------------------------
-    // 마이페이지 수정
+    // 프로필 및 계정 수정
     public UserUpdateRes patchUser(MultipartFile profilePic, UserUpdateReq req) {
         long signedUserId = authenticationFacade.getSignedUserId();
         req.setSignedUserId(signedUserId);

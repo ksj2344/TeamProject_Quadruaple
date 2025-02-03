@@ -44,10 +44,16 @@ public class BookingPostReq {
     private List<MenuIdAndQuantityDto> orderList;
 
     @JsonIgnore
+    private Long userId;
+
+    @JsonIgnore
+    private String tid;
+
+    @JsonIgnore
     private Long bookingId;
 
     @JsonIgnore
-    private long receiveId;
+    private Long receiveId;
 }
 /*
 *    "strf_id" : 1,
