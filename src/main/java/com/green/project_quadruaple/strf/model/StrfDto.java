@@ -7,12 +7,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
+
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
 @Schema
 public class StrfDto {
+    private Long userId;
     private long strfId;
     private String category;
     private String strfTitle;

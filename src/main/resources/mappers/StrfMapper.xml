@@ -20,43 +20,34 @@
         EXISTS(
         SELECT 1
         FROM wishlist
-        WHERE strf_id = a.strf_id
-        AND user_id = #{userId}
+        WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
         ), 1, 0
         ) AS wishIn ,
-
         IF(
         EXISTS(
         SELECT 1
         FROM recent
-        WHERE j.user_id = d.user_id
-        AND a.strf_id = #{strfId}
-        AND j.undo_recent = 0
+        WHERE j.user_id = d.user_id AND a.strf_id = #{strfId} AND j.undo_recent = 0
         ), 1, 0 ) AS recentCheck,
-
         CASE
         WHEN EXISTS(
         SELECT 1
         FROM recent
-        WHERE j.user_id = d.user_id
-        AND a.strf_id = #{strfId}
-        AND j.undo_recent = 1
+        WHERE j.user_id = d.user_id AND a.strf_id = #{strfId} AND j.undo_recent = 1
         ) THEN 0
         WHEN EXISTS(
         SELECT 1
         FROM recent
-        WHERE j.user_id = #{userId}
-        AND a.strf_id = #{strfId}
+        WHERE j.user_id = #{userId} AND a.strf_id = #{strfId}
         ) THEN 1
-        ELSE NULL
+        ELSE -1  -- 기본값으로 -1을 설정 , 실행 문제 있으면 null 로 변경
         END AS recentCheckStatus
-
         FROM
     stay_tour_restaur_fest a
     JOIN location_detail b ON a.location_detail_id = b.location_detail_id
     JOIN business_num c ON a.busi_num = c.busi_num
     LEFT JOIN menu g ON g.strf_id = a.strf_id
-    JOIN `user` d ON c.user_id = d.user_id
+    LEFT JOIN `user` d ON c.user_id = d.user_id
     LEFT JOIN review e ON e.strf_id = a.strf_id
     LEFT JOIN amenipoint h ON h.strf_id = a.strf_id
     LEFT JOIN amenity i ON h.amenity_id = i.amenity_id
@@ -66,6 +57,7 @@
     LEFT JOIN wishlist w ON a.strf_id = w.strf_id AND w.user_id = #{userId}
 
     WHERE a.strf_id = #{strfId}
+    AND (#{userId} IS NULL OR d.user_id = #{userId})
     GROUP BY
     a.strf_id, b.detail_title, d.name,
     d.profile_pic, h.amenity_id, g.menu_id, l.pic_name;
@@ -74,6 +66,7 @@
     <resultMap id="strfDetailResultMap" type="com.green.project_quadruaple.strf.model.StrfDto">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />
+        <result property="userId" column="userId" />
         <result property="strfTitle" column="strfTitle" />
         <result property="latit" column="latit" />
         <result property="longitude" column="longitude" />
@@ -123,6 +116,7 @@
         ON DUPLICATE KEY UPDATE
         undo_recent = VALUES(undo_recent),
         inquired_at = NOW()
+
     </insert>
 
 

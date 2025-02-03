@@ -1,10 +1,12 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.Paging;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/search") // 겹치지 않도록 설정
+@Tag(name = "검색")
 public class SearchController {
 
     private final SearchService searchService;
@@ -71,25 +74,32 @@ public class SearchController {
 
 
 
-    @PostMapping("/basic")
-    public ResponseWrapper<?> searchBasicList(@RequestBody SearchBasicReq request) {
-        return searchService.searchBasicList(request);
+
+    // 밑으로 상품 검색
+
+    @GetMapping("/basic")
+    public ResponseWrapper<?> searchBasicList(@RequestParam("user_id") Long userId) {
+        return searchService.searchBasicRecent(userId);
     }
 
+    @GetMapping("/popular")
+    public ResponseWrapper<?> searchBasicPopular(){
+        return searchService.searchBasicPopular();
+    }
 
     @GetMapping("/all")
     public ResponseWrapper<?> searchAllList(@RequestParam(value = "search_word") String searchWord, @RequestParam String category,
-            @RequestParam(value = "user_id", required = false) Long userId, @ModelAttribute Paging paging) {
+            @RequestParam(value = "user_id", required = false) Long userId, @ModelAttribute List<Long> amenityIds) {
 
-        return searchService.searchAllList(searchWord, category, userId, paging);
+        return searchService.searchAllList(searchWord, category, userId, amenityIds);
     }
 
-    @GetMapping("/category")
-    public ResponseWrapper<?> searchCategoryWithFilters(@RequestParam(value = "user_id", required = false) Long userId,
-             @RequestParam String category, @RequestParam("amenity_id") List<Long> amenityIds, @ModelAttribute Paging paging) {
-
-        return searchService.searchCategoryWithFilters(userId, category, amenityIds, paging);
-    }
+//    @GetMapping("/category")
+//    public ResponseWrapper<?> searchCategoryWithFilters(@RequestParam(value = "user_id", required = false) Long userId,
+//             @RequestParam String category, @RequestParam("amenity_id") List<Long> amenityIds, @ModelAttribute Paging paging) {
+//
+//        return searchService.searchCategoryWithFilters(userId, category, amenityIds, paging);
+//    }
 
 
 

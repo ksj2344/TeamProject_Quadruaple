@@ -174,31 +174,25 @@ public class ReviewService {
     public ResponseWrapper<List<MyReviewSelRes>> getMyReviews(MyReviewSelReq req) {
         log.info("Received userId: " + req.getUserId());
 
-        // 유효성 검사
         if (req.getStartIdx() < 0) {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), new ArrayList<>());
         }
 
-        // 리뷰 목록 가져오기
         List<MyReviewSelRes> resList = reviewMapper.getMyReviews(req);
 
-        // 리뷰가 없을 경우 처리
         if (resList == null || resList.isEmpty()) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), new ArrayList<>());
         }
 
-        // 리뷰 ID 목록 생성
         List<Long> reviewIds = resList.stream()
                 .map(MyReviewSelRes::getReviewId)
                 .collect(Collectors.toList());
 
-        // 각 리뷰에 대한 사진 목록 가져오기
         List<ReviewPicSel> reviewPics = reviewMapper.getReviewPics(reviewIds);
 
-        // 리뷰에 사진 목록 추가하기
         for (MyReviewSelRes review : resList) {
             List<ReviewPicSel> picsForReview = reviewPics.stream()
-                    .filter(pic -> pic.getReviewId() == review.getReviewId()) // long 타입 비교
+                    .filter(pic -> pic.getReviewId() == review.getReviewId())
                     .collect(Collectors.toList());
             review.setReviewPics(picsForReview);
         }

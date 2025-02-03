@@ -1,11 +1,14 @@
 package com.green.project_quadruaple.strf;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.Constants;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.review.model.ReviewSelReq;
 import com.green.project_quadruaple.review.model.ReviewSelRes;
 import com.green.project_quadruaple.strf.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,27 +20,38 @@ import java.util.stream.Collectors;
 public class StrfService {
     private final StrfMapper strfMapper;
 
-    public StrfDto getDetail(StrfSelReq req) {
-        StrfDto dto = strfMapper.getDetail(req);
+    public ResponseWrapper<StrfDto> getDetail(Long userId, Long strfId) {
+        Long effectedUserId = userId != null ? userId : null;
+        if (strfId == null){
+            return null;
+        }
+        StrfDto dto = strfMapper.getDetail(effectedUserId , strfId);
+        System.out.println("Current user_id: " + userId);
+
+
         if (dto == null) {
-            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
-        if (dto.getStrfId() != req.getStrfId()) {
-            throw new IllegalArgumentException("Invalid Strf ID: " + req.getStrfId());
-        }
+
         List<StrfSelRes> updatedResList = dto.getRes();
+
         if (updatedResList == null) {
             updatedResList = Collections.emptyList();
         }
+        System.out.println("Current user_id2: " + userId);
+
+
         dto.setRes(updatedResList);
 
-        if (req.getUserId() > 0){
-            strfMapper.strfUpsert(req.getUserId(), req.getStrfId());
+        if (dto.getUserId() > 0){
+            strfMapper.strfUpsert(dto.getUserId(), dto.getStrfId());
         } else {
-            throw new IllegalArgumentException("Invalid user ID: " + req.getUserId());
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
+        System.out.println("Current user_id3: " + userId);
 
-        return dto;
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), dto);
     }
 
 }

@@ -13,6 +13,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Schema
 public class StrfSelRes {
+    @Schema(description = "유저 id ")
+    private Long userId;
     @Schema(description = "카테고리", example = "STAY, TOUR, RESTAUR, FEST")
     private String category;
     @Schema(description = "상품 ID", example = "12345")

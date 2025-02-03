@@ -9,15 +9,20 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Schema(title = "검색 기본 페이지")
 @Getter
 @Setter
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class SearchAllList extends SearchBaseList {
+@EqualsAndHashCode
+@Schema(title = "검색 조회 시 전체 출력 부분")
+public class SearchAllList{
+    private long strfId;
+    private String strfTitle;
+    private String category;
+    private String locationName;
+    private int aveargeRating;
+    private int reviewCount;
+    private int wishlistCount;
+    private int userWishlist;
     private String amenities;
 
-    public SearchAllList(Integer page, Integer size) {
-        super(page, size);
-    }
 }

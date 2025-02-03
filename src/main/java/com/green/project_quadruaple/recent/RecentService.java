@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.recent;
 
 import com.green.project_quadruaple.recent.model.HideRecentUpdReq;
+import com.green.project_quadruaple.recent.model.HideRecentsUpdReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class RecentService {
 
     // 일괄 삭제(숨김) - 변경된 행의 개수 반환
     @Transactional
-    public int recentAllHide(HideRecentUpdReq req) {
+    public int recentAllHide(HideRecentsUpdReq req) {
         return recentMapper.recentAllHide(req);
     }
 

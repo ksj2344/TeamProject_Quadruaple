@@ -17,7 +17,7 @@
     </update>
 
     <update id="recentAllHide">
-        DELETE FROM recent
+        UPDATE recent
         SET undo_recent = 1
         WHERE user_id = #{userId}
     </update>

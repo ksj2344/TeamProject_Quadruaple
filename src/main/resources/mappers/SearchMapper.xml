@@ -98,28 +98,28 @@
         WHERE t.trip_id = #{tripId}
     </select>
 
+    <!-- 상품 검색 쿼리 -->
 
-    <select id="searchBasicList">
-        (
-        SELECT s.title AS searchTerm, 'recent' AS type, r.inquired_at AS inquiredAt
-        , NULL AS popularCount
+    <select id="searchBasicRecent">
+        SELECT a.user_id AS userId , b.title AS strfName , a.inquired_at AS inquiredAt
+        , c.pic_name AS strfPic ,  b.category , e.title AS locationTitle
+        FROM recent a
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN strf_pic c ON a.strf_id = c.strf_id
+        LEFT JOIN location_detail d ON b.location_detail_id = d.location_detail_id
+        LEFT JOIN location e ON d.location_id = e.location_id
+        WHERE a.user_id = #{userId} AND a.undo_recent = 0
+        ORDER BY inquiredAt DESC
+        LIMIT 5
+    </select>
+    <select id="searchBasicPopular">
+        SELECT s.title AS strfName, COUNT(*) AS popularCount
         FROM recent r
         JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
-        WHERE r.user_id = #{userId} AND r.undo_recent = 0
-        )
-        UNION ALL
-        (
-        SELECT s.title AS searchTerm, 'popular' AS type,
-        NULL AS inquiredAt, COUNT(*) AS popularCount
-        FROM recent r
-        JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
-        WHERE r.inquired_at <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
         GROUP BY s.title
-        )
-        ORDER BY
-        CASE WHEN type = 'recent' THEN inquiredAt END DESC,
-        CASE WHEN type = 'popular' THEN popularCount END DESC;
-        LIMIT #{startIdx}, #{size}
+        ORDER BY popularCount DESC
+        LIMIT 10
     </select>
 
     <select id="searchAllList">
@@ -137,17 +137,17 @@
         LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
         WHERE
         <if test="searchWord != null">
-        s.title LIKE CONCAT('%', #{searchWord}, '%') OR
-        l.title LIKE CONCAT('%', #{searchWord}, '%') OR
-        ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
-        a.title LIKE CONCAT('%', #{searchWord}, '%')
+            s.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%')
         </if>
         <if test="category != null">
-        s.category LIKE CONCAT('%', #{searchWord}, '%') OR
+            s.category LIKE CONCAT('%', #{searchWord}, '%') OR
         </if>
         GROUP BY s.strf_id
         ORDER BY s.created_at DESC
-        LIMIT #{startIdx}, #{size}
+        LIMIT 3
     </select>
 
     <select id="searchCategoryWithFilters">
@@ -169,6 +169,21 @@
         ORDER BY s.created_at DESC
         LIMIT #{startIdx}, #{size}
     </select>
+
+
+
+    <select id="searchGetList">
+        SELECT txt
+        FROM search_word
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="searchIns">
+        INSERT INTO search_word (txt , user_id)
+        VALUES (#{txt} , #{userId})
+    </insert>
+
+
 
 
     <!--
@@ -249,14 +264,6 @@
     </select>
     -->
 </mapper>
-
-
-
-
-
-
-
-
 
 
 
