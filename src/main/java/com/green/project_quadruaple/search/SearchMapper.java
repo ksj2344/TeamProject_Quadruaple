@@ -1,7 +1,10 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+import com.green.project_quadruaple.search.model.filter.Stay;
+import com.green.project_quadruaple.search.model.filter.StaySearchReq;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import org.apache.ibatis.annotations.Mapper;
@@ -21,13 +24,25 @@ public interface SearchMapper {
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
     List<SearchBasicPopualarRes> searchBasicPopular();
 
-    List<SearchAllList> searchAllList(@Param("search_word") String searchWord
-                                     , @Param("category") String category
-                                     , @Param("user_id") Long userId
-                                     , @Param("amenity_id") List<Long> amenityIds);
+//    List<SearchAllList> searchAllList(@Param("search_word") String searchWord
+//                                     , @Param("category") String category
+//                                     , @Param("user_id") Long userId
+//                                     , @Param("amenity_id") List<Long> amenityIds);
 
-    List<SearchCategoryList> searchCategoryWithFilters(@Param("user_id") Long userId, @Param("category") String category, @Param("amenity_id") List<Long> amenityIds,
-            @Param("start_idx") int startIdx, @Param("size") int size);
+    List<Stay> searchAllList(@Param("request") StaySearchReq request);
+
+    List<Stay> searchCategoryWithFilters(@Param("category") StrfCategory category
+                                        , @Param("startIdx") int startIdx
+                                        , @Param("size") int size
+                                        , @Param("userId") Long userId);
+
+    List<Stay> searchStayByAmenity(@Param("amenityId") Long amenityId
+                                        , @Param("startIdx") int startIdx
+                                        , @Param("size") int size
+                                        , @Param("userId") Long userId);
+//    List<SearchCategoryList> searchCategoryWithFilters(@Param("user_id") Long userId, @Param("category") String category, @Param("amenity_id") List<Long> amenityIds,
+//            @Param("start_idx") int startIdx, @Param("size") int size);
+
 
 
 

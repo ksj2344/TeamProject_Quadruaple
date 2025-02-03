@@ -1,9 +1,13 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import com.green.project_quadruaple.common.model.Paging;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
+import com.green.project_quadruaple.search.model.filter.Stay;
+import com.green.project_quadruaple.search.model.filter.StaySearchReq;
+import com.green.project_quadruaple.search.model.filter.StaySearchRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -91,11 +95,19 @@ public class SearchController {
         return searchService.searchBasicPopular();
     }
 
-    @GetMapping("/all")
-    public ResponseWrapper<?> searchAllList(@RequestParam(value = "search_word") String searchWord, @RequestParam String category,
-            @RequestParam(value = "user_id", required = false) Long userId, @ModelAttribute List<Long> amenityIds) {
+    @PostMapping("/search")
+    public StaySearchRes searchAll(@RequestBody StaySearchReq request) {
+        return searchService.searchAll(request);
+    }
 
-        return searchService.searchAllList(searchWord, category, userId, amenityIds);
+    @GetMapping("/category")
+    public List<Stay> searchCategoryWithFilters(@RequestParam StrfCategory category, @RequestParam int startIdx, @RequestParam int size, @RequestParam Long userId) {
+        return searchService.searchCategoryWithFilters(category, startIdx, size, userId);
+    }
+
+    @GetMapping("/amenity")
+    public List<Stay> searchStayByAmenity(@RequestParam Long amenityId, @RequestParam int startIdx, @RequestParam int size, @RequestParam Long userId) {
+        return searchService.searchStayByAmenity(amenityId, startIdx, size, userId);
     }
 
 //    @GetMapping("/category")

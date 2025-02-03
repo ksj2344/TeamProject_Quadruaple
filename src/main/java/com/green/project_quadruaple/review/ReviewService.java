@@ -64,8 +64,7 @@ public class ReviewService {
 
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
-        p.setReviewId(authenticationFacade.getSignedUserId());
-
+        p.setUserId(authenticationFacade.getSignedUserId());
         if (p.getReviewId() <= 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
@@ -82,14 +81,10 @@ public class ReviewService {
         String middlePath = String.format("reviewId/%d", reviewId);
         myFileUtils.makeFolders(middlePath);
 
-        // ReviewPicDto 리스트 생성
-        List<ReviewPicDto> reviewPicList = new ArrayList<>();
-        ReviewPicDto reviewPicDto = new ReviewPicDto();
-        reviewPicDto.setReviewId(reviewId);
-        List<String> picNameList = new ArrayList<>();
-
+        List<String> picNameList = new ArrayList<>(pics.size());
         for (MultipartFile pic : pics) {
             String savedPicName = myFileUtils.makeRandomFileName(pic);
+            picNameList.add(savedPicName);
             String filePath = String.format("%s/%s", middlePath, savedPicName);
             try {
                 myFileUtils.transferTo(pic, filePath);
@@ -100,15 +95,13 @@ public class ReviewService {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
-
-            // 사진 이름 리스트에 추가
-            picNameList.add(savedPicName);
         }
-        // ReviewPicDto에 사진 이름 리스트 설정
+        ReviewPicDto reviewPicDto = new ReviewPicDto();
+        reviewPicDto.setReviewId(reviewId);
         reviewPicDto.setPics(picNameList);
-        reviewPicList.add(reviewPicDto); // 리스트에 추가
+
         // DB에 사진 저장
-        int resultPics = reviewMapper.postReviewPic(reviewPicList);
+        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
     }
 
