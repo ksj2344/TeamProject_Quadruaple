@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.strf.model;
 
-import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,12 +10,11 @@ import java.util.List;
 
 @Getter
 @Setter
+@Schema(title = "리뷰 정보")
 @ToString
 @EqualsAndHashCode
-@Schema
-public class StrfSelRes {
+public class GetNonDetail {
     private Long strfId;
-    private Long userId;
     private String category;
     private String strfTitle;
     private double latit;
@@ -38,14 +36,10 @@ public class StrfSelRes {
     private String hostProfilePic;
     private String reviewWriterUserPic;
     private String hostName;
-    private int wishCnt;
-    private int wishIn;
-    private int recentCheck;
-    private int recentCheckStatus;
 
 
     private List<Amenity> amenities;
     private List<StrfPicSel> strfPics;
     private List<Menu> menu;
-
 }
+
