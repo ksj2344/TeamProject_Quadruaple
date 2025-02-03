@@ -6,11 +6,8 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
-<<<<<<< HEAD
 import io.swagger.v3.oas.annotations.tags.Tag;
-=======
 import io.swagger.v3.oas.annotations.Operation;
->>>>>>> 7ae566736101f0cd8002cf83fdfbad25ab3f2d62
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

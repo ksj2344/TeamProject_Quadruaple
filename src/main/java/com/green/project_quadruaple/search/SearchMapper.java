@@ -1,11 +1,8 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.search.model.*;
-<<<<<<< HEAD
-=======
 import com.green.project_quadruaple.search.model.SearchBasicReq;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
->>>>>>> 7ae566736101f0cd8002cf83fdfbad25ab3f2d62
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
