@@ -26,7 +26,7 @@ public class ExpenseController {
 
     //정산하기
     @GetMapping("dutch")
-    @Operation(summary = "가계부 보기", description = "여행에 관련한 비용목록 보기")
+    @Operation(summary = "정산하기", description = "비용추가 누르면 나오는 페이지")
     public ResponseEntity<?> dutchExpenses(@RequestBody DutchReq p){
         return expenseService.dutchExpenses(p);
     }
@@ -35,7 +35,6 @@ public class ExpenseController {
     @PostMapping
     @Operation(summary = "가계부 입력", description = "비용목록에 한 칸 추가")
     public ResponseEntity<?> postExpenses(@RequestBody ExpenseSameReq p){
-
         return expenseService.insSamePrice(p);
     }
 }
