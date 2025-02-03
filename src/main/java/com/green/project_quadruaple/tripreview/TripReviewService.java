@@ -134,6 +134,10 @@ public class TripReviewService {
         tripReviewMapper.delTripReviewLikeByTripReviewId(tripReviewId);
 
         tripReviewMapper.delTripReviewPic(tripReviewId);
+        String basePath = myFileUtils.getUploadPath(); // 기본 업로드 경로
+        String middlePath = String.format("tripReview/%d", tripReviewId);
+        String targetPath = String.format("%s/%s", basePath, middlePath); // 중복 경로 방지
+        myFileUtils.deleteFolder(targetPath, true);
 
         return tripReviewMapper.delTripReview(tripReviewId);
     }
