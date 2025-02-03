@@ -39,6 +39,8 @@
          WHERE trip_review_id = #{tripReviewId}
     </delete>
 
+    <!-- 여행기 삭제 -->
+
     <!-- 여행기 추천 -->
     <insert id="insTripLike">
         INSERT INTO trip_like

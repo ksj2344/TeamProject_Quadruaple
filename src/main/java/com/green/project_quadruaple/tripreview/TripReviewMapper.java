@@ -17,6 +17,8 @@ public interface TripReviewMapper {
     int updTripReview(TripReviewPatchDto dto);
     void delTripReviewPic(long tripReviewId);
 
+    //여행기 delete
+
     //여행기 추천
     int insTripLike(TripLikeDto like);
     int delTripLike(TripLikeDto like);

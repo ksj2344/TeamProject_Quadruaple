@@ -38,7 +38,7 @@ public class TripReviewController {
 
     //여행기 수정
     @PatchMapping
-    @Operation(summary = "여행기 수정(진행 중)")
+    @Operation(summary = "여행기 수정")
     public ResponseEntity<?> patchTripReview(@RequestPart(required = false) List<MultipartFile> tripReviewPic, @RequestPart TripReviewPatchDto dto) {
         int result = tripReviewService.patchTripReview(tripReviewPic, dto);
 
@@ -47,6 +47,8 @@ public class TripReviewController {
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
+
+    //여행기 삭제
 
     //여행기 추천
     @PostMapping("like")

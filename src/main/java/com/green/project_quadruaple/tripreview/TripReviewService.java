@@ -124,6 +124,8 @@ public class TripReviewService {
         return result;
     }
 
+    //여행기 삭제
+
 
     // 여행기 추천
     public int insTripLike(TripLikeDto like) {

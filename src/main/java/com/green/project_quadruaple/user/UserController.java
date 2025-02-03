@@ -78,9 +78,9 @@ public class UserController {
         return userService.getAccessToken(req);
     }
 
-    //마이페이지 조회
+    //프로필 및 계정 조회
     @GetMapping("userInfo")
-    @Operation(summary = "마이페이지 조회")
+    @Operation(summary = "프로필 및 계정 조회")
     public ResponseEntity<ResponseWrapper<UserInfoDto>> getUserInfo() {
         UserInfoDto userInfo = userService.infoUser();
 
@@ -92,9 +92,9 @@ public class UserController {
     }
 
 
-    //마이페이지 수정
+    //프로필 및 계정 수정
     @PatchMapping()
-    @Operation(summary = "마이페이지 수정")
+    @Operation(summary = "프로필 및 계정 수정")
     public ResponseEntity<?> patchUserInfo(@RequestPart(required = false) MultipartFile profilePic, @RequestPart @Valid UserUpdateReq p) {
         log.info("updateUserInfo > UserUpdateReq > p: {}", p);
         UserUpdateRes userUpdateRes = userService.patchUser(profilePic, p);
