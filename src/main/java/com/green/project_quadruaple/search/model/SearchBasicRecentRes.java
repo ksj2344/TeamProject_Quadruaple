@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.search.model;
 
+import com.green.project_quadruaple.search.model.strf_list.StrfSearchPaging;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,14 +12,12 @@ import lombok.ToString;
 @Schema(title = "검색 정보")
 @ToString
 @EqualsAndHashCode
-public class SearchBasicRes {
-    private String searchTerm;
-
-    private String type; // 'recent' 또는 'popular'
+public class SearchBasicRecentRes {
+    private long userId;
+    private String strfName;
     private String inquiredAt;
-    private Long popularCount;
-
-    private boolean isMore;
-
+    private String strfPic;
+    private String category;
+    private String locationTitle;
 }
 
