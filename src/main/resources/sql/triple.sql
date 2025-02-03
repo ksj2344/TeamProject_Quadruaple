@@ -157,6 +157,7 @@ CREATE TABLE booking(
     , menu_id BIGINT NOT NULL
     , final_payment int not null
     , tid varchar(30) not null
+    , refund tinyint not null default '0'
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
     , FOREIGN KEY(menu_id) REFERENCES menu (menu_id)
 );
@@ -461,3 +462,18 @@ SELECT M.memo_id, M.title, M.content, M.updated_at, M.trip_user_id
 FROM sche_memo SM
          JOIN memo M
               on SM.schedule_memo_id=M.memo_id;
+
+# 가계부 view
+CREATE VIEW depay AS
+SELECT T.trip_id, T.title,	T.start_at,	T.end_at, T.manager_id
+     , D.de_id, D.`for`, TU.trip_user_id, TU.user_id
+     , P.price, U.profile_pic, U.name
+FROM paid_user P
+         LEFT JOIN daily_expense D
+                   ON P.de_id=D.de_id
+         LEFT JOIN trip_user TU
+                   ON TU.trip_user_id=P.trip_user_id
+         left JOIN trip T
+                   ON T.trip_id=TU.trip_id
+         left JOIN user U
+                   ON U.user_id=TU.user_id
