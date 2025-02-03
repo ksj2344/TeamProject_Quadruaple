@@ -12,6 +12,7 @@ import java.util.List;
 public class GetSearchStrfListBasicRes {
 
     private boolean isMore;
+    private List<String> locationTitleList;
     private List<StrfShortInfoDto> list;
 }
 /*
