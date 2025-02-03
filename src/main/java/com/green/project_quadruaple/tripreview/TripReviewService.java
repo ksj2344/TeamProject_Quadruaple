@@ -67,6 +67,17 @@ public class TripReviewService {
         return tripReviewPostRes;
     }
 
+    //여행기 조회
+    // 로그인한 사용자의 여행기만 조회
+    public List<TripReviewGetDto> getMyTripReviews(String orderType) {
+        long userId = authenticationFacade.getSignedUserId(); // 현재 로그인한 유저 ID 가져오기
+        return tripReviewMapper.getMyTripReviews(userId, orderType);
+    }
+    // 모든 사용자의 여행기 조회
+    public List<TripReviewGetDto> getAllTripReviews(String orderType) {
+        return tripReviewMapper.getAllTripReviews(orderType);
+    }
+
     // 여행기 수정
     public int patchTripReview(List<MultipartFile> tripPic, TripReviewPatchDto dto) {
         dto.setUserId(authenticationFacade.getSignedUserId());
