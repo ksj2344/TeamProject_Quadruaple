@@ -8,12 +8,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("detail")
@@ -24,18 +22,26 @@ public class StrfController {
 
     @GetMapping
     @Operation(summary = "상품 조회")
-    public ResponseEntity<?> getDetail(@Valid @ModelAttribute StrfSelReq req) {
-        // Service 호출하여 상세 정보 조회
-        StrfDto detail = strfService.getDetail(req);
+    public ResponseEntity<?> getDetail(@RequestParam(value = "user_id" ,required = false) Long userId,
+                                       @RequestParam("strf_id") Long strfId) {
 
-        // 데이터가 없을 경우 404 응답 반환
-        if (detail == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        if (strfId == null) {
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null));
         }
 
-        // 정상적인 응답 반환
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),detail));
+//        if (userId == null) {
+//            // userId가 제공된 경우의 처리
+//            // 예: userId를 사용하여 특정 로직 수행
+//        } else {
+//            // userId가 제공되지 않은 경우의 처리
+//            // 예: 기본값 사용 또는 다른 로직 수행
+//        }
+
+        ResponseWrapper<StrfDto> detail = strfService.getDetail(userId,strfId);
+        System.out.println("Current user_id4: " + userId);
+
+
+        return ResponseEntity.ok(detail);
     }
 
 

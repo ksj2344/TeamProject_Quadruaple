@@ -19,7 +19,7 @@ public class ExpenseSameReq extends DeDto {
     private int price;
     @Schema(title = "여행PK",example = "1")
     private long tripId;
-    @Schema(title = "결제인원",example = "[101,104,108,109]")
+    @Schema(title = "결제인원",example = "[101,105,108,113]")
     private List<Long> userIds;
 }
 

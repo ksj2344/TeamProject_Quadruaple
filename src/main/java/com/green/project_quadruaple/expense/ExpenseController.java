@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,8 @@ public class ExpenseController {
     //가계부 보기
     @GetMapping
     @Operation(summary = "가계부 보기", description = "여행에 관련한 비용목록 보기")
-    public ResponseEntity<?> getExpenses(){
-        return null;
+    public ResponseEntity<?> getExpenses(@ParameterObject long tripId){
+        return expenseService.getExpenses(tripId);
     }
 
     //정산하기
