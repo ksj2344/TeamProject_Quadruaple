@@ -11,7 +11,7 @@ import lombok.ToString;
 public class Menu {
 
     @Schema(description = "메뉴 가격")
-    private String menuPrice;
+    private int menuPrice;
     @Schema(description = "메뉴 ID")
     private String menuId;
     @Schema(description = "메뉴 이름")

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Mapper
 public interface StrfMapper {
-    StrfDto getDetail(StrfSelReq req);
+    StrfDto getDetail(@Param("userId") Long userId, @Param("strfId") Long strfId);
     void strfUpsert(@Param("userId") Long userId, @Param("strfId") Long strfId);
 }
 

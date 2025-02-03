@@ -18,11 +18,32 @@ public interface SearchMapper {
     List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
 
 
-    List<SearchBasicRes> searchBasicList(SearchBasicReq request);
+    List<SearchBasicRecentRes> searchBasicRecent(Long userId);
+    List<SearchBasicPopualarRes> searchBasicPopular();
 
-    List<SearchAllList> searchAllList(@Param("search_word") String searchWord, @Param("category") String category, @Param("user_id") Long userId,
-            @Param("start_idx") int startIdx, @Param("size") int size);
+    List<SearchAllList> searchAllList(@Param("search_word") String searchWord
+                                     , @Param("category") String category
+                                     , @Param("user_id") Long userId
+                                     , @Param("amenity_id") List<Long> amenityIds);
+
     List<SearchCategoryList> searchCategoryWithFilters(@Param("user_id") Long userId, @Param("category") String category, @Param("amenity_id") List<Long> amenityIds,
             @Param("start_idx") int startIdx, @Param("size") int size);
+
+
+
+    /*
+    검색 창 터치 -> 검색 목록 출력
+    <select id="searchGetList">
+        SELECT txt
+        FROM search_word
+        WHERE user_id = #{userId}
+    </select>
+
+    검색 창 입력 -> 검색창 테이블에 검색 데이터 입력
+    <insert id="searchIns">
+        INSERT INTO search_word (txt , user_id)
+        VALUES (#{txt} , #{userId})
+    </insert>
+     */
 
 }

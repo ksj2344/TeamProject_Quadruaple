@@ -2,6 +2,7 @@ package com.green.project_quadruaple.recent;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.recent.model.HideRecentUpdReq;
+import com.green.project_quadruaple.recent.model.HideRecentsUpdReq;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class RecentController {
         return ResponseEntity.ok(updatedCount);
     }
     @PatchMapping("hide/all")
-    public ResponseEntity<?> recentAllHide(HideRecentUpdReq req) {
+    public ResponseEntity<?> recentAllHide(HideRecentsUpdReq req) {
         int updatedCount = recentService.recentAllHide(req);
 
         return ResponseEntity.ok(updatedCount);
