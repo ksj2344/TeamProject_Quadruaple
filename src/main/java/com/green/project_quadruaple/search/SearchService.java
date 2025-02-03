@@ -55,7 +55,7 @@ public class SearchService {
             res.setList(dto);
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            e.printStackTrace();
             throw new RuntimeException();
         }
     }

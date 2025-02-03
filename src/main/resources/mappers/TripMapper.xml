@@ -44,6 +44,10 @@
         SELECT
             count(sms.category) AS scheduleCnt
             , count(smm.category) AS memoCnt
+            , t.trip_id AS tripId
+            , t.title AS title
+            , t.start_at AS startAt
+            , t.end_at AS endAt
         FROM sche_memo sm
         LEFT JOIN (
             SELECT * FROM sche_memo
@@ -55,6 +59,8 @@
             WHERE trip_id = #{tripId}
                 AND category = 'MEMO') smm
             ON sm.schedule_memo_id = smm.schedule_memo_id
+        LEFT JOIN trip t
+            ON t.trip_id = sm.trip_id
     </select>
 
     <select id="selScheduleDetail" resultMap="scheduleForDay">

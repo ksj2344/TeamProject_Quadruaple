@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.booking;
 
 import com.green.project_quadruaple.booking.model.*;
+import com.green.project_quadruaple.booking.model.dto.BookingInsDto;
 import com.green.project_quadruaple.booking.model.dto.KakaoApproveDto;
 import com.green.project_quadruaple.booking.model.dto.KakaoReadyDto;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
@@ -110,7 +111,7 @@ public class BookingService {
                 kakaoReadyDto.setBookingPostReq(req);
                 kakaoTidSession.put(userId, kakaoReadyDto);
                 OrderThread orderThread = new OrderThread(userId);
-                new Thread(orderThread); // 30분 대기후 주문 세션 삭제
+                new Thread(orderThread); // 3분 대기후 주문 세션 삭제
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
         } catch (Exception e) {
@@ -140,17 +141,19 @@ public class BookingService {
 
         try {
             BookingPostReq bookingPostReq = session.getBookingPostReq();
-                bookingMapper.insBooking(bookingPostReq.getActualPaid(), bookingPostReq.getCheckIn(), bookingPostReq.getCheckOut(), userId, bookingPostReq.getOrderList());
-                bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
-                KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
-                log.info("approveDto = {}", approveDto);
-                if(approveDto == null) {
-                    throw new RuntimeException();
-                }
-                return "complete";
+            bookingPostReq.setUserId(userId);
+            bookingPostReq.setTid(session.getTid());
+            bookingMapper.insBooking(bookingPostReq);
+            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+            KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
+            log.info("approveDto = {}", approveDto);
+            if(approveDto == null) {
+                throw new RuntimeException();
+            }
+            return "complete";
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException();
         }
-        return "fail";
     }
 }

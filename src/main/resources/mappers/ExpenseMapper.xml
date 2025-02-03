@@ -20,18 +20,17 @@
     </insert>
 
     <insert id="insPaidUserSamePrice">
-        INSERT INTO paid_user
-        SET de_id=#{deId}
-        , price=#{price}
-        , trip_user_id
-        IN (SELECT trip_user_id
+        INSERT INTO paid_user (de_id, price, trip_user_id)
+        SELECT
+        #{deId},
+        #{price},
+        trip_user_id
         FROM trip_user
-        WHERE trip_id=#{tripId}
+        WHERE trip_id = #{tripId}
         AND user_id IN
         <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
             #{userId}
         </foreach>
-        )
     </insert>
 
     <select id="selExpense">
@@ -44,5 +43,17 @@
         LEFT JOIN daily_expense D
         ON D.de_id=P.de_id
         where TU.trip_id = #{tripId}
+    </select>
+
+    <select id="selDutchUsers">
+        SELECT U.user_id AS userId, U.profile_pic AS profilePic, U.`name`
+        FROM user U
+        LEFT JOIN trip_user TU
+        ON TU.user_id= U.user_id
+        WHERE TU.trip_id=#{tripId}
+        AND U.user_id NOT IN
+        <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
+            #{userId}
+        </foreach>
     </select>
 </mapper>
