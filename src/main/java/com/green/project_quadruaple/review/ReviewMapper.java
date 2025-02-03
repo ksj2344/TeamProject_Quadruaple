@@ -12,7 +12,7 @@ public interface ReviewMapper {
     List<ReviewPicSel> getReviewPics(List<Long> reviewIds);
 
     int postRating(ReviewPostReq p);
-    int postReviewPic(List<ReviewPicDto> reviewPicList);
+    int postReviewPic(List<ReviewPicDto> pics);
 
     int patchReview(ReviewUpdReq req);
     int patchReviewPic(@Param("pics") List<ReviewPicDto> reviewPicList);
