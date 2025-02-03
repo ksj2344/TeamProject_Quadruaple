@@ -72,7 +72,10 @@ public class SearchService {
                                                                                 String searchWord)
     {
         if(tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
-        String categoryValue = Optional.ofNullable(Category.getKeyByName(category)).orElseThrow(RuntimeException::new).getValue();
+        String categoryValue = null;
+        if(category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
         long signedUserId = 101L;
         int more = 1;
         try {
@@ -132,5 +135,4 @@ public class SearchService {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
     }
-
 }
