@@ -80,7 +80,7 @@ public class TripService {
     }
 
     public ResponseWrapper<TripDetailRes> getTrip(long tripId) {
-        ScheCntAndMemoCntDto scamcdDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
+        ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId);
         long totalDistance = 0L;
         long totalDuration = 0L;
@@ -97,11 +97,16 @@ public class TripService {
             }
         }
         TripDetailRes res = new TripDetailRes();
-        res.setScheduleCnt(scamcdDto.getScheduleCnt());
-        res.setMemoCnt(scamcdDto.getMemoCnt());
+        res.setScheduleCnt(scAndMcAndTripInfoDto.getScheduleCnt());
+        res.setMemoCnt(scAndMcAndTripInfoDto.getMemoCnt());
+
         res.setDays(tripDetailDto);
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
+        res.setTripId(scAndMcAndTripInfoDto.getTripId());
+        res.setTitle(scAndMcAndTripInfoDto.getTitle());
+        res.setStartAt(scAndMcAndTripInfoDto.getStartAt());
+        res.setEndAt(scAndMcAndTripInfoDto.getEndAt());
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 

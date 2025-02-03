@@ -110,7 +110,7 @@ public class BookingService {
                 kakaoReadyDto.setBookingPostReq(req);
                 kakaoTidSession.put(userId, kakaoReadyDto);
                 OrderThread orderThread = new OrderThread(userId);
-                new Thread(orderThread); // 30분 대기후 주문 세션 삭제
+                new Thread(orderThread); // 3분 대기후 주문 세션 삭제
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
         } catch (Exception e) {
