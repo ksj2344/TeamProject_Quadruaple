@@ -3,7 +3,7 @@
 
 <mapper namespace="com.green.project_quadruaple.strf.StrfMapper">
 
-    <select id="getDetail" resultMap="strfDetailResultMap">
+    <select id="getMemberDetail" resultMap="strfDetailResultMap">
     SELECT
     a.strf_id AS strfId, a.category, a.title AS strfTitle,
     a.lat AS latit, a.lng AS longitude, a.address,
@@ -47,8 +47,8 @@
     JOIN location_detail b ON a.location_detail_id = b.location_detail_id
     JOIN business_num c ON a.busi_num = c.busi_num
     LEFT JOIN menu g ON g.strf_id = a.strf_id
-    LEFT JOIN `user` d ON c.user_id = d.user_id
     LEFT JOIN review e ON e.strf_id = a.strf_id
+    LEFT JOIN `user` d ON e.user_id = d.user_id
     LEFT JOIN amenipoint h ON h.strf_id = a.strf_id
     LEFT JOIN amenity i ON h.amenity_id = i.amenity_id
     LEFT JOIN wishlist f ON a.strf_id = f.strf_id
@@ -64,6 +64,39 @@
     d.profile_pic, h.amenity_id, g.menu_id, l.pic_name;
     </select>
 
+    <select id="getNonMemberDetail" resultMap="strfDetailResultMap">
+        SELECT
+        a.strf_id AS strfId , a.category , a.title AS strfTitle ,
+        a.lat AS latit, a.lng AS longitude, a.address,
+        a.post, a.tell, a.start_at AS startAt, a.end_at AS endAt,
+        a.open_check as openCheck, a.close_check as closeCheck , a.rest_date AS restDate,
+        a.`explain`, a.detail, a.busi_num AS busiNum,
+        f.detail_title AS locationName, e.pic_name AS strfPic ,
+        AVG(h.rating) AS ratingAvg,
+        d.amenity_id AS amenityId, d.title AS amenityTitle, b.menu_id AS menuId,
+        b.title AS menuTitle, b.price AS menuPrice, b.menu_pic AS menuPic,
+        j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
+        l.profile_pic AS hostProfilePic, l.name AS hostName
+        FROM
+        stay_tour_restaur_fest a
+        JOIN menu b ON a.strf_id = b.strf_id
+        JOIN amenipoint c ON a.strf_id = c.strf_id
+        JOIN amenity d ON c.amenity_id = d.amenity_id
+        JOIN strf_pic e ON a.strf_id = e.strf_id
+        JOIN location_detail f ON a.location_detail_id = f.location_detail_id
+        JOIN location g ON f.location_id = g.location_id
+        JOIN review h ON a.strf_id = h.strf_id
+        JOIN review_pic i ON h.review_id = i.review_id
+        JOIN user j ON h.user_id = j.user_id
+        JOIN business_num k ON a.busi_num = k.busi_num
+        JOIN user l ON l.user_id = k.user_id
+
+        WHERE a.strf_id = #{strfId}
+        GROUP BY a.strf_id, b.detail_title, d.name,
+        d.profile_pic, h.amenity_id, g.menu_id, l.pic_name
+    </select>
+    
+    
     <resultMap id="strfDetailResultMap" type="com.green.project_quadruaple.strf.model.StrfDto">
         <id property="strfId" column="strfId" />
         <result property="category" column="category" />

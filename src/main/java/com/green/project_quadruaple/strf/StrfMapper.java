@@ -13,5 +13,7 @@ import java.util.List;
 public interface StrfMapper {
     StrfDto getDetail(@Param("userId") Long userId, @Param("strfId") Long strfId);
     void strfUpsert(@Param("userId") Long userId, @Param("strfId") Long strfId);
+
+//     getNonMemberDetail (@Param("strfId") Long strfId);
 }
 
