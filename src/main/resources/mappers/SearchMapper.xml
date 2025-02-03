@@ -76,7 +76,7 @@
         ON s.strf_id = r2.strf_id
         WHERE ld.location_id in
         <foreach collection="locationIdList" item="id" open="(" separator="," close=")">
-            #{id}
+            #{id.locationId}
         </foreach>
         <if test="searchWord != null">
             AND s.title LIKE '%${searchWord}%' OR title LIKE '%${searchWord}%'
@@ -91,10 +91,13 @@
 
     <select id="selLocationIdByTripId">
         SELECT
-        location_id AS locationId
+            l.location_id AS locationId
+            , l.title AS locationTitle
         FROM trip t
         INNER JOIN trip_location tl
-        ON tl.trip_id = t.trip_id
+            ON tl.trip_id = t.trip_id
+        INNER JOIN location l
+            ON l.location_id = tl.location_id
         WHERE t.trip_id = #{tripId}
     </select>
 

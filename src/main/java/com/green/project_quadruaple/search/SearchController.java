@@ -6,7 +6,11 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+<<<<<<< HEAD
 import io.swagger.v3.oas.annotations.tags.Tag;
+=======
+import io.swagger.v3.oas.annotations.Operation;
+>>>>>>> 7ae566736101f0cd8002cf83fdfbad25ab3f2d62
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,13 +60,16 @@ public class SearchController {
         return ResponseEntity.ok(locations);
     }
 
-
     @GetMapping("/strf-list-basic")
-    public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(@RequestParam("trip_id") Long tripId, @RequestParam("last_index") int lastIdx) {
+    @Operation(summary = "일정 추가 검색 기본", description = "일정 추가 검색 화면 처음 접근시 불러올 해당지역 추천 장소들 요청 API")
+    public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(@RequestParam("trip_id") Long tripId,
+                                                                       @RequestParam("last_index") int lastIdx)
+    {
         return searchService.getStrfListBasic(tripId, lastIdx);
     }
 
     @GetMapping("/strf-list-word")
+    @Operation(summary = "일정 추가 검색", description = "일정 추가 검색, 검색어 입력 시 요청 API, 현재 필터는 카테고리와 검색어 뿐")
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListWithSearchWord(@RequestParam("trip_id") Long tripId,
                                                                        @RequestParam("last_index") int lastIdx,
                                                                        @RequestParam(required = false) String category,

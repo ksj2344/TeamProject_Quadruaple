@@ -1,6 +1,11 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.search.model.*;
+<<<<<<< HEAD
+=======
+import com.green.project_quadruaple.search.model.SearchBasicReq;
+import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
+>>>>>>> 7ae566736101f0cd8002cf83fdfbad25ab3f2d62
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,8 +17,8 @@ public interface SearchMapper {
     List<LocationResponse> getTripLocation(@Param("search_word") String searchWord);
 
     // 일정 추가 검색
-    List<StrfShortInfoDto> selStrfShortInfoBasic(long userId, List<Long> locationIdList, int startIdx, int size, String category, String searchWord);
-    List<Long> selLocationIdByTripId(long tripId);
+    List<StrfShortInfoDto> selStrfShortInfoBasic(long userId, List<LocationIdAndTitleDto> locationIdList, int startIdx, int size, String category, String searchWord);
+    List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
 
 
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
