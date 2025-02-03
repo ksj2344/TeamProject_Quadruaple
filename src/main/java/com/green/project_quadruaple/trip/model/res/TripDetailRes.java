@@ -18,6 +18,10 @@ public class TripDetailRes {
     private long totalDuration;
     private int scheduleCnt;
     private int memoCnt;
+    private Long tripId;
+    private String title;
+    private String startAt;
+    private String endAt;
     private List<TripDetailDto> days;
 }
 /*

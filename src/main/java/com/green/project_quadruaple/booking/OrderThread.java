@@ -11,7 +11,7 @@ public class OrderThread implements Runnable {
     @Override
     public void run() {
         try {
-            Thread.sleep(1_800_000 );
+            Thread.sleep(180_000 );
             BookingService.kakaoTidSession.remove(userId);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

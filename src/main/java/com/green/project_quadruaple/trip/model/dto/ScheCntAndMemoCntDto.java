@@ -13,4 +13,8 @@ public class ScheCntAndMemoCntDto {
 
     private int scheduleCnt;
     private int memoCnt;
+    private Long tripId;
+    private String title;
+    private String startAt;
+    private String endAt;
 }
