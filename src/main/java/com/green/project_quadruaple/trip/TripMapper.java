@@ -18,6 +18,8 @@ public interface TripMapper {
     void insTripLocation(long tripId, List<Long> idList);
 
     TripDetailDto getTrip(long tripId);
+    Long selTripManagerId(Long tripId);
+    boolean selExistsTripUser(Long tripId, Long userId);
 
     ScheCntAndMemoCntDto selScheduleCntAndMemoCnt(long tripId);
     List<TripDetailDto> selScheduleDetail(Long tripId, Long userId);
@@ -52,7 +54,7 @@ public interface TripMapper {
     void deleteScheMemo(long scheduleId);
 
     // deleteTripUser
-    Long selTripById(long tripId);
+//    Long selTripById(long tripId);
     void disableTripUser(long tripId, long userId);
     List<StrfLatAndLngDto> selStrfLatAndLng(Long prevStrfId, Long nextStrfId);
 

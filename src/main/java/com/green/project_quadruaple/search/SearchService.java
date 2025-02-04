@@ -158,6 +158,7 @@ public class SearchService {
     public List<Stay> searchStayByAmenity(Long amenityId, int startIdx, int size, Long userId) {
         return searchMapper.searchStayByAmenity(amenityId, startIdx, size, userId);
     }
+
 //    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {
 //        try {
 //            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(searchWord ,category, userId,  amenityIds);
@@ -173,5 +174,4 @@ public class SearchService {
 //            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
 //        }
 //    }
-
 }
