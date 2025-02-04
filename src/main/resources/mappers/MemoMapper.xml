@@ -27,15 +27,6 @@
         values (#{memoId}), #{title}, #{content}
     </insert>-->
 
-    <!--gpt <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
-        INSERT INTO memo (title, content, updated_at)
-        VALUES (#{title}, #{content}, NOW())
-    </insert>
-
-    <insert id="insertScheMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="scheduleMemoId">
-        INSERT INTO sche_memo (trip_id, day, seq, category, created_at)
-        VALUES (#{tripId}, #{day}, #{seq}, 'MEMO', NOW())
-    </insert>-->
 
     <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
         INSERT INTO memo (trip_id, day, seq, user_id)
