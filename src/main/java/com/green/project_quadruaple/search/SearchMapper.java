@@ -7,6 +7,7 @@ import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.filter.StaySearchReq;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
+import com.green.project_quadruaple.trip.model.Category;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -21,44 +22,37 @@ public interface SearchMapper {
     List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
 
 
+
+
+    // 검색창 출력 + 검색어 저장
+    List<SearchGetRes> searchGetList (Long userId);
+    void searchIns (@Param("txt") String txt ,@Param("user_id") Long userId);
+
+    // 홈 기본 검색화면 - 최근 본 목록 & 인기 상품
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
     List<SearchBasicPopualarRes> searchBasicPopular();
 
+
+    // 검색 -> 전체 상품 탭
 //    List<SearchAllList> searchAllList(@Param("search_word") String searchWord
 //                                     , @Param("category") String category
 //                                     , @Param("user_id") Long userId
 //                                     , @Param("amenity_id") List<Long> amenityIds);
 
-    List<Stay> searchAllList(@Param("request") StaySearchReq request);
+    List<Stay> searchAllList(@Param("search_word") String searchWord , @Param("user_id") Long userId);
 
-    List<Stay> searchCategoryWithFilters(@Param("category") StrfCategory category
+    // 전체 상품에서 해당 카테고리 전환
+    List<Stay> searchCategoryWithFilters(@Param("category") Category category
                                         , @Param("startIdx") int startIdx
                                         , @Param("size") int size
                                         , @Param("userId") Long userId);
 
+    // 숙소 카테고리에서
     List<Stay> searchStayByAmenity(@Param("amenityId") Long amenityId
                                         , @Param("startIdx") int startIdx
                                         , @Param("size") int size
                                         , @Param("userId") Long userId);
 //    List<SearchCategoryList> searchCategoryWithFilters(@Param("user_id") Long userId, @Param("category") String category, @Param("amenity_id") List<Long> amenityIds,
 //            @Param("start_idx") int startIdx, @Param("size") int size);
-
-
-
-
-    /*
-    검색 창 터치 -> 검색 목록 출력
-    <select id="searchGetList">
-        SELECT txt
-        FROM search_word
-        WHERE user_id = #{userId}
-    </select>
-
-    검색 창 입력 -> 검색창 테이블에 검색 데이터 입력
-    <insert id="searchIns">
-        INSERT INTO search_word (txt , user_id)
-        VALUES (#{txt} , #{userId})
-    </insert>
-     */
 
 }

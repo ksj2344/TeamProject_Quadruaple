@@ -18,15 +18,16 @@ public class StrfService {
     private final StrfMapper strfMapper;
     private final AuthenticationFacade authenticationFacade;
 
-    public ResponseWrapper<StrfSelRes> getMemberDetail(Long userId, Long strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         if (signedUserId == null || strfId == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-        StrfSelRes res = strfMapper.getMemberDetail(userId , strfId);
+        StrfSelRes res = strfMapper.getMemberDetail(signedUserId , strfId);
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
+        strfMapper.strfUpsert(signedUserId,strfId);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }

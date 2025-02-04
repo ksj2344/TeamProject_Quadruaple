@@ -14,8 +14,6 @@ public class UserUpdateReq {
     private long signedUserId;
     private String email;
     private String name;
-    private String pw;
-    private String newPw;
-    private String checkPw;
+    @JsonIgnore
     private String profilePic;
 }

@@ -2,6 +2,7 @@ package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.Paging;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
@@ -15,6 +16,7 @@ import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import com.green.project_quadruaple.trip.model.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
-
+    private final AuthenticationFacade authenticationFacade;
     private final SearchMapper searchMapper;
 
     @Value("${const.default-review-size}")
@@ -97,8 +99,29 @@ public class SearchService {
         }
     }
 
-// 밑으로 상품 검색
 
+
+
+
+    // 검색창 - 최근 검색어 출력
+    public ResponseWrapper<List<SearchGetRes>> searchGetList (){
+       Long userId = authenticationFacade.getSignedUserId();
+       if (userId <= 0){
+           return null;
+       }
+       List<SearchGetRes> res = searchMapper.searchGetList(userId);
+
+        for (SearchGetRes searchGetRes : res) {
+            searchGetRes.setUserId(userId);
+        }
+
+
+       return new ResponseWrapper<>(ResponseCode.OK.getCode(),res);
+    }
+
+
+
+    // 밑으로 상품 검색
     public ResponseWrapper<List<SearchBasicRecentRes>> searchBasicRecent(Long userId) {
         Long effectedUserId = (userId != null) ? userId : null;
         List<SearchBasicRecentRes> res = searchMapper.searchBasicRecent(effectedUserId);
@@ -141,24 +164,33 @@ public class SearchService {
 //        }
 //    }
 
-    public StaySearchRes searchAll(StaySearchReq request) {
-        List<Stay> stays = searchMapper.searchAllList(request);
+    public ResponseWrapper<StaySearchRes> searchAll(String searchWord) {
+        Long signedUserId = authenticationFacade.getSignedUserId();
+        if (signedUserId <= 0){
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+        }
+
+        // 검색어 search_word 테이블 insert + update 작업용
+        searchMapper.searchIns(searchWord,signedUserId);
+
+        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
+
         int totalCount = stays.size(); // 총 개수 계산 (필요시 수정)
 
         StaySearchRes response = new StaySearchRes();
         response.setStays(stays);
         response.setTotalCount(totalCount);
-        return response;
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), response);
     }
 
-    public List<Stay> searchCategoryWithFilters(StrfCategory category, int startIdx, int size, Long userId) {
+    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size, Long userId) {
+
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
 
     public List<Stay> searchStayByAmenity(Long amenityId, int startIdx, int size, Long userId) {
         return searchMapper.searchStayByAmenity(amenityId, startIdx, size, userId);
     }
-
 //    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {
 //        try {
 //            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(searchWord ,category, userId,  amenityIds);

@@ -186,7 +186,6 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
-
     <resultMap id="stayResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
         <result property="title" column="strfTitle" />
@@ -199,70 +198,18 @@
         <result property="userWishlist" column="userWishlist" />
     </resultMap>
 
-
-
     <select id="searchGetList">
         SELECT txt
         FROM search_word
         WHERE user_id = #{userId}
+        ORDER BY search_at DESC
+        LIMIT 5
     </select>
-
     <insert id="searchIns">
         INSERT INTO search_word (txt , user_id)
-        VALUES (#{txt} , #{userId})
+        VALUES (#{txt}, #{userId})
+        ON DUPLICATE KEY UPDATE
+        search_at = NOW()
     </insert>
-
-
-    <!--
-    <select id="searchAllList">
-        SELECT
-        s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName ,
-        AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount, COUNT(w.user_id) AS wishlistCount,
-        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist,
-        GROUP_CONCAT(a.title) AS amenities
-        FROM stay_tour_restaur_fest s
-        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
-        JOIN location l ON ld.location_id = l.location_id
-        LEFT JOIN review r ON s.strf_id = r.strf_id
-        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
-        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
-        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
-        WHERE
-        <if test="searchWord != null">
-            s.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            l.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            ld.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
-            a.title LIKE CONCAT('%', #{searchWord}, '%')
-        </if>
-        <if test="category != null">
-            s.category LIKE CONCAT('%', #{searchWord}, '%') OR
-        </if>
-        GROUP BY s.strf_id
-        ORDER BY s.created_at DESC
-        LIMIT 3
-    </select>
-
-
-    <select id="searchCategoryWithFilters">
-        SELECT s.strf_id AS strfId , s.title AS strfTitle , s.category, l.title AS locationName, AVG(r.rating) AS averageRating,
-        COUNT(r.review_id) AS reviewCount, COUNT(w.user_id) AS wishlistCount,
-        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist
-        FROM stay_tour_restaur_fest s
-        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
-        JOIN location l ON ld.location_id = l.location_id
-        LEFT JOIN review r ON s.strf_id = r.strf_id
-        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
-        JOIN amenipoint ap ON s.strf_id = ap.strf_id
-        WHERE s.category = #{category.name()}  - Enum의 name() 메서드를 사용하여 문자열로 변환
-        AND ap.amenity_id IN
-        <foreach item="amenityId" collection="amenityIds" open="(" separator="," close=")">
-            #{amenityId}
-        </foreach>
-        GROUP BY s.strf_id
-        ORDER BY s.created_at DESC
-        LIMIT #{startIdx}, #{size}
-    </select>
-
-    -->
 
 </mapper>

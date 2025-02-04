@@ -16,6 +16,8 @@ public interface TripReviewMapper {
     List<TripReviewGetDto> getMyTripReviews(long userId, String orderType);
     // 모든 사용자의 여행기 조회
     List<TripReviewGetDto> getAllTripReviews(String orderType);
+    // 다른 사용자의 여행기 조회
+    TripReviewGetDto getOtherTripReviewById(long tripReviewId);
 
     //여행기 update
     int updTripReview(TripReviewPatchDto dto);
@@ -30,4 +32,10 @@ public interface TripReviewMapper {
     int insTripLike(TripLikeDto like);
     int delTripLike(TripLikeDto like);
     Integer tripLikeCount(Long tripReviewId);
+
+    //여행기 조회수
+    int insTripReviewRecent(long userId, long tripReviewId);
+
+    //여행기 스크랩
+    int insTripReviewScrap(TripReviewScrapDto scrap);
 }
