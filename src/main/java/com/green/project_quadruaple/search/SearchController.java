@@ -10,6 +10,7 @@ import com.green.project_quadruaple.search.model.filter.StaySearchReq;
 import com.green.project_quadruaple.search.model.filter.StaySearchRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.HttpStatus;
@@ -81,6 +82,13 @@ public class SearchController {
 
 
 
+    // 상품 검색어 최근 리스트
+
+    @GetMapping("/list")
+    @Operation(summary = "검색창 최근 검색어 리스트", description = "user_id 가 없으면 반환하는 데이터 없음")
+    public ResponseWrapper<SearchGetRes> searchGetList (){
+        return searchService.searchGetList();
+    }
 
 
     // 밑으로 상품 검색
@@ -99,13 +107,13 @@ public class SearchController {
 
     @PostMapping("/all")
     @Operation(summary = "검색 - 전체 페이지 리스트", description = "최대 3개 출력 - 나머지는 더 보기 누르면 category 로 이전")
-    public StaySearchRes searchAll(@RequestBody StaySearchReq request) {
-        return searchService.searchAll(request);
+    public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord) {
+        return searchService.searchAll(searchWord);
     }
 
     @GetMapping("/category")
     @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
-    public List<Stay> searchCategoryWithFilters(@RequestParam("category") StrfCategory category
+    public List<Stay> searchCategoryWithFilters(@RequestParam("category") Category category
                                                 , @RequestParam("start_idx") int startIdx
                                                 , @RequestParam("size") int size
                                                 , @RequestParam(value = "user_id",required = false) Long userId) {
