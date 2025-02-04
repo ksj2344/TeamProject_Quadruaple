@@ -10,9 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WishListGetReq {
-
     private List<String> categoryList;
     private int page;
-    private Long userId;
+
 
 }
