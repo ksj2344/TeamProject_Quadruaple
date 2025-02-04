@@ -15,5 +15,6 @@ public class ExpenseDto {
     private long deId;
     private String paidFor;
     private int totalPrice;
+    private int myPrice;
     private List<PaidUser> paidUserList;
 }

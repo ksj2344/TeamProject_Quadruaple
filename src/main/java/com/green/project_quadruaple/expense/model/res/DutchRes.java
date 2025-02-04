@@ -11,7 +11,6 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public class DutchRes {
-    private String paidFor;
     private int totalPrice;
     private List<DutchPaidUserDto> paidUserList;
 }

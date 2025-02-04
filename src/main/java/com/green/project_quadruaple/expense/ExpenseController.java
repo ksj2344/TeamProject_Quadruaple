@@ -1,14 +1,15 @@
 package com.green.project_quadruaple.expense;
 
 import com.green.project_quadruaple.expense.model.req.DutchReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseSameReq;
+import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,14 +29,17 @@ public class ExpenseController {
     //정산하기
     @GetMapping("dutch")
     @Operation(summary = "정산하기", description = "비용추가 누르면 나오는 페이지")
-    public ResponseEntity<?> dutchExpenses(@RequestBody DutchReq p){
+    public ResponseEntity<?> dutchExpenses(@RequestParam("total_price") int totalPrice,
+                                           @RequestParam("trip_id") long tripId,
+                                           @RequestParam("except_users") List<Long> exceptUsers){
+        DutchReq p = new DutchReq(totalPrice,tripId,exceptUsers);
         return expenseService.dutchExpenses(p);
     }
 
     //가계부 추가
     @PostMapping
     @Operation(summary = "가계부 입력", description = "비용목록에 한 칸 추가")
-    public ResponseEntity<?> postExpenses(@RequestBody ExpenseSameReq p){
+    public ResponseEntity<?> postExpenses(@RequestBody ExpenseInsReq p){
         return expenseService.insSamePrice(p);
     }
 

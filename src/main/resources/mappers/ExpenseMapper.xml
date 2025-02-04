@@ -11,7 +11,7 @@
 
     <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
         INSERT INTO daily_expense
-        SET `for`=#{forText}
+        SET `for`=#{paidFor}
     </insert>
 
     <insert id="insPaidUser">
@@ -25,7 +25,7 @@
         AND trip_id=#{tripId})
     </insert>
 
-    <insert id="insPaidUserSamePrice">
+    <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
         SELECT
         #{deId},
@@ -76,6 +76,7 @@
         <id property="deId" column="deId" />
         <result property="paidFor" column="paidFor" />
         <result property="totalPrice" column="totalPrice" />
+        <result property="myPrice" column="myPrice" />
         <collection property="paidUserList" resultMap="paidUserList" />
     </resultMap>
 
@@ -99,7 +100,8 @@
         SELECT
         de_id,
         `for` AS paidFor,
-        SUM(price) AS totalPrice
+        SUM(price) AS totalPrice,
+        price AS myPrice
         FROM depay
         WHERE trip_id = #{tripId}
         GROUP BY de_id, `for`
@@ -111,6 +113,7 @@
         TS.myTotalPrice,
         ES.paidFor,
         ES.totalPrice,
+        ES.myPrice,
         T.de_id AS deId,
         T.user_id AS userId,
         T.name,
