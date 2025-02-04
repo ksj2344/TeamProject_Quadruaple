@@ -3,6 +3,7 @@ package com.green.project_quadruaple.trip;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.trip.model.PathInfoVo;
 import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
@@ -31,6 +32,7 @@ import java.util.*;
 
 @Slf4j
 @Service
+@Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
 public class TripService {
 
@@ -40,8 +42,7 @@ public class TripService {
     private final ObjectMapper objectMapper;
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
-//        long signedUserId = AuthenticationFacade.getSignedUserId();
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long now = new Date().getTime();
         List<TripDto> TripList = tripMapper.getTripList(signedUserId);
 
@@ -68,21 +69,20 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-    @Transactional
     public ResponseWrapper<PostTripRes> postTrip(PostTripReq req) {
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         req.setManagerId(signedUserId);
         tripMapper.insTrip(req);
         tripMapper.insTripLocation(req.getTripId(), req.getLocationId());
         PostTripRes res = new PostTripRes();
         res.setTripId(req.getTripId());
-        return new ResponseWrapper<PostTripRes>(ResponseCode.OK.getCode(), res);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
     public ResponseWrapper<TripDetailRes> getTrip(Long tripId) {
-        Long userId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
-        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, userId);
+        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         long totalDistance = 0L;
         long totalDuration = 0L;
         for (TripDetailDto detailDto : tripDetailDto) {
@@ -114,9 +114,13 @@ public class TripService {
     /*
     * 여행 수정
     * */
-    @Transactional
     public ResultResponse patchTrip(PatchTripReq req) {
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
+        long managerId = tripMapper.selTripManagerId(req.getTripId());
+        if(signedUserId != managerId) {
+            return ResultResponse.forbidden();
+        }
         tripMapper.updateTrip(req);
 
         // 참여 유저 수정
@@ -153,7 +157,7 @@ public class TripService {
      * 5. 미완료 여행 목록 중 상품의 locationId 를 이미 가지고 있는 여행이라면 locateTripList 에 저장, 아니라면 totalTripList 에 저장
      * */
     public ResponseWrapper<IncompleteTripRes> getIncomplete(long strfId) {
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long strfLocationId = tripMapper.selStrfLocationId(strfId); // 상품의 locationId 찾기
         long now = new Date().getTime();
         List<TripIdMergeDto> dtoList = tripMapper.selIncompleteTripList(signedUserId); // 로그인 유저의 여행 리스트 데이터 DB 에서 가져오기
@@ -211,7 +215,7 @@ public class TripService {
     * 길찾기
     * */
     public ResponseWrapper<List<FindPathRes>> getTransPort(FindPathReq req) {
-
+        Optional.of(AuthenticationFacade.getSignedUserId()).get();
         log.info("odsayConst.getBaseUrl = {}", odsayApiConst.getBaseUrl());
         log.info("odsayConst.getSearchPubTransPathUrl = {}", odsayApiConst.getSearchPubTransPathUrl());
         String json = httpPostRequestReturnJson(req);
@@ -254,9 +258,12 @@ public class TripService {
     * 4. 가져온 nextSche 의 strf 위경도(start)와 postSche 의 위경도(end)로 OdsayAPi 호출, 거리, 시간, 수단 불러오기
     * 5. nextSche 의 거리, 시간, 수단을 가져온 API 값으로 update
     * */
-    @Transactional
     public ResultResponse postSchedule(PostScheduleReq req) {
+        Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
+        if(tripMapper.selExistsTripUser(tripId, signedUserId)) {
+            return ResultResponse.forbidden();
+        }
         long strfId = req.getStrfId();
         int seq = req.getSeq();
 
@@ -298,9 +305,13 @@ public class TripService {
     /*
     * 일정메모 순서 변경
     * */
-    @Transactional
     public ResultResponse patchSeq(PatchSeqReq req) {
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
+        Long managerId = tripMapper.selTripManagerId(tripId);
+        if(signedUserId != managerId) {
+            return ResultResponse.forbidden();
+        }
         long scheduleId = req.getScheduleId();
         int originSeq = req.getOriginSeq();
         int destSeq = req.getDestSeq();
@@ -349,7 +360,6 @@ public class TripService {
             * A의 변경된 위치가 마지막 일정이라면
             * 3-1. 변경 없음
             * */
-            FindPathReq findPathReq;
             if(!notFirst) { // 원래 자리가 첫 일정이라면
                 tripMapper.updateSchedule(false, scheduleDto.getNextScheduleId(), 0, 0, 0);
             } else if (scheduleDto.getNextScheduleStrfId() != null) { // 원래 자리가 마지막 일정이 아니라면
@@ -398,10 +408,15 @@ public class TripService {
     * 3. sche_memo 의 category 가 SCHE 인 가장 가까운 seq 의 일정은 거리, 시간, 이동수단을 삭제하는 일정의 이전 일정과 다시 맞추어야함
     * 4. 먄약 삭제하는 일정이 마지막 일정이라면 그냥 일정만 삭제하면 됨
     * */
-    @Transactional
     public ResultResponse deleteSchedule(long scheduleId) {
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+
         try {
             long tripId = tripMapper.selScheduleByScheduleId(scheduleId); // 삭제할 일정의 여행 ID
+            Long managerId = tripMapper.selTripManagerId(tripId);
+            if(signedUserId != managerId) {
+                return ResultResponse.forbidden();
+            }
             ScheduleDto scheduleDto = tripMapper.selScheduleAndScheMemoByScheduleId(scheduleId, tripId); // 삭제할 일정
             if(!scheduleDto.isNotFirst()) { // 첫번째 일정일때는 다음일정의 거리, 시간, 이동수단을 null 로 바꾸고 끝.
                 tripMapper.updateSeqScheMemo(scheduleDto.getTripId(), scheduleDto.getSeq(), true); // ScheMemo 의 시퀀스 변경
@@ -431,13 +446,16 @@ public class TripService {
         }
     }
 
-    @Transactional
     public ResultResponse deleteTripUser(DeleteTripUserReq req) {
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
+        if(signedUserId != tripMapper.selTripManagerId(tripId)) {
+            return ResultResponse.forbidden();
+        }
+
         long targetUserId = req.getTargetUserId();
 
-        Long managerId = tripMapper.selTripById(tripId);
+        Long managerId = tripMapper.selTripManagerId(tripId);
         if(managerId != req.getLeaderId() || signedUserId != targetUserId || managerId == targetUserId) {
             return ResultResponse.forbidden();
         }

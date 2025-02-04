@@ -206,6 +206,4 @@ public class SearchService {
 //            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
 //        }
 //    }
-
-
 }

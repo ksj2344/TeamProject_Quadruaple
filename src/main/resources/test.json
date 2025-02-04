@@ -1,25 +1,29 @@
 {
   "code" : "200 성공",
   "data" : {
-    "category" : "숙소" ,
-    "isMore" : "true" ,
-    "list" : [
+    "bookingList" : [
       {
-        "strfId" : 1,
-        "title" : "숙소명",
-        "latit" : "37.5664707",
-        "longitude" : "127.0039404",
-        "picTitle" : "숙소.jpg",
-        "ratingCnt" : 2000,
-        "explain" : "숙소에 대한 간략한 설명",
-        "wishCnt" : 150,
-        "averageRating" : 3.2,
-        "wishIn" : false,
-        "ratingIn" : true,
-        "startAt" : null,
-        "endAt" : null
-      } ,
-      ...
+        "bookingId": 1,
+        "strfId": 3,
+        "strfPic": "image.jpg",
+        "createdAt": "2025-06-21 수",
+        "checkInDate": "2025-07-08 토",
+        "checkOutDate": "2025-07-09 일",
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "price": 225000
+      },
+      {
+        "bookingId": 2,
+        "strfId": 58,
+        "strfPic": "image.jpg",
+        "createdAt": "2025-06-21 수",
+        "checkInDate": "2025-07-09 일",
+        "checkOutDate": "2025-07-10 월",
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "price": 99000
+      }
     ]
   }
 }
