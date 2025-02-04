@@ -86,39 +86,38 @@ public class SearchController {
     // 밑으로 상품 검색
 
     @GetMapping("/basic")
-    public ResponseWrapper<?> searchBasicList(@RequestParam("user_id") Long userId) {
+    @Operation(summary = "상품 검색 최근 본 목록 리스트", description = "user_id 가 없으면 반환하는 데이터 없음")
+    public ResponseWrapper<?> searchBasicList(@RequestParam(value = "user_id" , required = false) Long userId) {
         return searchService.searchBasicRecent(userId);
     }
 
     @GetMapping("/popular")
+    @Operation(summary = "인기 상품", description = "현재 날짜 기준 3개월 동안 검색이 많은 상품")
     public ResponseWrapper<?> searchBasicPopular(){
         return searchService.searchBasicPopular();
     }
 
-    @PostMapping("/search")
+    @PostMapping("/all")
+    @Operation(summary = "검색 - 전체 페이지 리스트", description = "최대 3개 출력 - 나머지는 더 보기 누르면 category 로 이전")
     public StaySearchRes searchAll(@RequestBody StaySearchReq request) {
         return searchService.searchAll(request);
     }
 
     @GetMapping("/category")
-    public List<Stay> searchCategoryWithFilters(@RequestParam StrfCategory category, @RequestParam int startIdx, @RequestParam int size, @RequestParam Long userId) {
+    @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
+    public List<Stay> searchCategoryWithFilters(@RequestParam("category") StrfCategory category
+                                                , @RequestParam("start_idx") int startIdx
+                                                , @RequestParam("size") int size
+                                                , @RequestParam(value = "user_id",required = false) Long userId) {
         return searchService.searchCategoryWithFilters(category, startIdx, size, userId);
     }
 
     @GetMapping("/amenity")
-    public List<Stay> searchStayByAmenity(@RequestParam Long amenityId, @RequestParam int startIdx, @RequestParam int size, @RequestParam Long userId) {
+    @Operation(summary = "숙소 카테고리 - 편의 필터", description = "편의 id -> 편의 정보에 맞춰 숙소 리스트 반환")
+    public List<Stay> searchStayByAmenity(@RequestParam("amenity_id") Long amenityId
+                                                , @RequestParam("start_idx") int startIdx
+                                                , @RequestParam("size") int size
+                                                , @RequestParam(value = "user_id" , required = false) Long userId) {
         return searchService.searchStayByAmenity(amenityId, startIdx, size, userId);
     }
-
-//    @GetMapping("/category")
-//    public ResponseWrapper<?> searchCategoryWithFilters(@RequestParam(value = "user_id", required = false) Long userId,
-//             @RequestParam String category, @RequestParam("amenity_id") List<Long> amenityIds, @ModelAttribute Paging paging) {
-//
-//        return searchService.searchCategoryWithFilters(userId, category, amenityIds, paging);
-//    }
-
-
-
-
-
 }

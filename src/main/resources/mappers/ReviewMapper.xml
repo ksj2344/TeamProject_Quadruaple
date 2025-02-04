@@ -40,11 +40,8 @@
     </select>
 
     <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
-        INSERT INTO review
-        SET content = #{content}
-        , rating = #{rating}
-        , strf_id = #{strfId}
-        , user_id = #{userId}
+        INSERT INTO review (content, rating, strf_id, user_id)
+        VALUES (#{content}, #{rating}, #{strfId}, #{userId})
     </insert>
 
     <insert id="postReviewPic">
