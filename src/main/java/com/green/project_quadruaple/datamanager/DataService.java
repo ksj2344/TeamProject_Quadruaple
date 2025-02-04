@@ -50,11 +50,12 @@ public class DataService {
         List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
         List<MenuDto> menus=p.getMenus();
         String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
+        String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         int strfCnt;
         int menuCnt;
         try {
-             strfCnt=(int) myFileUtils.countFiles(sourcePath);
-             menuCnt=(int) myFileUtils.countFiles(sourcePath+"/menu");
+             strfCnt=(int) myFileUtils.countFiles(sourcePath)-1;
+             menuCnt=(int) myFileUtils.countFiles(menuPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
