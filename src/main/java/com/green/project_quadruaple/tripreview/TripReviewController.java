@@ -125,4 +125,17 @@ public class TripReviewController {
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
+
+    //--------------------------------------------------------------------
+    // 여행기 스크랩
+    @PostMapping("scrap")
+    @Operation(summary = "여행기 스크랩 등록(작업중)")
+    public ResponseEntity<?> postScrap(@RequestBody TripReviewScrapDto scrap) {
+        int result = tripReviewService.copyTripReview(scrap);
+
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
 }

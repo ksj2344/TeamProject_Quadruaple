@@ -115,9 +115,8 @@ public class SearchController {
     @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
     public List<Stay> searchCategoryWithFilters(@RequestParam("category") Category category
                                                 , @RequestParam("start_idx") int startIdx
-                                                , @RequestParam("size") int size
-                                                , @RequestParam(value = "user_id",required = false) Long userId) {
-        return searchService.searchCategoryWithFilters(category, startIdx, size, userId);
+                                                , @RequestParam("size") int size) {
+        return searchService.searchCategoryWithFilters(category, startIdx, size);
     }
 
     @GetMapping("/amenity")

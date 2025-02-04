@@ -12,6 +12,5 @@ import lombok.ToString;
 public class Amenity {
     private Long amenityId;
     private String title;
-
 }
 
