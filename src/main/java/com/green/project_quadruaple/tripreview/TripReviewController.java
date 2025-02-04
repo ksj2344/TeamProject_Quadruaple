@@ -60,6 +60,17 @@ public class TripReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), allTripReview));
     }
 
+    @GetMapping("otherTripReview")
+    @Operation(summary = "다른 사용자의 여행기 조회")
+    public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
+        TripReviewGetDto tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
+
+        if (tripReviewGetDto == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), tripReviewGetDto));
+    }
+
     //여행기 수정
     @PatchMapping
     @Operation(summary = "여행기 수정")
