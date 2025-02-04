@@ -22,8 +22,5 @@ public class Stay {
     private int reviewCount;
     private int wishlistCount;
     private boolean userWishlist;
-    private List<Amenity> amenities;
-
-
 }
 
