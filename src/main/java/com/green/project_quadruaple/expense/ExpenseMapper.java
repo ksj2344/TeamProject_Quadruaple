@@ -16,8 +16,11 @@ public interface ExpenseMapper {
 
     //같은 가격 가계부 insert
     int insPaidUserSamePrice (ExpenseSameReq p);
-
+    //정산하기
     List<DutchPaidUserDto> selDutchUsers (DutchReq p);
-
+    //가계부 보기
     ExpensesRes getExpenses(long tripId, long userId);
+
+    //참여유저인지 확인하기
+    boolean IsUserInTrip(long tripId, long userId);
 }

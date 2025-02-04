@@ -27,6 +27,10 @@ public class ExpenseService {
 
     //추가하기
     public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseSameReq p){
+        if(!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         DeDto d=new DeDto(null, p.getForText());
         expenseMapper.insDe(d);
         Long deId=d.getDeId();
@@ -45,6 +49,10 @@ public class ExpenseService {
 
     //정산하기
     public ResponseEntity<ResponseWrapper<DutchRes>> dutchExpenses(DutchReq p){
+        if(!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         List<DutchPaidUserDto> dutchPaidUserDtos=expenseMapper.selDutchUsers(p);
         int price=p.getTotalPrice()/dutchPaidUserDtos.size();
         for(DutchPaidUserDto dto:dutchPaidUserDtos){
@@ -57,6 +65,10 @@ public class ExpenseService {
     //가계부 보기
     public ResponseEntity<ResponseWrapper<ExpensesRes>> getExpenses(long tripId){
         long userId=authenticationFacade.getSignedUserId();
+        if(!expenseMapper.IsUserInTrip(tripId,userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         ExpensesRes result= expenseMapper.getExpenses(tripId,userId);
         if(result==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
