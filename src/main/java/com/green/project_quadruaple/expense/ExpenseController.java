@@ -21,7 +21,7 @@ public class ExpenseController {
     //가계부 보기
     @GetMapping
     @Operation(summary = "가계부 보기", description = "여행에 관련한 비용목록 보기")
-    public ResponseEntity<?> getExpenses(@ParameterObject long tripId){
+    public ResponseEntity<?> getExpenses(@RequestParam("trip_id") long tripId){
         return expenseService.getExpenses(tripId);
     }
 
@@ -37,5 +37,26 @@ public class ExpenseController {
     @Operation(summary = "가계부 입력", description = "비용목록에 한 칸 추가")
     public ResponseEntity<?> postExpenses(@RequestBody ExpenseSameReq p){
         return expenseService.insSamePrice(p);
+    }
+
+    //가계부 조회
+    @GetMapping("select")
+    @Operation(summary = "가계부 조회", description = "입력된 금액 1줄 보기")
+    public ResponseEntity<?> selectExpenses(@RequestParam("de_id") long deId){
+        return null;
+    }
+
+    //가계부 수정
+    @PutMapping
+    @Operation(summary = "가계부 수정", description = "금액 혹은 인원수정")
+    public ResponseEntity<?> updateExpenses(){
+        return null;
+    }
+
+    //가계부 삭제
+    @DeleteMapping
+    @Operation(summary = "가계부 삭제", description = "가계부 삭제, 본인만 삭제 가능")
+    public ResponseEntity<?> delExpenses(){
+        return null;
     }
 }

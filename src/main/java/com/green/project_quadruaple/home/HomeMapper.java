@@ -20,4 +20,6 @@ public interface HomeMapper {
     //mypage 가져오기
     MyPageRes pushHamburger(long userId);
 
+    //유저가 여행이 있는지 체크
+    boolean isUserHaveTrip(long userId);
 }
