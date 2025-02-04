@@ -104,6 +104,14 @@ public class UserController {
         return  ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), userUpdateRes));
     }
 
+    //비밀번호 변경
+    @PatchMapping("/password")
+    @Operation(summary = "비밀번호 변경")
+    public ResponseEntity<?> changeUserPassword(@RequestBody ChangePasswordReq req) {
+        userService.changePassword(req);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), "비밀번호가 변경되었습니다."));
+    }
+
     // 임시 비밀번호 발급
     @PostMapping("password")
     @Operation(summary = "임시 비밀번호 전송")
