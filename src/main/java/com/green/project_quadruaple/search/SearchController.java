@@ -95,8 +95,8 @@ public class SearchController {
 
     @GetMapping("/basic")
     @Operation(summary = "상품 검색 최근 본 목록 리스트", description = "user_id 가 없으면 반환하는 데이터 없음")
-    public ResponseWrapper<?> searchBasicList(@RequestParam(value = "user_id" , required = false) Long userId) {
-        return searchService.searchBasicRecent(userId);
+    public ResponseWrapper<?> searchBasicList() {
+        return searchService.searchBasicRecent();
     }
 
     @GetMapping("/popular")
