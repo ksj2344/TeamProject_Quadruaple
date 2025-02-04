@@ -25,7 +25,7 @@ public interface SearchMapper {
 
 
     // 검색창 출력 + 검색어 저장
-    SearchGetRes searchGetList (@Param("user_id") Long userId);
+    List<SearchGetRes> searchGetList (Long userId);
     void searchIns (@Param("txt") String txt ,@Param("user_id") Long userId);
 
     // 홈 기본 검색화면 - 최근 본 목록 & 인기 상품
