@@ -50,7 +50,7 @@ public class ReviewService {
 
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
+    public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
         p.setUserId(authenticationFacade.getSignedUserId());
 //        if (p.getReviewId() <= 0) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -60,8 +60,7 @@ public class ReviewService {
         // 리뷰 저장
         int result = reviewMapper.postRating(p);
         if (result == 0) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            return 0;
         }
 
         long reviewId = p.getReviewId();
@@ -79,8 +78,7 @@ public class ReviewService {
                 // 폴더 삭제 처리
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
-                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                return 0;
             }
         }
         ReviewPicDto reviewPicDto = new ReviewPicDto();
@@ -89,7 +87,7 @@ public class ReviewService {
 
         // DB에 사진 저장
         int resultPics = reviewMapper.postReviewPic(reviewPicDto);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
+        return 1;
     }
 
 
