@@ -15,8 +15,8 @@ import java.util.List;
 @EqualsAndHashCode
 @Schema
 public class StrfSelRes {
+
     private Long strfId;
-    private Long userId;
     private String category;
     private String strfTitle;
     private double latit;
