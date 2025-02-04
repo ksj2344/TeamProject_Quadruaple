@@ -1,16 +1,10 @@
 package com.green.project_quadruaple.recent;
 
-import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.recent.model.HideRecentUpdReq;
-import com.green.project_quadruaple.recent.model.HideRecentsUpdReq;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -22,15 +16,15 @@ public class RecentController {
 
     @PatchMapping("hide")
     public ResponseEntity<?> hideRecentItem(
-            HideRecentUpdReq req) {
+            @RequestParam("strf_id") Long strfId) {
 
-        int updatedCount = recentService.recentHide(req);
+        int updatedCount = recentService.recentHide(strfId);
 
         return ResponseEntity.ok(updatedCount);
     }
     @PatchMapping("hide/all")
-    public ResponseEntity<?> recentAllHide(HideRecentsUpdReq req) {
-        int updatedCount = recentService.recentAllHide(req);
+    public ResponseEntity<?> recentAllHide() {
+        int updatedCount = recentService.recentAllHide();
 
         return ResponseEntity.ok(updatedCount);
     }
