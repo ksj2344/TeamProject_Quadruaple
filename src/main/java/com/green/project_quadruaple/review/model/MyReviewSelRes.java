@@ -33,3 +33,4 @@ public class MyReviewSelRes {
     @Schema(description = "리뷰 사진 목록")
     private List<ReviewPic> myReviewPic;
 }
+
