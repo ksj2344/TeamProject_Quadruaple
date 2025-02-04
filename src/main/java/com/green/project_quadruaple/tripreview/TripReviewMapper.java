@@ -38,4 +38,7 @@ public interface TripReviewMapper {
 
     //여행기 스크랩
     int insTripReviewScrap(TripReviewScrapDto scrap);
+    void copyInsTrip(long tripId, long newManagerId, String newStartAt, String newEndAt);
+    void copyInsScheMemo(long tripId, int day, long originalScheMemoId);
+    void copyInsSchedule(long scheMemoId, long originalScheduleId);
 }
