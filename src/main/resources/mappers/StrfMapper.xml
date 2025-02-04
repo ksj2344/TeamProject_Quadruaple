@@ -191,7 +191,6 @@
         ON DUPLICATE KEY UPDATE
         undo_recent = VALUES(undo_recent),
         inquired_at = NOW()
-
     </insert>
 
 
