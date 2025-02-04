@@ -27,6 +27,7 @@ public class StrfService {
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
+        strfMapper.strfUpsert(userId,strfId);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
