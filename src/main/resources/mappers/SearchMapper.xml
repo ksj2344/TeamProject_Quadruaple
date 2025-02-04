@@ -22,15 +22,9 @@
 
     <select id="selStrfShortInfoBasic">
         SELECT
-            s.strf_id
-            , s.category AS category
-            , s.title AS title
-            , s.lat AS lat
-            , s.lng AS lng
-            , s.`explain` AS `explain`
-            , sp.pic_name AS picTitle
-            , COALESCE(w.wishlist_count, 0) AS wishCnt
-            , COALESCE(r1.review_count, 0) AS ratingCnt
+            s.strf_id , s.category AS category , s.title AS title , s.lat AS lat
+            , s.lng AS lng , s.`explain` AS `explain` , sp.pic_name AS picTitle
+            , COALESCE(w.wishlist_count, 0) AS wishCnt , COALESCE(r1.review_count, 0) AS ratingCnt
             , COALESCE(r1.avgRating, 0) AS avgRating
             , CASE
             WHEN uw.user_id IS NOT NULL THEN 1
@@ -40,8 +34,7 @@
             WHEN r2.user_id IS NOT NULL THEN 1
             ELSE 0
             END AS ratingIn
-            , s.start_at
-            , s.end_at
+            , s.start_at , s.end_at
         FROM stay_tour_restaur_fest s
         INNER JOIN location_detail ld
             ON ld.location_detail_id = s.location_detail_id
@@ -51,8 +44,7 @@
         GROUP BY strf_id
         ) w
             ON s.strf_id = w.strf_id
-        LEFT JOIN strf_pic sp
-            ON sp.strf_id = s.strf_id
+        LEFT JOIN strf_pic sp ON sp.strf_id = s.strf_id
         LEFT JOIN (
         SELECT
             strf_id
@@ -90,14 +82,10 @@
     </select>
 
     <select id="selLocationIdByTripId">
-        SELECT
-            l.location_id AS locationId
-            , l.title AS locationTitle
+        SELECT l.location_id AS locationId , l.title AS locationTitle
         FROM trip t
-        INNER JOIN trip_location tl
-            ON tl.trip_id = t.trip_id
-        INNER JOIN location l
-            ON l.location_id = tl.location_id
+        INNER JOIN trip_location tl ON tl.trip_id = t.trip_id
+        INNER JOIN location l ON l.location_id = tl.location_id
         WHERE t.trip_id = #{tripId}
     </select>
 

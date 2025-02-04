@@ -65,10 +65,10 @@ public class ReviewService {
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
         p.setUserId(authenticationFacade.getSignedUserId());
-        if (p.getReviewId() <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-        }
+//        if (p.getReviewId() <= 0) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+//        }
 
         // 리뷰 저장
         int result = reviewMapper.postRating(p);
