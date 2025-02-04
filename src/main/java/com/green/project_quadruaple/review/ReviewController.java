@@ -37,12 +37,12 @@ public class ReviewController {
         return ResponseEntity.ok(response); // ResponseWrapper를 직접 반환
     }
 
-//    @PostMapping
-//    public ResponseEntity<?> postReview(@RequestBody ReviewPostReq reviewPostReq,
-//                                           @RequestParam List<ReviewPostPic> pics) {
-//        ResponseWrapper<Long> reviewId = reviewService.postReview(reviewPostReq, pics);
-//        return ResponseEntity.ok(reviewId);
-//    }
+    @PostMapping
+    @Operation(summary = "리뷰 등록")
+    public ResponseEntity<?> postReview(@RequestPart List<MultipartFile> pics, @Valid @RequestPart ReviewPostReq p) {
+        ResponseEntity<ResponseWrapper<Integer>> reviewId = reviewService.postRating(pics,p);
+        return ResponseEntity.ok(reviewId);
+    }
 
 //    @PutMapping
 //    @Operation(summary = "리뷰 수정")
@@ -62,9 +62,4 @@ public class ReviewController {
         req.setReviewId(reviewId); // URL에서 리뷰 ID를 설정
         return reviewService.deleteReview(req);
     }
-
-
-
-
-
 }
