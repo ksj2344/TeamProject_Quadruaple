@@ -30,7 +30,7 @@
         SELECT 1
         FROM recent
         WHERE j.user_id = #{userId} AND a.strf_id = #{strfId} AND n.undo_recent = 0
-        ), 1, 0 ) AS recentCheck,
+        ), 0, 1 ) AS recentCheck,
         CASE
         WHEN EXISTS(
         SELECT 1
@@ -68,7 +68,6 @@
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
-        <result property="userId" column="userId" />
         <result property="category" column="category" />
         <result property="strfTitle" column="strfTitle" />
         <result property="latit" column="latit" />
@@ -94,6 +93,7 @@
         <result property="wishIn" column="wishIn" />
         <result property="recentCheck" column="recentCheck" />
         <result property="recentCheckStatus" column="recentCheckStatus" />
+        <result property="inquiredAt" column="inquiredAt" />
 
 
         <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
