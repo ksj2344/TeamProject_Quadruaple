@@ -146,9 +146,9 @@ public class SearchService {
 
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long signedUserId = authenticationFacade.getSignedUserId();
-        if (signedUserId <= 0){
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-        }
+//        if (signedUserId <= 0){
+//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+//        }
 
         // 검색어 search_word 테이블 insert + update 작업용
         searchMapper.searchIns(searchWord,signedUserId);
@@ -158,7 +158,9 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
 
-    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size, Long userId) {
+    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
+        Long userId = authenticationFacade.getSignedUserId();
+
 
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
