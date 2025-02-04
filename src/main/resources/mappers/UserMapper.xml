@@ -80,6 +80,9 @@
         <if test="profilePic != null  and profilePic != '' ">
             , profile_pic = #{profilePic}
         </if>
+        <if test="profilePic == null">
+            , profile_pic = NULL
+        </if>
         </set>
         WHERE email = #{email}
     </update>
