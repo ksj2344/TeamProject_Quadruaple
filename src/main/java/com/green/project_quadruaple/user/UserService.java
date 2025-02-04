@@ -161,6 +161,7 @@ public class UserService {
         return MailService.mailChecked.getOrDefault(email, false);
     }
 
+
     //-------------------------------------------------
     // 프로필 및 계정 조회
     public UserInfoDto infoUser() {
