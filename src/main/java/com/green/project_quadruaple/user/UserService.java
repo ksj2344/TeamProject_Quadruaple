@@ -161,6 +161,7 @@ public class UserService {
         return MailService.mailChecked.getOrDefault(email, false);
     }
 
+
     //-------------------------------------------------
     // 프로필 및 계정 조회
     public UserInfoDto infoUser() {
@@ -207,14 +208,16 @@ public class UserService {
             req.setNewPw(hashedPassword);
         }
 
-        if (profilePic != null && !profilePic.isEmpty()) {
-            String targetDir = "user/" + req.getSignedUserId();
-            myFileUtils.makeFolders(targetDir);
+        String targetDir = "user/" + req.getSignedUserId();
+        myFileUtils.makeFolders(targetDir);
 
+        // 기존 파일 경로 설정
+        String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getSignedUserId());
+
+        if (profilePic != null && !profilePic.isEmpty()) {
             String savedFileName = myFileUtils.makeRandomFileName(profilePic);
 
             // 기존 파일 삭제
-            String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getSignedUserId());
             myFileUtils.deleteFolder(deletePath, false);
 
             // 파일 저장
@@ -225,6 +228,10 @@ public class UserService {
             } catch (IOException e) {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
+        } else {
+            // 프로필 사진을 제거하려는 경우
+            myFileUtils.deleteFolder(deletePath, false);
+            req.setProfilePic(null); // DB에도 null로 업데이트
         }
 
         int result = userMapper.updUser(req);
