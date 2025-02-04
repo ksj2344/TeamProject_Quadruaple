@@ -90,6 +90,7 @@ public class SearchController {
         return searchService.searchGetList();
     }
 
+
     // 밑으로 상품 검색
 
     @GetMapping("/basic")
