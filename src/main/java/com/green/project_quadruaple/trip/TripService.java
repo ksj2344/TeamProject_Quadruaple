@@ -40,6 +40,7 @@ public class TripService {
     private final OdsayApiConst odsayApiConst;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final WeatherApiCall weatherApiCall;
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
@@ -85,8 +86,12 @@ public class TripService {
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         long totalDistance = 0L;
         long totalDuration = 0L;
+        if(tripDetailDto.isEmpty()) {
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), null);
+        }
         for (TripDetailDto detailDto : tripDetailDto) {
-            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
+//            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
+            detailDto.setWeather(weatherApiCall.call(webClient, objectMapper, detailDto.getSchedules().get(0).getLat(), detailDto.getSchedules().get(0).getLng()));
             for (ScheduleResDto schedule : detailDto.getSchedules()) {
                 Long distance = schedule.getDistance();
                 Long duration = schedule.getDuration();
