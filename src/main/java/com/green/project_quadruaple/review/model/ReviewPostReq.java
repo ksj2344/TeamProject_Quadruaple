@@ -16,5 +16,4 @@ public class ReviewPostReq {
     private String content;
     private int rating;
     private long strfId;
-    private long userId;
 }
