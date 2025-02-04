@@ -10,7 +10,6 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class Amenity {
-    private Long amenityId;
-    private String title;
+    private String amenityTitle;
 }
 

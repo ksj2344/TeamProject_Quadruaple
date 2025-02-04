@@ -30,7 +30,6 @@
         <result property="pic" column="pic"/>
     </resultMap>
 
-
     <select id="getReviewPics">
         SELECT review_id AS reviewId , title
         FROM review_pic
@@ -129,6 +128,7 @@
         LEFT JOIN user c ON a.user_id = c.user_id
         WHERE a.user_id = #{userId}
         ORDER BY a.review_id DESC
+        LIMIT #{startIdx} , #{size}
     </select>
     <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
         <id property="reviewId" column="reviewId"/>

@@ -135,7 +135,7 @@
         LIMIT 10
     </select>
 
-    <select id="searchAllList" resultMap="stayResultMap">
+    <select id="searchAllList" resultMap="searchAllResultMap">
         SELECT *
         FROM (
         SELECT
@@ -166,7 +166,7 @@
         WHERE row_num <![CDATA[ <= ]]> 3
         ORDER BY category, created_at DESC;
     </select>
-    <resultMap id="stayResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
+    <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
         <result property="title" column="strfTitle" />
         <result property="category" column="category" />
@@ -179,7 +179,7 @@
     </resultMap>
 
 
-    <select id="searchCategoryWithFilters" resultMap="stayResultMap">
+    <select id="searchCategoryWithFilters" >
         SELECT
         s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName,
         c.pic_name AS strfPic, AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount,
@@ -199,8 +199,8 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
-    <!--
-    <select id="searchStayByAmenity" resultMap="stayResultMap">
+
+    <select id="searchStayByAmenity" resultMap="stayAmenityResultMap">
         SELECT
         s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName,
         c.pic_name AS strfPic, AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount,
@@ -220,7 +220,7 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
-    <resultMap id="stayResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
+    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
         <result property="title" column="strfTitle" />
         <result property="category" column="category" />
@@ -230,12 +230,11 @@
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
         <result property="userWishlist" column="userWishlist" />
-        <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.Amenity" javaType="java.util.List">
-            <id property="amenityId" column="amenityId" />
-            <result property="title" column="amenityTitle" />
-        </collection>
+        <collection property="amenities" resultMap="stayAmenity"/>
     </resultMap>
--->
+    <resultMap id="stayAmenity" type="com.green.project_quadruaple.search.model.filter.Stay">
+        <result property="amenityTitle" column="amenityTitle"/>
+    </resultMap>
 
 
 </mapper>
