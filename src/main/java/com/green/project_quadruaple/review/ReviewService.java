@@ -26,40 +26,27 @@ public class ReviewService {
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
-    public ResponseEntity<ResponseWrapper<List<ReviewSelRes>>> getReview(ReviewSelReq req) {
-        List<ReviewSelRes> res = reviewMapper.getReview(req);
-
-        if (res.isEmpty()) {
-            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new ArrayList<>()));
+    public List<ReviewSelRes> getReviewWithPics(ReviewSelReq req) {
+        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(req);
+        Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
+        for (ReviewSelRes item : dtoList) {
+            // 기존 리뷰 ID로 저장된 객체가 있는지 확인
+            ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
-
-        List<Long> reviewIds = res.stream()
-                .map(ReviewSelRes::getReviewId)
-                .collect(Collectors.toList());
-
-        List<ReviewPicSel> reviewPics = reviewMapper.getReviewPics(reviewIds);
-
-        Map<Long, List<String>> picHashMap = new HashMap<>();
-        for (ReviewPicSel item : reviewPics) {
-            picHashMap.computeIfAbsent(item.getReviewId(), k -> new ArrayList<>()).add(item.getPic());
-        }
-
-        for (ReviewSelRes review : res) {
-            List<String> pictureUrls = picHashMap.get(review.getReviewId());
-            if (pictureUrls != null) {
-                List<ReviewPicSel> reviewPicSelList = pictureUrls.stream()
-                        .map(url -> {
-                            ReviewPicSel reviewPicSel = new ReviewPicSel();
-                            reviewPicSel.setPic(url);
-                            reviewPicSel.setReviewId(review.getReviewId());
-                            return reviewPicSel;
-                        }).collect(Collectors.toList());
-                review.setReviewPics(reviewPicSelList);
-            }
-        }
-
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
+        return dtoList;
     }
+    public List<MyReviewSelRes> getMyReviews(MyReviewSelReq req) {
+
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(req);
+        Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
+
+        for (MyReviewSelRes item : dtoList) {
+            // 기존 리뷰 ID로 저장된 객체가 있는지 확인
+            ReviewSelRes review = reviewMap.get(item.getReviewId());
+        }
+        return dtoList;
+    }
+
 
 
     @Transactional
@@ -162,34 +149,7 @@ public class ReviewService {
     }
 
 
-    public ResponseWrapper<List<MyReviewSelRes>> getMyReviews(MyReviewSelReq req) {
-        log.info("Received userId: " + req.getUserId());
 
-        if (req.getStartIdx() < 0) {
-            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), new ArrayList<>());
-        }
-
-        List<MyReviewSelRes> resList = reviewMapper.getMyReviews(req);
-
-        if (resList == null || resList.isEmpty()) {
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), new ArrayList<>());
-        }
-
-        List<Long> reviewIds = resList.stream()
-                .map(MyReviewSelRes::getReviewId)
-                .collect(Collectors.toList());
-
-        List<ReviewPicSel> reviewPics = reviewMapper.getReviewPics(reviewIds);
-
-        for (MyReviewSelRes review : resList) {
-            List<ReviewPicSel> picsForReview = reviewPics.stream()
-                    .filter(pic -> pic.getReviewId() == review.getReviewId())
-                    .collect(Collectors.toList());
-            review.setReviewPics(picsForReview);
-        }
-
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), resList);
-    }
 
 
 
