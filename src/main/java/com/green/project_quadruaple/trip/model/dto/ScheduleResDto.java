@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.trip.model.dto;
 
-import com.green.project_quadruaple.trip.model.Category;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ScheduleDto {
+public class ScheduleResDto {
 
     private long scheduleMemoId;
     private String scheOrMemo;
@@ -25,9 +24,5 @@ public class ScheduleDto {
     private long tripId;
     private String title;
     private String content;
-    private Long reviewed;
-    private boolean isNotFirst;
-    private Long nextScheduleId;
-    private Long prevScheduleStrfId;
-    private Long nextScheduleStrfId;
+    private boolean reviewed;
 }
