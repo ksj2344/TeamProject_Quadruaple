@@ -13,11 +13,12 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class SearchBasicRecentRes {
-    private long userId;
+    private Long strfId;
     private String strfName;
     private String inquiredAt;
     private String strfPic;
     private String category;
     private String locationTitle;
 }
+
 
