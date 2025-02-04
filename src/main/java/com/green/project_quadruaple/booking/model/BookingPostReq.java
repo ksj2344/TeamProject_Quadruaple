@@ -33,7 +33,7 @@ public class BookingPostReq {
     private String checkOut;
 
     @JsonProperty("coupon_id")
-    private long couponId;
+    private Long couponId;
 
     @NotNull
     @JsonProperty("actual_paid")
