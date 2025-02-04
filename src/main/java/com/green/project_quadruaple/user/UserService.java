@@ -191,36 +191,16 @@ public class UserService {
     public UserUpdateRes patchUser(MultipartFile profilePic, UserUpdateReq req) {
         long signedUserId = authenticationFacade.getSignedUserId();
         req.setSignedUserId(signedUserId);
-        UserUpdateRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
-
-        if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
-            throw new IllegalArgumentException("잘못된 사용자 ID 또는 비밀번호입니다.");
-        }
-
-        // newPw가 null이 아니고 기존 비밀번호와 같지 않은 경우에만 비밀번호 변경
-        if (req.getNewPw() != null) {
-            if (req.getNewPw().equals(checkPassword.getPw())) {
-                throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
-            }
-
-            String hashedPassword = passwordEncoder.encode(req.getNewPw());
-            userMapper.changePassword(signedUserId, hashedPassword);
-            req.setNewPw(hashedPassword);
-        }
 
         String targetDir = "user/" + req.getSignedUserId();
         myFileUtils.makeFolders(targetDir);
 
-        // 기존 파일 경로 설정
         String deletePath = String.format("%s/user/%s", myFileUtils.getUploadPath(), req.getSignedUserId());
 
         if (profilePic != null && !profilePic.isEmpty()) {
             String savedFileName = myFileUtils.makeRandomFileName(profilePic);
-
-            // 기존 파일 삭제
             myFileUtils.deleteFolder(deletePath, false);
 
-            // 파일 저장
             String filePath = String.format("%s/%s", targetDir, savedFileName);
             try {
                 myFileUtils.transferTo(profilePic, filePath);
@@ -229,9 +209,8 @@ public class UserService {
                 throw new RuntimeException("프로필 사진 저장에 실패했습니다.", e);
             }
         } else {
-            // 프로필 사진을 제거하려는 경우
             myFileUtils.deleteFolder(deletePath, false);
-            req.setProfilePic(null); // DB에도 null로 업데이트
+            req.setProfilePic(null);
         }
 
         int result = userMapper.updUser(req);
@@ -241,8 +220,26 @@ public class UserService {
 
         return UserUpdateRes.builder()
                 .signedUserId(signedUserId)
-                .pw(req.getNewPw())  // 새로운 비밀번호가 없으면 null일 수 있으므로 그대로 반환
                 .build();
+    }
+
+    //-------------------------------------------------
+    // 계정 비밀번호 변경
+    public void changePassword(ChangePasswordReq req) {
+        long signedUserId = authenticationFacade.getSignedUserId();
+
+        UserUpdateRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
+
+        if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+
+        if (req.getNewPw().equals(req.getPw())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
+
+        String hashedPassword = passwordEncoder.encode(req.getNewPw());
+        userMapper.changePassword(signedUserId, hashedPassword);
     }
 
     //-------------------------------------------------

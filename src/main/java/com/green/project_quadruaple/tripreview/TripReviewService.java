@@ -2,8 +2,9 @@ package com.green.project_quadruaple.tripreview;
 
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.trip.TripMapper;
+import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.tripreview.model.*;
-import com.green.project_quadruaple.user.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TripReviewService {
     private final TripReviewMapper tripReviewMapper;
+    private final TripMapper tripMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
@@ -76,6 +78,20 @@ public class TripReviewService {
     // 모든 사용자의 여행기 조회
     public List<TripReviewGetDto> getAllTripReviews(String orderType) {
         return tripReviewMapper.getAllTripReviews(orderType);
+    }
+    // 다른 사용자의 여행기 조회
+    public TripReviewGetDto getOtherTripReviews(long tripReviewId) {
+        long userId = authenticationFacade.getSignedUserId();
+
+        // 여행기 조회수 삽입
+        tripReviewMapper.insTripReviewRecent(userId, tripReviewId);
+
+        TripReviewGetDto tripReviewGetDto = tripReviewMapper.getOtherTripReviewById(tripReviewId);
+        if (tripReviewGetDto == null) {
+            throw new RuntimeException("해당 여행기를 찾을 수 없습니다.");
+        }
+
+        return tripReviewGetDto;
     }
 
     // 여행기 수정
@@ -165,5 +181,20 @@ public class TripReviewService {
 
     public int getTripLikeCount(Long tripReviewId) {
         return Optional.ofNullable(tripReviewMapper.tripLikeCount(tripReviewId)).orElse(0);
+    }
+
+    // 여행기 스크랩
+    public int copyTripReview(TripReviewScrapDto scrap) {
+        long userId = authenticationFacade.getSignedUserId();
+
+        int result = tripReviewMapper.insTripReviewScrap(scrap);
+
+        if (result == 1) {
+            PostTripReq postTripReq = new PostTripReq();
+            postTripReq.setManagerId(userId);
+
+        }
+
+        return 1;
     }
 }
