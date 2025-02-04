@@ -2,8 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.home.HomeMapper">
+    <select id="isUserHaveTrip">
+        SELECT IF(EXISTS (
+        SELECT 1 FROM trip_user TU
+        WHERE TU.user_id = #{userId}
+        ), 1, 0) AS exist
+    </select>
+
     <select id="getFestival">
-        SELECT
+        SELECT DISTINCT
             A.strf_id AS strfId,
             SP.pic_name AS strfPic,
             A.title AS festTitle,
@@ -29,7 +36,7 @@
     </select>
 
     <select id="getFestivalWithOutUserId">
-        SELECT
+        SELECT DISTINCT
         A.strf_id AS strfId,
         SP.pic_name AS strfPic,
         A.title AS festTitle,
@@ -51,8 +58,9 @@
     </select>
 
     <select id="getPopularLocation">
-        SELECT
+        SELECT DISTINCT
         L.location_id AS locationId,
+        LD.location_detail_id AS locationDetailId,
         LD.detail_title AS locationTitle,
         L.location_pic AS locationPic,
         COUNT(TL.location_id) AS tripedCnt
@@ -138,33 +146,43 @@
     </select>
 
     <select id="getRecommendWithOutUserId">
-        SELECT
+        SELECT DISTINCT
         A.strf_id AS strfId,
         A.title AS strfTitle,
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,
-        A.`explain`
+        A.`explain`,
+        COUNT(W.strf_id) AS wishCnt,
+        COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
+        COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews
         FROM stay_tour_restaur_fest A
         LEFT JOIN location_detail LD ON LD.location_detail_id = A.location_detail_id
         LEFT JOIN location L ON L.location_id = LD.location_id
         LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        LEFT JOIN wishlist W ON W.strf_id=A.strf_id
         WHERE A.category !='FEST'
+        GROUP BY A.strf_id, A.title
+        ORDER BY wishCnt DESC, averageRating DESC , recentViews DESC
         LIMIT 10
     </select>
 
     <select id="getRecommend">
-        SELECT
+        SELECT DISTINCT
         A.strf_id AS strfId,
         A.title AS strfTitle,
         CONCAT(L.title, ' ', LD.detail_title) AS locationTitle,
         A.category,
         SP.pic_name AS strfPic,
-        A.`explain`
+        A.`explain`,
+        COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
+        COALESCE((SELECT COUNT(R.strf_id) FROM recent R WHERE R.strf_id = A.strf_id), 0) AS recentViews,
+        COUNT(W.strf_id) AS wishCnt
         FROM stay_tour_restaur_fest A
         LEFT JOIN location_detail LD ON LD.location_detail_id = A.location_detail_id
         LEFT JOIN location L ON L.location_id = LD.location_id
         LEFT JOIN strf_pic SP ON SP.strf_id = A.strf_id
+        LEFT JOIN wishlist W ON W.strf_id=A.strf_id
         WHERE
         L.location_id IN (
         SELECT TL.location_id
@@ -191,6 +209,8 @@
         AND W.user_id = #{userId}
         )
         AND A.category !='FEST'
+        GROUP BY A.strf_id, A.title
+        ORDER BY wishCnt DESC, averageRating DESC , recentViews DESC
         LIMIT 10
     </select>
 

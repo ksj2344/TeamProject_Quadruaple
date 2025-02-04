@@ -90,7 +90,7 @@ public class MyFileUtils {
     //폴더 내 파일 갯수 체크
     public static long countFiles(String directoryPath) throws IOException {
         try (Stream<Path> files = Files.list(Paths.get(directoryPath))) {
-            return files.count()-1;
+            return files.count();
         }
     }
 
