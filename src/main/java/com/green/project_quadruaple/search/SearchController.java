@@ -95,8 +95,8 @@ public class SearchController {
 
     @GetMapping("/basic")
     @Operation(summary = "상품 검색 최근 본 목록 리스트", description = "user_id 가 없으면 반환하는 데이터 없음")
-    public ResponseWrapper<?> searchBasicList(@RequestParam(value = "user_id" , required = false) Long userId) {
-        return searchService.searchBasicRecent(userId);
+    public ResponseWrapper<?> searchBasicList() {
+        return searchService.searchBasicRecent();
     }
 
     @GetMapping("/popular")
@@ -115,9 +115,8 @@ public class SearchController {
     @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
     public List<Stay> searchCategoryWithFilters(@RequestParam("category") Category category
                                                 , @RequestParam("start_idx") int startIdx
-                                                , @RequestParam("size") int size
-                                                , @RequestParam(value = "user_id",required = false) Long userId) {
-        return searchService.searchCategoryWithFilters(category, startIdx, size, userId);
+                                                , @RequestParam("size") int size) {
+        return searchService.searchCategoryWithFilters(category, startIdx, size);
     }
 
     @GetMapping("/amenity")

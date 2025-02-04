@@ -163,6 +163,28 @@
              , trip_id = #{tripId}
     </insert>
 
+    <insert id="copyInsTrip" useGeneratedKeys="true" keyProperty="tripId">
+        INSERT INTO trip (title, manager_id, start_at, end_at)
+        SELECT title, #{newManagerId}, #{newStartAt}, #{newEndAt}
+          FROM trip
+         WHERE trip_id = #{tripId}
+    </insert>
+
+    <insert id="copyInsScheMemo">
+        INSERT INTO sche_memo (trip_id, `day`, seq, category)
+        SELECT #{tripId}, #{day}, seq, category
+          FROM sche_memo
+         WHERE sche_memo_id = #{originalScheMemoId}
+    </insert>
+
+    <insert id="copyInsSchedule">
+        INSERT INTO schedule
+        (schedule_id, distance, duration, pathtype, strf_id)
+        SELECT #{scheMemoId}, distance, time AS duration, pathTypeValue AS pathtype, strf_id
+          FROM schedule
+         WHERE schedule_id = #{originalScheduleId}
+    </insert>
+
     <!-- 여행기 스크랩 조회수-->
     <select id="selTripReviewScrapCount">
         SELECT COUNT(scrap_id)

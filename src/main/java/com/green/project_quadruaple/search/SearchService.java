@@ -110,21 +110,18 @@ public class SearchService {
            return null;
        }
        List<SearchGetRes> res = searchMapper.searchGetList(userId);
-
         for (SearchGetRes searchGetRes : res) {
             searchGetRes.setUserId(userId);
         }
-
-
        return new ResponseWrapper<>(ResponseCode.OK.getCode(),res);
     }
 
 
 
     // 밑으로 상품 검색
-    public ResponseWrapper<List<SearchBasicRecentRes>> searchBasicRecent(Long userId) {
-        Long effectedUserId = (userId != null) ? userId : null;
-        List<SearchBasicRecentRes> res = searchMapper.searchBasicRecent(effectedUserId);
+    public ResponseWrapper<List<SearchBasicRecentRes>> searchBasicRecent() {
+        Long userId = authenticationFacade.getSignedUserId();
+        List<SearchBasicRecentRes> res = searchMapper.searchBasicRecent(userId);
         if (res.isEmpty()){
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
@@ -147,43 +144,23 @@ public class SearchService {
         }
     }
 
-
-
-//    public ResponseWrapper<List<SearchAllList>> searchAllList(String searchWord , String category, Long userId, List<Long> amenityIds) {
-//        Long effectiveUserId = (userId != null) ? userId : null;
-//
-//        List<Long> effectiveAmenityIds = (amenityIds != null && !amenityIds.isEmpty()) ? amenityIds : Collections.emptyList();
-//
-//        List<SearchAllList> result = searchMapper.searchAllList(searchWord ,category, effectiveUserId, effectiveAmenityIds);
-//
-//        try {
-//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), result);
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-//        }
-//    }
-
-    public ResponseWrapper<StaySearchRes> searchAll(String searchWord) {
+    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long signedUserId = authenticationFacade.getSignedUserId();
-        if (signedUserId <= 0){
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-        }
+//        if (signedUserId <= 0){
+//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+//        }
 
         // 검색어 search_word 테이블 insert + update 작업용
         searchMapper.searchIns(searchWord,signedUserId);
 
         List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
 
-        int totalCount = stays.size(); // 총 개수 계산 (필요시 수정)
-
-        StaySearchRes response = new StaySearchRes();
-        response.setStays(stays);
-        response.setTotalCount(totalCount);
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), response);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
 
-    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size, Long userId) {
+    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
+        Long userId = authenticationFacade.getSignedUserId();
+
 
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
