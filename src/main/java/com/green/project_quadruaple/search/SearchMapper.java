@@ -31,11 +31,13 @@ public interface SearchMapper {
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
     List<SearchBasicPopualarRes> searchBasicPopular();
     List<Stay> searchAllList(@Param("search_word") String searchWord, Long userId);
+
     // 전체 상품에서 해당 카테고리 전환
     List<Stay> searchCategoryWithFilters(@Param("category") Category category
                                         , @Param("start_idx") int startIdx
                                         , @Param("size") int size
                                         , Long userId);
+
     // 숙소 카테고리에서
     List<Stay> searchStayByAmenity(@Param("amenity_id") Long amenityId
                                         , @Param("start_idx") int startIdx

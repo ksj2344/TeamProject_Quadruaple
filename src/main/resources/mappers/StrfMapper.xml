@@ -14,9 +14,7 @@
         AVG(h.rating) AS ratingAvg, b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
-        n.inquired_at AS inquiredAt,
-
-        COUNT(m.user_id) AS wishCnt,
+        n.inquired_at AS inquiredAt, COUNT(m.user_id) AS wishCnt,
 
         IF(
         EXISTS(
@@ -62,7 +60,6 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        AND n.user_id = #{userId}
         GROUP BY a.strf_id, f.detail_title, j.`name`, l.`name`,
         j.profile_pic, l.profile_pic , d.amenity_id, b.menu_id, e.pic_name
     </select>

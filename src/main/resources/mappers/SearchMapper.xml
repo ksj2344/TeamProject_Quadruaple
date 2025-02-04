@@ -89,6 +89,28 @@
         WHERE t.trip_id = #{tripId}
     </select>
 
+
+
+
+
+
+    <!-- 검색 테이블 구현 -->
+    <select id="searchGetList">
+        SELECT txt
+        FROM search_word
+        WHERE user_id = #{userId}
+        ORDER BY search_at DESC
+        LIMIT 5
+    </select>
+    <insert id="searchIns">
+        INSERT INTO search_word (txt , user_id)
+        VALUES (#{search_word}, #{userId})
+        ON DUPLICATE KEY UPDATE
+        search_at = NOW()
+    </insert>
+
+
+
     <!-- 상품 검색 쿼리 -->
 
     <select id="searchBasicRecent">
@@ -144,6 +166,18 @@
         WHERE row_num <![CDATA[ <= ]]> 3
         ORDER BY category, created_at DESC;
     </select>
+    <resultMap id="stayResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
+        <id property="strfId" column="strfId" />
+        <result property="title" column="strfTitle" />
+        <result property="category" column="category" />
+        <result property="locationName" column="locationName" />
+        <result property="strfPic" column="strfPic" />
+        <result property="averageRating" column="averageRating" />
+        <result property="reviewCount" column="reviewCount" />
+        <result property="wishlistCount" column="wishlistCount" />
+        <result property="userWishlist" column="userWishlist" />
+    </resultMap>
+
 
     <select id="searchCategoryWithFilters" resultMap="stayResultMap">
         SELECT
@@ -165,6 +199,7 @@
         LIMIT #{startIdx}, #{size}
     </select>
 
+    <!--
     <select id="searchStayByAmenity" resultMap="stayResultMap">
         SELECT
         s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName,
@@ -180,7 +215,7 @@
         LEFT JOIN strf_pic c ON c.strf_id = s.strf_id
         LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
         WHERE ap.amenity_id = #{amenityId}
-        GROUP BY s.strf_id
+        GROUP BY s.strf_id, s.title, s.category, l.title, c.pic_name, a.amenity_id, a.title
         ORDER BY s.created_at DESC
         LIMIT #{startIdx}, #{size}
     </select>
@@ -195,20 +230,12 @@
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
         <result property="userWishlist" column="userWishlist" />
+        <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.Amenity" javaType="java.util.List">
+            <id property="amenityId" column="amenityId" />
+            <result property="title" column="amenityTitle" />
+        </collection>
     </resultMap>
+-->
 
-    <select id="searchGetList">
-        SELECT txt
-        FROM search_word
-        WHERE user_id = #{userId}
-        ORDER BY search_at DESC
-        LIMIT 5
-    </select>
-    <insert id="searchIns">
-        INSERT INTO search_word (txt , user_id)
-        VALUES (#{search_word}, #{userId})
-        ON DUPLICATE KEY UPDATE
-        search_at = NOW()
-    </insert>
 
 </mapper>
