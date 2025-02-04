@@ -35,10 +35,26 @@
     <!-- 예약 등록 -->
     <select id="selExistUserCoupon">
         SELECT
-        receive_id
+            rc.receive_id
+            , c.discountper AS discountRate
         FROM receive_coupon rc
+        JOIN coupon c
+        ON rc.coupon_id = c.coupon_id
         WHERE rc.user_id = #{userId}
-        AND coupon_id = #{couponId}
+        AND c.coupon_id = #{couponId}
+    </select>
+
+    <select id="selMenu">
+        SELECT
+            menu_id AS menuId
+            , strf_id AS strfId
+            , m.price AS price
+        FROM menu m
+        WHERE menu_id IN (
+        <foreach collection="menuIdList" item="menu" separator=",">
+            #{menu.menuId}
+        </foreach>
+        )
     </select>
 
     <insert id="insBooking" useGeneratedKeys="true" keyProperty="bookingId">

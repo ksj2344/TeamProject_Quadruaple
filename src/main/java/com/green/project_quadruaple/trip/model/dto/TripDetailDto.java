@@ -14,7 +14,7 @@ import java.util.List;
 public class TripDetailDto {
     private int day;
     private String weather;
-    private List<ScheduleDto> schedules;
+    private List<ScheduleResDto> schedules;
 }
 
 /*

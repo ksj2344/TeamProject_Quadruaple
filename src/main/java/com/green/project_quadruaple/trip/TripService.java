@@ -70,7 +70,7 @@ public class TripService {
 
     @Transactional
     public ResponseWrapper<PostTripRes> postTrip(PostTripReq req) {
-        long signedUserId = 102L;
+        long signedUserId = 101L;
         req.setManagerId(signedUserId);
         tripMapper.insTrip(req);
         tripMapper.insTripLocation(req.getTripId(), req.getLocationId());
@@ -79,14 +79,15 @@ public class TripService {
         return new ResponseWrapper<PostTripRes>(ResponseCode.OK.getCode(), res);
     }
 
-    public ResponseWrapper<TripDetailRes> getTrip(long tripId) {
+    public ResponseWrapper<TripDetailRes> getTrip(Long tripId) {
+        Long userId = 101L;
         ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
-        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId);
+        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, userId);
         long totalDistance = 0L;
         long totalDuration = 0L;
         for (TripDetailDto detailDto : tripDetailDto) {
             detailDto.setWeather("sunny"); // 날씨 API 받아와야함
-            for (ScheduleDto schedule : detailDto.getSchedules()) {
+            for (ScheduleResDto schedule : detailDto.getSchedules()) {
                 Long distance = schedule.getDistance();
                 Long duration = schedule.getDuration();
                 if(distance == null || duration == null) {
