@@ -24,17 +24,15 @@ public class ReviewController {
 
     @GetMapping
     @Operation(summary = "리뷰 조회")
-    public ResponseEntity<?> getReview(@Valid @ModelAttribute ReviewSelReq req) {
-        ResponseEntity<ResponseWrapper<List<ReviewSelRes>>> response = reviewService.getReview(req);
+    public List<ReviewSelRes> getReview(@Valid @ModelAttribute ReviewSelReq req) {
 
-        return ResponseEntity.ok(response.getBody());
+        return reviewService.getReviewWithPics(req);
     }
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
-    public ResponseEntity<?> getReview(@Valid @ModelAttribute MyReviewSelReq req) {
-        ResponseWrapper<List<MyReviewSelRes>> response = reviewService.getMyReviews(req);
+    public List<MyReviewSelRes> getMyReviews(@Valid @ModelAttribute MyReviewSelReq req) {
 
-        return ResponseEntity.ok(response); // ResponseWrapper를 직접 반환
+        return reviewService.getMyReviews(req);
     }
 
     @PostMapping
