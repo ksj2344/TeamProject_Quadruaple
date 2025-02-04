@@ -28,17 +28,22 @@ public class ReviewService {
 
     public ResponseEntity<ResponseWrapper<List<ReviewSelRes>>> getReview(ReviewSelReq req) {
         List<ReviewSelRes> res = reviewMapper.getReview(req);
+
         if (res.isEmpty()) {
             return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), new ArrayList<>()));
         }
+
         List<Long> reviewIds = res.stream()
                 .map(ReviewSelRes::getReviewId)
                 .collect(Collectors.toList());
+
         List<ReviewPicSel> reviewPics = reviewMapper.getReviewPics(reviewIds);
+
         Map<Long, List<String>> picHashMap = new HashMap<>();
         for (ReviewPicSel item : reviewPics) {
             picHashMap.computeIfAbsent(item.getReviewId(), k -> new ArrayList<>()).add(item.getPic());
         }
+
         for (ReviewSelRes review : res) {
             List<String> pictureUrls = picHashMap.get(review.getReviewId());
             if (pictureUrls != null) {
@@ -52,78 +57,53 @@ public class ReviewService {
                 review.setReviewPics(reviewPicSelList);
             }
         }
+
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
     }
 
-//    @Transactional
-//    public ResponseWrapper<Long> postReview(ReviewPostReq reviewPostReq, List<MultipartFile> pics) {
-//        Long signedUserId = authenticationFacade.getSignedUserId();
-//
-//        // 사용자 ID가 없으면 NOT_FOUND 응답 반환
-//        if (signedUserId == null) {
-//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-//        }
-//
-//        // 사용자 ID를 reviewPostReq에 설정
-//        reviewPostReq.setUserId(signedUserId);
-//
-//        // 리뷰 추가 및 생성된 reviewId 가져오기
-//        Long reviewId = reviewMapper.postRating(reviewPostReq);
-//
-//        // 리뷰 ID를 각 사진에 설정
-//        List<ReviewPostPic> reviewPostPics = new ArrayList<>();
-//        for (MultipartFile pic : pics) {
-//            ReviewPostPic reviewPostPic = new ReviewPostPic();
-//            reviewPostPic.setReviewId(reviewId);
-//            reviewPostPics.add(reviewPostPic);
-//        }
-//
-//        // 리뷰 사진 추가
-//        reviewMapper.postReviewPic(reviewPostPics);
-//
-//        // 파일 저장 경로 생성
-//        String middlePath = String.format("reviewId/%d", reviewId);
-//        myFileUtils.makeFolders(middlePath);
-//
-//        List<String> picNameList = new ArrayList<>();
-//
-//        // 사진 저장 및 이름 리스트에 추가
-//        for (MultipartFile pic : pics) {
-//            String savedPicName = myFileUtils.makeRandomFileName(pic);
-//            String filePath = String.format("%s/%s", middlePath, savedPicName);
-//            try {
-//                myFileUtils.transferTo(pic, filePath);
-//                picNameList.add(savedPicName);
-//            } catch (IOException e) {
-//                // 폴더 삭제 처리
-//                myFileUtils.deleteFolder(myFileUtils.getUploadPath() + "/" + middlePath, true);
-//                return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-//            }
-//        }
-//
-//        // DB에 사진 저장
-//        if (!picNameList.isEmpty()) {
-//            // ReviewPostPic 객체 리스트 생성
-//            List<ReviewPostPic> reviewPostPicsToSave = new ArrayList<>();
-//            for (String picName : picNameList) {
-//                ReviewPostPic reviewPostPic = new ReviewPostPic();
-//                reviewPostPic.setReviewId(reviewId);
-//                reviewPostPic.setPicName(picName); // picName을 ReviewPostPic에 설정
-//                reviewPostPicsToSave.add(reviewPostPic);
-//            }
-//
-//            // 리뷰 사진 DB에 저장
-//            int resultPics = reviewMapper.postReviewPic(reviewPostPicsToSave);
-//            if (resultPics == 0) {
-//                return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-//            }
-//        }
-//
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewId);
-//    }
 
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p) {
+        p.setUserId(authenticationFacade.getSignedUserId());
+        if (p.getReviewId() <= 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
 
+        // 리뷰 저장
+        int result = reviewMapper.postRating(p);
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
 
+        long reviewId = p.getReviewId();
+        String middlePath = String.format("reviewId/%d", reviewId);
+        myFileUtils.makeFolders(middlePath);
+
+        List<String> picNameList = new ArrayList<>(pics.size());
+        for (MultipartFile pic : pics) {
+            String savedPicName = myFileUtils.makeRandomFileName(pic);
+            picNameList.add(savedPicName);
+            String filePath = String.format("%s/%s", middlePath, savedPicName);
+            try {
+                myFileUtils.transferTo(pic, filePath);
+            } catch (IOException e) {
+                // 폴더 삭제 처리
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+        }
+        ReviewPicDto reviewPicDto = new ReviewPicDto();
+        reviewPicDto.setReviewId(reviewId);
+        reviewPicDto.setPics(picNameList);
+
+        // DB에 사진 저장
+        int resultPics = reviewMapper.postReviewPic(reviewPicDto);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
+    }
 
 
 //    @Transactional
