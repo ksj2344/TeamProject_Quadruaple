@@ -21,3 +21,4 @@ public class SearchBasicRecentRes {
     private String locationTitle;
 }
 
+
