@@ -31,6 +31,12 @@ public class BookingController {
         return bookingService.postBooking(req);
     }
 
+//    @PatchMapping
+//    @Operation(summary = "예약 취소")
+//    public ResponseWrapper<String> cancelBooking(@RequestBody ) {
+//
+//    }
+
     @Hidden
     @GetMapping("/pay-approve")
     public String getBookingList(@RequestParam("pg_token") String pgToken) {
