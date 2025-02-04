@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +29,21 @@ public class HomeService {
         List<RecentStrf> recentStrfs=new ArrayList<>();
         List<RecommendStrf> recommendStrfs=new ArrayList<>();
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof JwtUser){
-            Long userId=authenticationFacade.getSignedUserId();
+        Long userId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+
+        if(userId!=null && homeMapper.isUserHaveTrip(userId)){
             recommendFests=homeMapper.getFestival(userId);
-            recentStrfs=homeMapper.getRecent(userId);
             recommendStrfs=homeMapper.getRecommend(userId);
+            recentStrfs=homeMapper.getRecent(userId);
+        } else if(userId!=null && !homeMapper.isUserHaveTrip(userId)){
+            recommendFests=homeMapper.getFestivalWithOutUserId();
+            recommendStrfs=homeMapper.getRecommendWithOutUserId();
+            recentStrfs=homeMapper.getRecent(userId);
         } else {
             recommendFests=homeMapper.getFestivalWithOutUserId();
             recommendStrfs=homeMapper.getRecommendWithOutUserId();

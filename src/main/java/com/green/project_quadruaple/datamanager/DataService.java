@@ -49,13 +49,24 @@ public class DataService {
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
         List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
         List<MenuDto> menus=p.getMenus();
-
+        String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
+        int strfCnt;
+        int menuCnt;
+        try {
+             strfCnt=(int) myFileUtils.countFiles(sourcePath);
+             menuCnt=(int) myFileUtils.countFiles(sourcePath+"/menu");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if(menuCnt!=menus.size()){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
         for (long strfId : strfIds) {
             String middlePath=String.format("strf/%d",strfId);
             myFileUtils.makeFolders(middlePath);
             // ${file.directory}/pics/${category}/${picFolder} 내부의 파일을
             // ${file.directory}/strf/${strfId}/으로 파일을 붙여넣기
-            String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
             String filePath=String.format("%s/strf/%d",myFileUtils.getUploadPath(),strfId);
             try{
                 Path source = Paths.get(sourcePath);
@@ -69,14 +80,6 @@ public class DataService {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                             .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-            }
-            int strfCnt;
-            int menuCnt;
-            try {
-                strfCnt=(int) myFileUtils.countFiles(sourcePath);
-                menuCnt=(int) myFileUtils.countFiles(sourcePath+"/menu");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
             for(int i=0; i<strfCnt; i++){
                 Map<String, Object> map = new HashMap<>();
@@ -94,7 +97,6 @@ public class DataService {
                 menuData.add(menuMap);
             }
         }
-        log.info("picAndStrfIds:{}",picAndStrfIds.subList(0,3));
         int result= dataMapper.insStrfPic(picAndStrfIds);
         int menuResult= dataMapper.insMenu(menuData);
         if(result==0||menuResult==0){
@@ -172,22 +174,22 @@ public class DataService {
 
 
     //menu사진 삭제
-    @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> delMenu (StrfIdGetReq p){
-        List<Long> strfIds= dataMapper.selectStrfId(p);
-        if(strfIds==null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
-
-        int result= dataMapper.delMenu(strfIds);
-        if(result==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        for(int i=0; i<strfIds.size(); i++){
-            String deletePath = String.format("%s/strf/%d/menu", myFileUtils.getUploadPath(), strfIds.get(i));
-            myFileUtils.deleteFolder(deletePath, true);
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
-    }
+//    @Transactional
+//    public ResponseEntity<ResponseWrapper<Integer>> delMenu (StrfIdGetReq p){
+//        List<Long> strfIds= dataMapper.selectStrfId(p);
+//        if(strfIds==null){
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
+//
+//        int result= dataMapper.delMenu(strfIds);
+//        if(result==0){
+//            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+//        }
+//        for(int i=0; i<strfIds.size(); i++){
+//            String deletePath = String.format("%s/strf/%d/menu", myFileUtils.getUploadPath(), strfIds.get(i));
+//            myFileUtils.deleteFolder(deletePath, true);
+//        }
+//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+//    }
 }
