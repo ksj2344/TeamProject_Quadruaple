@@ -42,11 +42,11 @@ public class DataController {
 //        return dataService.insPicAndMenuToStrf(p);
 //    }
 
-    @DeleteMapping("menu")
-    @Operation(summary = "menu지우기", description = "카테고리, 원한다면 제목과 범위도")
-    public ResponseEntity<?> delMenu(@RequestBody StrfIdGetReq p){
-        return dataService.delMenu(p);
-    }
+//    @DeleteMapping("menu")
+//    @Operation(summary = "menu지우기", description = "카테고리, 원한다면 제목과 범위도")
+//    public ResponseEntity<?> delMenu(@RequestBody StrfIdGetReq p){
+//        return dataService.delMenu(p);
+//    }
 
     @PostMapping
     public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewPostReq p){
