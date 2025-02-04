@@ -187,14 +187,54 @@ public class TripReviewService {
     public int copyTripReview(TripReviewScrapDto scrap) {
         long userId = authenticationFacade.getSignedUserId();
 
-        int result = tripReviewMapper.insTripReviewScrap(scrap);
-
+        // 1. 여행기 스크랩 저장
+        int result = saveTripReviewScrap(scrap);
         if (result == 1) {
-            PostTripReq postTripReq = new PostTripReq();
-            postTripReq.setManagerId(userId);
+            // 2. 여행기 정보 복사
+            copyTripInfo(scrap, userId);
 
+            // 새로 생성된 trip_id 가져오기
+            long newTripId = scrap.getTripId();
+
+            // 3. 여행 일정 복사
+            copyScheMemo(newTripId, scrap);
+
+            // 4. 여행 일정 세부 사항 복사
+            copySchedule(scrap);
         }
 
-        return 1;
+        return result;  // 스크랩 성공 여부 반환
+    }
+
+    // 여행기 스크랩 저장
+    private int saveTripReviewScrap(TripReviewScrapDto scrap) {
+        return tripReviewMapper.insTripReviewScrap(scrap);
+    }
+
+    // 여행기 정보 복사
+    private void copyTripInfo(TripReviewScrapDto scrap, long userId) {
+        tripReviewMapper.copyInsTrip(
+                scrap.getTripId(),  // 원본 여행 ID
+                userId,             // 새로운 매니저 ID
+                scrap.getStartAt(), // 시작일
+                scrap.getEndAt()    // 종료일
+        );
+    }
+
+    // 여행 일정 복사
+    private void copyScheMemo(long newTripId, TripReviewScrapDto scrap) {
+        tripReviewMapper.copyInsScheMemo(
+                newTripId,           // 새 tripId
+                scrap.getDay(),      // 클라이언트가 지정한 `day`
+                scrap.getScheMemoId()// 기존의 sche_memo_id
+        );
+    }
+
+    // 여행 일정 세부 사항 복사
+    private void copySchedule(TripReviewScrapDto scrap) {
+        tripReviewMapper.copyInsSchedule(
+                scrap.getScheMemoId(),            // 기존 scheMemoId
+                scrap.getOriginalScheduleId()     // 기존 schedule_id
+        );
     }
 }
