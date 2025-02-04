@@ -81,11 +81,15 @@
             , strf.lng as lng
             , m.title AS title
             , m.content AS content
+            , if(r.user_id = #{userId}, 1, 0) AS reviewed
         FROM sche_memo sm
         LEFT JOIN schedule s
             ON sm.schedule_memo_id = s.schedule_id
         LEFT JOIN stay_tour_restaur_fest strf
             ON strf.strf_id = s.strf_id
+        LEFT JOIN review r
+            ON strf.strf_id = r.strf_id
+            AND r.user_id = #{userId}
         LEFT JOIN memo m
             ON m.memo_id = sm.schedule_memo_id
         WHERE sm.trip_id = #{tripId}
@@ -93,7 +97,7 @@
 
     <resultMap id="scheduleForDay" type="com.green.project_quadruaple.trip.model.dto.TripDetailDto">
         <id column="day" property="day"/>
-        <collection property="schedules" ofType="com.green.project_quadruaple.trip.model.dto.ScheduleDto">
+        <collection property="schedules" ofType="com.green.project_quadruaple.trip.model.dto.ScheduleResDto">
             <id column="seq" property="seq"/>
             <result column="scheOrMemo" property="scheOrMemo"/>
             <result column="scheduleMemoId" property="scheduleMemoId"/>
@@ -109,6 +113,7 @@
             <result column="pathType" property="pathType"/>
             <result column="title" property="title"/>
             <result column="content" property="content"/>
+            <result column="reviewed" property="reviewed"/>
         </collection>
     </resultMap>
 
