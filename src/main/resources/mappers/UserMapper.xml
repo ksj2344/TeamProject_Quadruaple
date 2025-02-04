@@ -71,9 +71,6 @@
     <update id="updUser">
         UPDATE user
         <set>
-        <if test=" newPw != null and newPw != '' and checkPw != null and checkPw != '' " >
-            pw = #{newPw}
-        </if>
         <if test=" name != null and name != '' ">
             , name = #{name}
         </if>
