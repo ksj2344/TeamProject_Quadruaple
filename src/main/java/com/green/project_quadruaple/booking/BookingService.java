@@ -1,9 +1,7 @@
 package com.green.project_quadruaple.booking;
 
 import com.green.project_quadruaple.booking.model.*;
-import com.green.project_quadruaple.booking.model.dto.BookingInsDto;
-import com.green.project_quadruaple.booking.model.dto.KakaoApproveDto;
-import com.green.project_quadruaple.booking.model.dto.KakaoReadyDto;
+import com.green.project_quadruaple.booking.model.dto.*;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,7 @@ import java.util.*;
 
 @Slf4j
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class BookingService {
 
     private final BookingMapper bookingMapper;
@@ -66,15 +65,37 @@ public class BookingService {
     // check in - out 날짜 체크 (일정의 날짜 , check in - out 날짜 겹침x)
     // final_paymaent = 실제 결제 금액 맞는지 비교 필요
     // strf id 가 실제 상품과 맞는지 체크
-    @Transactional
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
         Long userId = 101L;
+        Long couponId = req.getCouponId();
+        List<MenuIdAndQuantityDto> orderList = req.getOrderList();
 
-        Long receiveId = bookingMapper.selExistUserCoupon(userId, req.getCouponId());
-        if(receiveId == null) {
-            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
+        if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
+            CouponDto couponDto = bookingMapper.selExistUserCoupon(userId, couponId);
+            if(couponDto == null) { // 쿠폰 미소지시 에러
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
+            }
+            List<MenuDto> menuDtoList = bookingMapper.selMenu(orderList);
+            for(MenuDto menuDto : menuDtoList) {
+                for(MenuIdAndQuantityDto order : orderList) {
+                    if(menuDto.getMenuId() == order.getMenuId()) { // 메뉴의 상품 가격이 일치하는지
+                        if(menuDto.getStrfId() == req.getStrfId()) {
+                            log.info("상품 가격 일치!");
+                        } else {
+                            log.info("상품 가격 불일치!");
+                        }
+                    }
+                }
+            }
+            req.setReceiveId(couponDto.getReceiveId());
         }
-        req.setReceiveId(receiveId);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime checkInDate = LocalDateTime.parse(req.getCheckIn(), formatter);
+        LocalDateTime checkOutDate = LocalDateTime.parse(req.getCheckOut(), formatter);
+        if(checkInDate.isAfter(checkOutDate) || checkInDate.isEqual(checkOutDate)) { // 날짜 체크
+            throw new RuntimeException();
+        }
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -85,7 +106,7 @@ public class BookingService {
 
         LocalDateTime localDateTime = LocalDateTime.now();
         String orderNo = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + (int)(Math.random()*1000);
-        String quantity = String.valueOf(req.getOrderList().get(0).getQuantity());
+        String quantity = String.valueOf(orderList.get(0).getQuantity());
         String totalAmount = String.valueOf(req.getActualPaid());
         String taxFreeAmount = String.valueOf((req.getActualPaid()/10));
 
