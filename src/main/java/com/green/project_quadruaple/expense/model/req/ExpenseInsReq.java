@@ -20,9 +20,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ExpenseInsReq extends DeDto {
-    @Schema(title = "여행PK",example = "1")
+    @Schema(example = "1")
     private long tripId;
-    @Schema(title = "결제인원",example = "[101,105,108,113]")
     private List<UserPriceDto> priceList;
 }
 

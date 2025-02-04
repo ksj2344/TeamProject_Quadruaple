@@ -10,7 +10,9 @@ import java.util.List;
 @Getter
 @ToString
 @AllArgsConstructor
-public class DutchRes {
+public class ExpenseOneRes {
+    private long deId;
+    private String paidFor;
     private int totalPrice;
-    private List<DutchPaidUserDto> paidUserList;
+    private List<DutchPaidUserDto> payList;
 }

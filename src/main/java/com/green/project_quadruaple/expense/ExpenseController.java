@@ -46,8 +46,8 @@ public class ExpenseController {
     //가계부 조회
     @GetMapping("select")
     @Operation(summary = "가계부 조회", description = "입력된 금액 1줄 보기")
-    public ResponseEntity<?> selectExpenses(@RequestParam("de_id") long deId){
-        return null;
+    public ResponseEntity<?> selectExpenses(@RequestParam("de_id") long deId, @RequestParam("trip_id") long tripId){
+        return expenseService.selectExpenses(deId,tripId);
     }
 
     //가계부 수정
