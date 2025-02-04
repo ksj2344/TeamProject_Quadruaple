@@ -2,6 +2,7 @@ package com.green.project_quadruaple.memo;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.memo.model.MemoDto;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/memo")
 @RequiredArgsConstructor
+@Tag(name = "메모")
 public class MemoController {
 
     private final MemoService memoService;
@@ -23,17 +25,6 @@ public class MemoController {
         return ResponseEntity.ok(memo);
     }
 
-    /*@PostMapping("/post")
-    public ResponseEntity<?> postMemo(@RequestBody MemoDto memoDto) {
-        Long scheduleMemoId = memoService.insertMemo(memoDto);
-        return ResponseEntity.ok(scheduleMemoId);
-    }*/
-
-    /*@PostMapping("/post")
-    public ResponseEntity<Long> postMemo(@RequestBody MemoDto memoDto) {
-        Long memoId = memoService.insertMemoAndScheMemo(memoDto);
-        return ResponseEntity.ok(memoId);
-    }*/
 
     @PostMapping("/post")
     public ResponseEntity<Long> postMemo(@RequestBody MemoDto memoDto) {
