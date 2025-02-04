@@ -42,6 +42,7 @@ public class StrfSelRes {
     private int wishIn;
     private int recentCheck;
     private int recentCheckStatus;
+    private String inquiredAt;
 
 
     private List<Amenity> amenities;
