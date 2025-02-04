@@ -199,7 +199,7 @@
     </resultMap>
 
     <select id="searchGetList">
-        SELECT txt , search_at
+        SELECT txt
         FROM search_word
         WHERE user_id = #{userId}
         ORDER BY search_at DESC

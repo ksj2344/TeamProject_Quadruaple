@@ -104,12 +104,17 @@ public class SearchService {
 
 
     // 검색창 - 최근 검색어 출력
-    public ResponseWrapper<SearchGetRes> searchGetList (){
+    public ResponseWrapper<List<SearchGetRes>> searchGetList (){
        Long userId = authenticationFacade.getSignedUserId();
        if (userId <= 0){
            return null;
        }
-       SearchGetRes res = searchMapper.searchGetList(userId);
+       List<SearchGetRes> res = searchMapper.searchGetList(userId);
+
+        for (SearchGetRes searchGetRes : res) {
+            searchGetRes.setUserId(userId);
+        }
+
 
        return new ResponseWrapper<>(ResponseCode.OK.getCode(),res);
     }
