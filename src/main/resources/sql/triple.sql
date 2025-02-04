@@ -394,6 +394,26 @@ CREATE TABLE trip_review(
     , FOREIGN KEY(trip_id) REFERENCES trip (trip_id)
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
 );
+
+# 여행기 조회
+CREATE TABLE recent_tr(
+                          user_id BIGINT NOT NULL
+    , trip_review_id BIGINT NOT NULL
+    , inquired_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    , PRIMARY KEY (user_id, trip_review_id)
+    , FOREIGN KEY (user_id) REFERENCES user (user_id)
+    , FOREIGN KEY (trip_review_id) REFERENCES trip_review (trip_review_id)
+);
+
+# 여행기 스크랩
+CREATE TABLE scrap(
+                      scrap_id BIGINT primary key auto_increment
+    , trip_review_id BIGINT NOT NULL
+    , trip_id BIGINT NOT NULL
+    , FOREIGN KEY (trip_id) REFERENCES trip (trip_id)
+    , FOREIGN KEY (trip_review_id) REFERENCES trip_review (trip_review_id)
+);
+
 # 여행기 사진
 CREATE TABLE trip_review_pic(
                                 trip_review_pic VARCHAR(200)
