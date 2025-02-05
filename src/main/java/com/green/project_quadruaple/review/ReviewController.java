@@ -4,11 +4,13 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.review.model.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,15 +35,15 @@ public class ReviewController {
     }
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
-    public List<MyReviewSelRes> getMyReviews(@Valid @ModelAttribute MyReviewSelReq req) {
+    public List<MyReviewSelRes> getMyReviews() {
 
-        return reviewService.getMyReviews(req);
+        return reviewService.getMyReviews();
     }
 
     @PostMapping
     @Operation(summary = "리뷰 등록")
     public ResponseEntity<?> postReview(@RequestPart(required = false) List<MultipartFile> pics
-                                        , @Valid @RequestPart ReviewPostReq p, ServletRequest servletRequest) {
+                                        , @Valid @RequestPart ReviewPostReq p) {
         int result = reviewService.postRating(pics,p);
         if (result<0){
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), 0));
@@ -61,10 +63,7 @@ public class ReviewController {
 
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "리뷰 삭제")
-    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(
-            @PathVariable long reviewId,
-            @ParameterObject @ModelAttribute ReviewDelReq req) {
-        req.setReviewId(reviewId); // URL에서 리뷰 ID를 설정
-        return reviewService.deleteReview(req);
+    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(@RequestParam("review_id") Long reviewId) {
+        return reviewService.deleteReview(reviewId);
     }
 }
