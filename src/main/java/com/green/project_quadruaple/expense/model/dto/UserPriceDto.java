@@ -12,7 +12,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @EqualsAndHashCode
-@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserPriceDto {
     @Schema(example = "116")
     private long userId;
