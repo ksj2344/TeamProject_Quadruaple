@@ -2,6 +2,7 @@ package com.green.project_quadruaple.expense;
 
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
+import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
@@ -20,6 +21,8 @@ public interface ExpenseMapper {
     //정산하기
     List<DutchPaidUserDto> selDutchUsers (DutchReq p);
 
+    //정산에서 제외되었던 인원 불러오기
+    List<PaidUser> exceptedMember(long deId);
 
     //가계부 보기
     ExpensesRes getExpenses(long tripId, long userId);
@@ -32,4 +35,6 @@ public interface ExpenseMapper {
 
     //가계부 삭제
     int delExpenses(long deId);
+    //paidUser 삭제
+    int delPaidUser(long deId);
 }
