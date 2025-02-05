@@ -1,22 +1,16 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
-import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
-import com.green.project_quadruaple.common.model.Paging;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.Stay;
-import com.green.project_quadruaple.search.model.filter.StaySearchReq;
-import com.green.project_quadruaple.search.model.filter.StaySearchRes;
+import com.green.project_quadruaple.search.model.filter.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
-import com.green.project_quadruaple.search.model.SearchBasicReq;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import com.green.project_quadruaple.trip.model.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -165,9 +159,25 @@ public class SearchService {
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
 
-    public List<Stay> searchStayByAmenity(Long amenityId, int startIdx, int size, Long userId) {
-        return searchMapper.searchStayByAmenity(amenityId, startIdx, size, userId);
+    public ResponseWrapper<List<StayAmenity>> searchStayByAmenity(String searchWord, List<Long> amenityId, int startIdx, int size) {
+        Long userId = authenticationFacade.getSignedUserId();
+        if (userId == null || userId <= 0) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+        }
+//        if (amenityId == null || amenityId.isEmpty()) {
+//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+//        }
+        List<StayAmenity> res = searchMapper.searchStayByAmenity(searchWord, amenityId, startIdx, size, userId);
+        if (res.isEmpty()) {
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+        }
+        try {
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
+        }
     }
+
 //    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {
 //        try {
 //            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(searchWord ,category, userId,  amenityIds);

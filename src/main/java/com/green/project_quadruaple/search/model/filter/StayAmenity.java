@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.search.model.filter;
 
-import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,16 +11,15 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class Stay {
+public class StayAmenity {
     private Long strfId;
-    private String title;
-    private StrfCategory category;// enum 연결해야해서 enum 클래스 타입으로 선언함
+    private String strfTitle;
+    private String category;
     private String locationName;
     private String strfPic;
-    private Double averageRating;
-    private int reviewCount;
-    private int wishlistCount;
-    private int userWishlist;
+    private double averageRating;
+    private int reviewCnt;
+    private int wishlistCnt;
+    private int wishIn;
     private List<SearchAmenity> amenities;
 }
-

@@ -193,6 +193,7 @@ public class TripReviewService {
 
         // 2. 일정/메모 복사
         CopyInsertScheMemoDto copyInsertScheMemoDto = new CopyInsertScheMemoDto();
+        copyInsertScheMemoDto.setTripId(trip.getTripId());
         copyInsertScheMemoDto.setCopyTripId(trip.getCopyTripId());
         int copyScheMemo = tripReviewMapper.copyInsScheMemo(copyInsertScheMemoDto);
 
@@ -200,14 +201,14 @@ public class TripReviewService {
         List<Long> originalScheMemoIds = tripReviewMapper.getOriginalScheMemoIds(trip.getCopyTripId());
 
         // 3-1. 새롭게 생성된 scheduleMemoId 목록 조회
-        List<Long> newScheMemoIds = tripReviewMapper.getNewScheMemoIds(trip.getCopyTripId());
+        List<Long> newScheMemoIds = tripReviewMapper.getNewScheMemoIds(trip.getTripId());
 
         // 4. 기존 일정의 schedule_id 목록 조회
         List<Long> originalScheduleIds = tripReviewMapper.getOriginalScheduleIds(originalScheMemoIds);
 
         // 5. 기존 일정 개수와 새로 복사된 일정 개수가 같은지 확인
-        if (originalScheduleIds.size() != copyScheMemo) {
-            throw new RuntimeException("Mismatch in copied schedules. Expected: " + originalScheduleIds.size() + ", but got: " + copyScheMemo);
+        if (originalScheduleIds.size() != newScheMemoIds.size()) {
+            throw new RuntimeException("Mismatch in schedule_memo mapping. Expected: " + originalScheduleIds.size() + ", but got: " + newScheMemoIds.size());
         }
 
         // 6. 일정 복사
@@ -218,6 +219,18 @@ public class TripReviewService {
 
             int copySchedule = tripReviewMapper.copyInsSchedule(copyScheduleDto);
         }
+
+        // 7. 여행 위치 복사
+        int originalLocationIds = tripReviewMapper.getOriginalLocationIds(trip.getCopyTripId());
+        if (!originalScheduleIds.isEmpty()) {
+            tripReviewMapper.copyInsTripLocation(trip.getCopyTripId(), trip.getTripId());
+        }
+
+        // 8. 스크랩 테이블에 담기
+        TripReviewScrapDto tripReviewScrapDto = new TripReviewScrapDto();
+        tripReviewScrapDto.setTripReviewId(trip.getTripReviewId());
+        tripReviewScrapDto.setTripId(trip.getTripId());
+        int insScrap = tripReviewMapper.insTripReviewScrap(tripReviewScrapDto);
 
         return 1;
     }

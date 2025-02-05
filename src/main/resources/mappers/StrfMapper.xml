@@ -93,9 +93,7 @@
         <result property="inquiredAt" column="inquiredAt" />
         <result property="reviewCnt" column="reviewCnt" />
 
-
-
-        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
+        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">
             <id property="amenityId" column="amenityId" />
             <result property="amenityTitle" column="amenityTitle" />
         </collection>
@@ -167,7 +165,7 @@
         <result property="hostName" column="hostName" />
         <result property="reviewCnt" column="reviewCnt" />
 
-        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
+        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">
             <id property="amenityId" column="amenityId" />
             <result property="amenityTitle" column="amenityTitle" />
         </collection>

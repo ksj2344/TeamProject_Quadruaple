@@ -171,22 +171,10 @@
     </insert>
 
     <insert id="copyInsScheMemo" useGeneratedKeys="true" keyProperty="scheduleMemoId">
-        INSERT INTO sche_memo (trip_id, `day`, seq, category, created_at)
-        SELECT #{copyTripId}, src.`day`, src.seq, src.category, NOW()
-         FROM sche_memo src
-        WHERE src.trip_id = #{copyTripId}
-          AND src.category = 'SCHE'
-          AND NOT EXISTS (
-        SELECT 1 FROM sche_memo tgt
-        WHERE tgt.trip_id = #{copyTripId}
-        AND tgt.`day` = src.`day`
-        AND tgt.seq = src.seq
-        AND tgt.category = src.category
-        )
-        AND src.schedule_memo_id <![CDATA[ <= ]]> (
-        SELECT MIN(schedule_memo_id) FROM sche_memo
-        WHERE trip_id = #{copyTripId}
-        )
+        INSERT INTO sche_memo (trip_id, `day`, seq, category)
+        SELECT #{tripId}, `day`, seq, category
+          FROM sche_memo
+         WHERE trip_id = #{copyTripId}  AND category = 'SCHE'
     </insert>
 
     <select id="getOriginalScheMemoIds">
@@ -218,6 +206,19 @@
             #{scheduleMemoId}
         </foreach>
     </select>
+
+    <select id="getOriginalLocationIds">
+        SELECT location_id
+          FROM trip_location
+         WHERE trip_id = #{tripId}
+    </select>
+
+    <insert id="copyInsTripLocation">
+        INSERT IGNORE INTO trip_location (trip_id, location_id)
+        SELECT #{tripId}, location_id
+          FROM trip_location
+         WHERE trip_id = #{copyTripId}
+    </insert>
 
     <!-- 여행기 스크랩 조회수-->
     <select id="selTripReviewScrapCount">
