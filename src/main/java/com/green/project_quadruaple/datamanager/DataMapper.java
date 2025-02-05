@@ -2,6 +2,7 @@ package com.green.project_quadruaple.datamanager;
 
 import com.green.project_quadruaple.datamanager.model.MenuDto;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
+import com.green.project_quadruaple.datamanager.model.UserProfile;
 
 import java.util.List;
 import java.util.Map;
@@ -19,4 +20,10 @@ public interface DataMapper {
     int insMenu(List<Map<String, Object>> menuData);
     //menu 삭제
     int delMenu(List<Long> strfIds);
+
+
+    //user 전체 profile pic 찾기
+    List<UserProfile> getAllUsersProfilePics();
+    //user profile pic 바꾸기
+    int updateProfilePicsToDefault(List<Long> userIds, String defaultPic);
 }

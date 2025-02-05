@@ -54,4 +54,11 @@ public class DataController {
         return postreviewdummy(pics, p);
     }
 
+    @PostMapping("default-profile-pic")
+    @Operation(summary = "프로필 사진 기본 이미지로 변경",
+            description = "profilePic이 null이거나 확장자가 없는 경우, 기본 이미지(user.png)로 변경")
+    public ResponseEntity<?> updateProfilePicsToDefault() {
+        return dataService.updateInvalidProfilePics();
+    }
+
 }
