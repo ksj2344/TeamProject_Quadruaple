@@ -3,51 +3,55 @@
 
 <mapper namespace="com.green.project_quadruaple.memo.MemoMapper">
 
-    <resultMap id="MemoResultMap" type="com.green.project_quadruaple.memo.model.MemoDto">
-        <id property="memoId" column="memo_id"/>
-        <result property="tripId" column="trip_id"/>
-        <result property="day" column="day"/>
-        <result property="seq" column="seq"/>
-        <result property="userId" column="user_id"/>
-        <result property="title" column="title"/>
-        <result property="content" column="content"/>
-    </resultMap>
-
-    <select id="selectMemo" resultMap="MemoResultMap">
-        SELECT * FROM memo WHERE memo_id = #{memoId}
+    <!-- 메모 조회 -->
+    <select id="selectMemo" parameterType="long" resultType="com.green.project_quadruaple.memo.model.MemoDto">
+        SELECT
+        memo_id AS memoId,
+        trip_id AS tripId,
+        day,
+        seq,
+        title,
+        content,
+        user_id AS userId,
+        created_at AS createdAt,
+        updated_at AS updatedAt
+        FROM
+        memo
+        WHERE
+        memo_id = #{memoId}
     </select>
 
-    <!-- 1 진 <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
-        INSERT INTO memo (trip_id, day, seq, user_id)
-        VALUES (#{tripId}, #{day}, #{seq}, #{userId})
+    <!-- 메모 추가 -->
+    <insert id="postMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
+        INSERT INTO memo (
+        trip_id, day, seq, title, content, user_id, created_at
+        ) VALUES (
+        #{tripId}, #{day}, #{seq}, #{title}, #{content}, #{userId}, #{createdAt}
+        )
     </insert>
 
-    <insert id="insertScMemo">
-        insert into memo (memo_id, title, content)
-        values (#{memoId}), #{title}, #{content}
-    </insert>-->
-
-
-    <insert id="insertMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto" useGeneratedKeys="true" keyProperty="memoId">
-        INSERT INTO memo (trip_id, day, seq, user_id)
-        VALUES (#{tripId}, #{day}, #{seq}, #{userId})
-    </insert>
-
-    <!-- scMemo 삽입 -->
-    <insert id="insertScMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
-        INSERT INTO memo (memo_id, title, content)
-        VALUES (#{memoId}, #{title}, #{content})
-    </insert>
-
-
-    <update id="updateMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
-        UPDATE memo
-        SET title = #{title}, content = #{content}
+    <!-- 메모 작성자 조회 -->
+    <select id="findMemoOwnerId" parameterType="long" resultType="long">
+        SELECT user_id
+        FROM memo
         WHERE memo_id = #{memoId}
+    </select>
+
+    <!-- 메모 수정 -->
+    <update id="patchMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
+        UPDATE memo
+        SET
+        title = #{title},
+        content = #{content},
+        updated_at = #{updatedAt}
+        WHERE
+        memo_id = #{memoId}
     </update>
 
-    <delete id="deleteMemo">
-        DELETE FROM memo WHERE memo_id = #{memoId}
+    <!-- 메모 삭제 -->
+    <delete id="deleteMemo" parameterType="long">
+        DELETE FROM memo
+        WHERE memo_id = #{memoId}
     </delete>
 
 
