@@ -10,6 +10,5 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 public class ReviewDelReq {
-    private Long userId;
     private Long reviewId;
 }
