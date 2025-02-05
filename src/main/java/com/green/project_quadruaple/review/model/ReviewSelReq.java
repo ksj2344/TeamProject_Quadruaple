@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.BindParam;
 @EqualsAndHashCode(callSuper = true)
 @Schema(title = "리뷰 요청")
 public class ReviewSelReq extends Paging {
-    @JsonIgnore
-    private Long userId;
+//    @JsonIgnore
+//    private Long userId;
 
     @NotNull
     @Positive
@@ -29,5 +29,5 @@ public class ReviewSelReq extends Paging {
         super(page, size);
         this.strfId = strfId;
     }
-    public void setUserId(Long userId){this.userId = userId;}
+//    public void setUserId(Long userId){this.userId = userId;}
 }
