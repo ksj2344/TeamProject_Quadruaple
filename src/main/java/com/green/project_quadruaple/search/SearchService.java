@@ -4,6 +4,7 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
+import com.green.project_quadruaple.search.model.SearchFilter;
 import com.green.project_quadruaple.search.model.filter.*;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
@@ -143,45 +144,47 @@ public class SearchService {
 //        if (signedUserId <= 0){
 //            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
 //        }
-
         // 검색어 search_word 테이블 insert + update 작업용
         searchMapper.searchIns(searchWord,signedUserId);
-
         List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
-
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
+    /*
+    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
+    Long signedUserId = authenticationFacade.getSignedUserId();
+    if (searchWord == null) {
+        return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
+    }
+    if (signedUserId == null) {
+        signedUserId = 0L; // NOT NULL 조건 충족
+    }
+    searchMapper.searchIns(searchWord, signedUserId);
+    List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId);
+    return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+}
+     */
 
     public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
         Long userId = authenticationFacade.getSignedUserId();
-
-
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
-
-    public List<StayAmenity> searchStayByAmenity(SearchAmenityReq req) {
-        Long userId = authenticationFacade.getSignedUserId();
-
-        List<StayAmenity> stayAmenities = new ArrayList<>();
-
-        List<StayAmenity> list = searchMapper.searchStayByAmenity(req.getAmenityId(),userId,req.getSearchWord());
-
-        return list;
+    public List<StayCategory> searchCategory(String category, String searchWord, Long userId) {
+        return searchMapper.searchCategory(category, searchWord, userId);
     }
 
-//    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {
-//        try {
-//            List<SearchCategoryList> result = searchMapper.searchCategoryWithFilters(searchWord ,category, userId,  amenityIds);
+
+    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
+       Long userId = authenticationFacade.getSignedUserId();
+       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+       return null;
+    }
+//    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
+//        Long userId = authenticationFacade.getSignedUserId();
 //
-//            boolean isMore = result.size() > paging.getSize();
-//            if (isMore) {
-//                result = result.subList(0, paging.getSize());
-//            }
+//        List<SearchFilterDto> stayAmenities = new ArrayList<>();
 //
-//            return new ResponseWrapper<>(ResponseCode.OK.getCode(), result);
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-//        }
+//        List<SearchFilterDto> list = searchMapper.searchStayByAmenity(req.getAmenityId(),userId,req.getSearchWord());
+//
+//        return list;
 //    }
 }
