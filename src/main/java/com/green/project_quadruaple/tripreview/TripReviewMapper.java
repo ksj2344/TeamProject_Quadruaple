@@ -38,11 +38,13 @@ public interface TripReviewMapper {
 
     //여행기 스크랩
     int insTripReviewScrap(TripReviewScrapDto scrap);
-    CopyScheduleDto copySelTripByTripId(long tripId);
+    int countTripReview(long tripReviewId, long tripId);
     int copyInsTrip(CopyInsertTripDto trip);
     int copyInsScheMemo(CopyInsertScheMemoDto scheMemo);
     int copyInsSchedule(CopyScheduleDto schedule);
     List<Long> getOriginalScheMemoIds(long tripId);
     List<Long> getOriginalScheduleIds(List<Long> scheduleMemoIds);
     List<Long> getNewScheMemoIds(long copyTripId);
+    int getOriginalLocationIds(long tripId);
+    void copyInsTripLocation(long copyTripId, long tripId);
 }

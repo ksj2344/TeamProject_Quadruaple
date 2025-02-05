@@ -1,6 +1,5 @@
 package com.green.project_quadruaple.strf.model;
 
-import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -46,7 +45,7 @@ public class StrfSelRes {
     private String reviewCnt;
 
 
-    private List<Amenity> amenities;
+    private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
     private List<Menu> menu;
 

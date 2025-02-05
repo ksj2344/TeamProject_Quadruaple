@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.search.model.filter;
+package com.green.project_quadruaple.review.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class Amenity {
-    private String amenityTitle;
+public class ReviewDelReq {
+    private Long userId;
+    private Long reviewId;
 }
-

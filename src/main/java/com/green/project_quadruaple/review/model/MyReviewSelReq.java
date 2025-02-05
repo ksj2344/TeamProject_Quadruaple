@@ -13,12 +13,13 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Schema(title = "리뷰 요청")
 public class MyReviewSelReq extends Paging {
-//    @NotNull
-//    @Positive
-//    @Schema(title = "상품 PK",description = "상품 PK", example = "1")
-////    @JsonProperty("user_id")
-//    private long userId;
-    public MyReviewSelReq(Integer page, Integer size ) {
+    @NotNull
+    @Positive
+    @Schema(title = "상품 PK",description = "상품 PK", example = "1")
+//    @JsonProperty("user_id")
+    private long userId;
+    public MyReviewSelReq(Integer page, Integer size , long userId) {
         super(page, size);
+        this.userId = userId;
     }
 }
