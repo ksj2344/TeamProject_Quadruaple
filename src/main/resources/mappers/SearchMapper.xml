@@ -224,20 +224,19 @@
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
         WHERE
         <if test="amenityId != null and amenityId.size() > 0">
-            AND d.amenity_id IN
+            d.amenity_id IN
             <foreach item="id" collection="amenityId" open="(" separator="," close=")">
                 #{id}
             </foreach>
+            AND
         </if>
-        AND a.category = 'STAY'
-        AND (
-        a.title LIKE CONCAT('%', #{search_word}, '%') OR
-        a.address LIKE CONCAT('%', #{search_word}, '%') OR
-        b.detail_title LIKE CONCAT('%', #{search_word}, '%')
+        a.category = 'STAY' AND (
+        (#{search_word} IS NOT NULL AND a.title LIKE CONCAT('%', #{search_word}, '%')) OR
+        (#{search_word} IS NOT NULL AND a.address LIKE CONCAT('%', #{search_word}, '%')) OR
+        (#{search_word} IS NOT NULL AND b.detail_title LIKE CONCAT('%', #{search_word}, '%'))
         )
         GROUP BY a.strf_id
         ORDER BY a.created_at DESC
-        LIMIT #{start_idx}, #{size}
     </select>
 
     <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.StayAmenity">

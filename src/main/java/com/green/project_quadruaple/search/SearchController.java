@@ -3,6 +3,7 @@ package com.green.project_quadruaple.search;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
+import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.filter.StayAmenity;
@@ -117,14 +118,11 @@ public class SearchController {
     }
 
     @GetMapping("/amenity")
-    public ResponseEntity<?> searchStayByAmenity(
-            @RequestParam(name = "amenityId", required = false) List<Long> amenityId,
-            @RequestParam(name = "searchWord", required = false) String searchWord,
-            @RequestParam(name = "page") Integer page,
-            @RequestParam(name = "size") Integer size) {
+    public List<StayAmenity> searchStayByAmenity(SearchAmenityReq req) {
 
-        SearchAmenityReq req = new SearchAmenityReq(page, size, amenityId, searchWord);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
+        List<StayAmenity> searchAmenityReq = searchService.searchStayByAmenity(req);
+        return searchAmenityReq;
+//                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
     }
 
 }
