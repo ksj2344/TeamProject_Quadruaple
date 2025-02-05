@@ -5,7 +5,6 @@ import com.green.project_quadruaple.strf.model.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-
 @Mapper
 public interface StrfMapper {
 

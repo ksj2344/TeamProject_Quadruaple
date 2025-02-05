@@ -36,6 +36,7 @@ public class GetNonDetail {
     private String hostProfilePic;
     private String reviewWriterUserPic;
     private String hostName;
+    private int reviewCnt;
 
 
     private List<Amenity> amenities;
