@@ -130,8 +130,8 @@ public class TripReviewController {
     // 여행기 스크랩
     @PostMapping("scrap")
     @Operation(summary = "여행기 스크랩 등록(작업중)")
-    public ResponseEntity<?> postScrap(@RequestBody TripReviewScrapDto scrap) {
-        int result = tripReviewService.copyTripReview(scrap);
+    public ResponseEntity<?> postScrap(@RequestBody CopyInsertTripDto trip) {
+        int result = tripReviewService.copyTripReview(trip);
 
         if (result == 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
