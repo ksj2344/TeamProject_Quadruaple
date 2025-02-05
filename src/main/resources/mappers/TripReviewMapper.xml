@@ -163,6 +163,13 @@
              , trip_id = #{tripId}
     </insert>
 
+    <select id="countTripReview">
+        SELECT COUNT(*)
+          FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+           AND trip_id = #{tripId}
+    </select>
+
     <insert id="copyInsTrip" useGeneratedKeys="true" keyProperty="tripId">
         INSERT INTO trip (title, manager_id, start_at, end_at)
         SELECT title, #{userId}, #{newStartAt}, #{newEndAt}
@@ -172,9 +179,9 @@
 
     <insert id="copyInsScheMemo" useGeneratedKeys="true" keyProperty="scheduleMemoId">
         INSERT INTO sche_memo (trip_id, `day`, seq, category)
-        SELECT #{tripId}, `day`, seq, category
-          FROM sche_memo
-         WHERE trip_id = #{copyTripId}  AND category = 'SCHE'
+        SELECT #{tripId}, `day`, (@rownum := @rownum + 1) AS seq, category
+          FROM sche_memo, (SELECT @rownum := 0) AS r
+         WHERE trip_id = #{copyTripId} AND category = 'SCHE'
     </insert>
 
     <select id="getOriginalScheMemoIds">

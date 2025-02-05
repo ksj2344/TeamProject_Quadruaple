@@ -61,10 +61,12 @@
         LEFT JOIN trip_user TU
         ON TU.user_id= U.user_id
         WHERE TU.trip_id=#{tripId}
-        AND U.user_id NOT IN
-        <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
-            #{userId}
-        </foreach>
+        <if test="exceptUsers != null and exceptUsers.size() > 0">
+            AND U.user_id NOT IN
+            <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
     </select>
 
 
@@ -158,5 +160,10 @@
         WHERE D.de_id = #{deId}
         GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
     </select>
+
+    <update id="delExpenses">
+        DELETE FROM paid_user WHERE de_id = #{deId};
+        DELETE FROM daily_expense WHERE de_id = #{deId};
+    </update>
 
 </mapper>
