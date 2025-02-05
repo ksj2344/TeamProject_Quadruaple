@@ -29,6 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.util.*;
@@ -47,6 +51,9 @@ public class UserService {
 
     @Value("${spring.mail.username}")
     private static String FROM_ADDRESS;
+
+    @Value("${file.directory}")
+    private String fileDirectory;
 
     // 회원가입 및 이메일 인증 메일 발송
     public int signUp(MultipartFile pic, UserSignUpReq p) {
@@ -67,11 +74,17 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(p.getPw());
         p.setPw(hashedPassword);
 
-        String savedPicName = null;
+        String savedPicName;
+        boolean isDefaultPic = false;
+
         if (pic != null && !pic.isEmpty()) {
             savedPicName = myFileUtils.makeRandomFileName(pic);
-            p.setProfilePic(savedPicName);  // DB 저장 전에 profilePic 설정
+        } else {
+            // 프로필 사진이 없으면 기본 사진 사용
+            savedPicName = "user.png";
+            isDefaultPic = true;
         }
+        p.setProfilePic(savedPicName); // DB 저장 전에 profilePic 설정
 
         try {
             int result = userMapper.insUser(p);
@@ -80,17 +93,39 @@ public class UserService {
                 p.setUserId(userId);
                 userMapper.insUserRole(p);
 
-                // 프로필 사진 저장
-                if (savedPicName != null) {
-                    String middlePath = String.format("user/%s", userId);
-                    myFileUtils.makeFolders(middlePath);
-                    String filePath = String.format("%s/%s", middlePath, savedPicName);
+                // 프로필 사진 저장 경로 설정
+                String middlePath = String.format("user/%s", userId);
+                myFileUtils.makeFolders(middlePath);
+                String filePath = String.format("%s/%s", middlePath, savedPicName);
+                Path destination = Paths.get(fileDirectory, filePath); // 절대 경로로 설정
 
-                    try {
+                try {
+                    if (isDefaultPic) {
+                        // 기본 프로필 사진 복사
+                        Path source = Paths.get(fileDirectory, "common", "user.png");
+
+                        // 디버깅용 로그 추가
+                        System.out.println("Source Path: " + source.toAbsolutePath());
+                        System.out.println("Destination Path: " + destination.toAbsolutePath());
+
+                        // 원본 파일 존재 여부 확인
+                        if (!Files.exists(source)) {
+                            System.out.println("기본 프로필 사진이 존재하지 않습니다!");
+                        } else {
+                            System.out.println("기본 프로필 사진이 존재합니다.");
+                        }
+
+                        // 대상 폴더 생성 (존재하지 않으면 생성)
+                        Files.createDirectories(destination.getParent());
+
+                        // 기본 사진 복사
+                        Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+                        System.out.println("기본 프로필 사진 복사 완료!");
+                    } else {
                         myFileUtils.transferTo(pic, filePath);
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
