@@ -39,7 +39,7 @@ public class GetNonDetail {
     private int reviewCnt;
 
 
-    private List<Amenity> amenities;
+    private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
     private List<Menu> menu;
 }
