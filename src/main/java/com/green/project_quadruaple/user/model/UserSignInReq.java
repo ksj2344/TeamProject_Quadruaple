@@ -10,7 +10,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class UserSignInReq {
-    @Schema(title="아이디", example = "test@gmail.com", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title="아이디", example = "ksj23444@gmail.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,10}$", message = "유효하지 않은 형식의 이메일입니다.")
     private final String email;
     @Schema(title="비밀번호", example = "password!", requiredMode = Schema.RequiredMode.REQUIRED)

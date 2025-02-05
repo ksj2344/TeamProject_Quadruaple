@@ -1,10 +1,15 @@
 package com.green.project_quadruaple.recent;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
+import com.green.project_quadruaple.recent.model.RecentGetListRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -12,6 +17,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecentService {
     private final RecentMapper recentMapper;
     private final AuthenticationFacade authenticationFacade;
+
+    public ResponseWrapper<List<RecentGetListRes>> recentList (){
+        Long userId = authenticationFacade.getSignedUserId();
+        List<RecentGetListRes> res = recentMapper.recentList(userId);
+
+        if (res.isEmpty()){
+            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
+        }
+        try {
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
+        }
+    }
 
     @Transactional
     public int recentHide(Long strfId) {

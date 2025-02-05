@@ -11,32 +11,36 @@
 
     <insert id="insDe" useGeneratedKeys="true" keyProperty="deId">
         INSERT INTO daily_expense
-        SET `for`=#{forText}
+        SET `for`=#{paidFor}
     </insert>
 
-    <insert id="insPaidUser">
-        INSERT INTO paid_user
-        SET de_id=#{deId}
-        , price=#{price}
-        , trip_user_id
-        =(SELECT trip_user_id
-        FROM trip_user
-        WHERE user_id=#{userId}
-        AND trip_id=#{tripId})
-    </insert>
+<!--    <select id="selTripUser">-->
+<!--        SELECT trip_user_id-->
+<!--        FROM trip_user-->
+<!--        WHERE trip_id=#{tripId}-->
+<!--        AND user_id in-->
+<!--        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">-->
+<!--            #{userId}-->
+<!--        </foreach>-->
+<!--    </select>-->
 
-    <insert id="insPaidUserSamePrice">
+<!--    <insert id="insPaid">-->
+<!--        INSERT INTO paid_user (de_id, price, trip_user_id)-->
+<!--        VALUES-->
+<!--        <foreach collection="userPaid" item="item" separator=",">-->
+<!--            (#{deId}, #{item.price}, #{item.userId})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+
+    <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
-        SELECT
-        #{deId},
-        #{price},
-        trip_user_id
-        FROM trip_user
-        WHERE trip_id = #{tripId}
-        AND user_id IN
-        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
-            #{userId}
-        </foreach>
+        SELECT #{deId}, temp.price, tu.trip_user_id
+        FROM trip_user tu
+        JOIN
+        <foreach collection="userPaid" item="item" open="(" close=")" separator=" UNION ALL ">
+            SELECT #{item.price} AS price, #{item.userId} AS userId, #{tripId} AS tripId
+        </foreach> AS temp
+        ON tu.trip_id = temp.tripId AND tu.user_id = temp.userId
     </insert>
 
     <select id="selExpense">
@@ -76,6 +80,7 @@
         <id property="deId" column="deId" />
         <result property="paidFor" column="paidFor" />
         <result property="totalPrice" column="totalPrice" />
+        <result property="myPrice" column="myPrice" />
         <collection property="paidUserList" resultMap="paidUserList" />
     </resultMap>
 
@@ -99,7 +104,8 @@
         SELECT
         de_id,
         `for` AS paidFor,
-        SUM(price) AS totalPrice
+        SUM(price) AS totalPrice,
+        price AS myPrice
         FROM depay
         WHERE trip_id = #{tripId}
         GROUP BY de_id, `for`
@@ -111,6 +117,7 @@
         TS.myTotalPrice,
         ES.paidFor,
         ES.totalPrice,
+        ES.myPrice,
         T.de_id AS deId,
         T.user_id AS userId,
         T.name,
@@ -122,5 +129,34 @@
         ORDER BY T.de_id
     </select>
 
+
+    <resultMap id="expenseOne" type="com.green.project_quadruaple.expense.model.res.ExpenseOneRes">
+        <id property="deId" column="deId" />
+        <result property="paidFor" column="paidFor" />
+        <result property="totalPrice" column="totalPrice" />
+        <collection property="payList" resultMap="payList" />
+    </resultMap>
+
+    <resultMap id="payList" type="com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto">
+        <id property="userId" column="userId" />
+        <result property="name" column="name" />
+        <result property="profilePic" column="profilePic" />
+        <result property="price" column="price" />
+    </resultMap>
+
+    <select id="selExpenseOne" resultMap="expenseOne">
+        SELECT
+        D.de_id AS deId,
+        COALESCE(SUM(P.price), 0) AS totalPrice,
+        D.`for` AS paidFor,
+        D.user_id AS userId,
+        D.name,
+        D.profile_pic AS profilePic,
+        D.price
+        FROM depay D
+        LEFT JOIN depay P ON D.de_id = P.de_id
+        WHERE D.de_id = #{deId}
+        GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
+    </select>
 
 </mapper>
