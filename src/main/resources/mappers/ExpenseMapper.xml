@@ -161,4 +161,9 @@
         GROUP BY D.user_id, D.`for`, D.name, D.profile_pic, D.price
     </select>
 
+    <update id="delExpenses">
+        DELETE FROM paid_user WHERE de_id = #{deId};
+        DELETE FROM daily_expense WHERE de_id = #{deId};
+    </update>
+
 </mapper>

@@ -86,17 +86,17 @@ public class DataService {
             for (int i = 0; i < strfCnt; i++) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("strfId", strfId);
-                map.put("picName", String.format("%d.png", i + 1));
+                map.put("picName", String.format("%d.png", (i + 1)));
                 picAndStrfIds.add(map);
             }
             if (menuCnt != 0) {
-                for (int i = 0; i < menuCnt; i++) {
+                for (int i = 0; i < menus.size(); i++) {
                     Map<String, Object> menuMap = new HashMap<>();
                     MenuDto menu = menus.get(i);
                     menuMap.put("strfId", strfId);
                     menuMap.put("title", menu.getTitle());
                     menuMap.put("price", menu.getPrice());
-                    menuMap.put("menuPic", String.format("%d.png", i + 1));
+                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
                     menuData.add(menuMap);
                 }
             }
