@@ -6,6 +6,7 @@ import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
+import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.dto.UserPriceDto;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
@@ -30,6 +31,7 @@ public class ExpenseService {
     private final AuthenticationFacade authenticationFacade;
 
     //추가하기
+    @Transactional
     public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseInsReq p){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(!(principal instanceof JwtUser) ||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
@@ -83,6 +85,21 @@ public class ExpenseService {
             dutchPaidUserDtos.get(r.nextInt(dutchPaidUserDtos.size())).setPrice(morePrice);
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),dutchPaidUserDtos));
+    }
+
+    //이 결제에서 제외된 인원보기
+    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
+        List<PaidUser> exceptUsers=new ArrayList<>();
+        if(exceptUsers==null){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),exceptUsers));
     }
 
     //가계부 보기
