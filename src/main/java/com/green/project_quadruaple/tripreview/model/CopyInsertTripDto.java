@@ -12,6 +12,7 @@ import lombok.ToString;
 public class CopyInsertTripDto {
     @JsonIgnore
     private long tripId;
+    private long tripReviewId;
     private long copyTripId;
     @JsonIgnore
     private long userId;
