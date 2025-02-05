@@ -5,6 +5,7 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.MenuDto;
+import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.review.ReviewService;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
@@ -29,8 +30,8 @@ public class DataService {
     private final MyFileUtils myFileUtils;
     private final ReviewService reviewService;
 
-    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p){
-        for(Long i=1L; i<901; i*=3){
+    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewDummyReq p){
+        for(Long i=1L; i<901; i+=p.getNum()){
             p.setStrfId(i);
             reviewService.postRating(pics, p);
         }
@@ -38,7 +39,7 @@ public class DataService {
     }
 
 
-    //strf 사진 등록
+    //strf 사진, 메뉴 등록
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p){
         List<Long> strfIds= dataMapper.selectStrfId(p);
@@ -47,8 +48,8 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
 
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
-        List<MenuDto> menus=p.getMenus();
+        List<MenuDto> menus=p.getMenus()==null||p.getMenus().size()==0?new ArrayList<>():p.getMenus();
+        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*menus.size());
         String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         int strfCnt;
@@ -64,43 +65,50 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for (long strfId : strfIds) {
-            String middlePath=String.format("strf/%d",strfId);
+            String middlePath = String.format("strf/%d", strfId);
             myFileUtils.makeFolders(middlePath);
             // ${file.directory}/pics/${category}/${picFolder} 내부의 파일을
             // ${file.directory}/strf/${strfId}/으로 파일을 붙여넣기
-            String filePath=String.format("%s/strf/%d",myFileUtils.getUploadPath(),strfId);
-            try{
+            String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
+            try {
                 Path source = Paths.get(sourcePath);
                 Path destination = Paths.get(filePath);
                 myFileUtils.copyFolder(source, destination);
-            }catch(IOException e){
+            } catch (IOException e) {
                 //폴더 삭제 처리
                 log.error("파일 저장 실패: {}", filePath, e);
-                String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
-                myFileUtils.deleteFolder(delFolderPath,true);
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                            .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
-            for(int i=0; i<strfCnt; i++){
+            for (int i = 0; i < strfCnt; i++) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("strfId",strfId);
-                map.put("picName",String.format("%d.png",i+1));
+                map.put("strfId", strfId);
+                map.put("picName", String.format("%d.png", (i + 1)));
                 picAndStrfIds.add(map);
             }
-            for(int i=0; i<menuCnt; i++){
-                Map<String, Object> menuMap = new HashMap<>();
-                MenuDto menu=menus.get(i);
-                menuMap.put("strfId",strfId);
-                menuMap.put("title",menu.getTitle());
-                menuMap.put("price",menu.getPrice());
-                menuMap.put("menuPic",String.format("%d.png",i+1));
-                menuData.add(menuMap);
+            if (menuCnt != 0) {
+                for (int i = 0; i < menus.size(); i++) {
+                    Map<String, Object> menuMap = new HashMap<>();
+                    MenuDto menu = menus.get(i);
+                    menuMap.put("strfId", strfId);
+                    menuMap.put("title", menu.getTitle());
+                    menuMap.put("price", menu.getPrice());
+                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
+                    menuData.add(menuMap);
+                }
             }
         }
         int result= dataMapper.insStrfPic(picAndStrfIds);
-        int menuResult= dataMapper.insMenu(menuData);
-        if(result==0||menuResult==0){
+        if (menuCnt != 0) { int menuResult= dataMapper.insMenu(menuData);
+            if(menuResult==0){
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+        }
+        if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }

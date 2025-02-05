@@ -2,6 +2,7 @@ package com.green.project_quadruaple.datamanager;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.MenuReq;
+import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,8 +49,8 @@ public class DataController {
 //        return dataService.delMenu(p);
 //    }
 
-    @PostMapping
-    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewPostReq p){
+    @PostMapping("review")
+    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewDummyReq p){
         return postreviewdummy(pics, p);
     }
 
