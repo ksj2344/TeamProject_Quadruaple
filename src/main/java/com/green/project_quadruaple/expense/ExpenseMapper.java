@@ -29,4 +29,7 @@ public interface ExpenseMapper {
 
     //참여유저인지 확인하기
     boolean IsUserInTrip(long tripId, long userId);
+
+    //가계부 삭제
+    int delExpenses(long deId);
 }
