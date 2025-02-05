@@ -9,6 +9,8 @@ import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.green.project_quadruaple.common.config.constant.OdsayApiConst;
@@ -33,13 +35,29 @@ import java.util.*;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor
 public class TripService {
 
     private final TripMapper tripMapper;
     private final OdsayApiConst odsayApiConst;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+
+    private final String ADD_USER_LINK;
+
+    public static final Map<String, Long> addUserLinkMap = new HashMap<>();
+
+    public TripService(TripMapper tripMapper,
+                       OdsayApiConst odsayApiConst,
+                       WebClient webClient,
+                       ObjectMapper objectMapper,
+                       @Value("${add-user-link}") String ADD_USER_LINK)
+    {
+        this.tripMapper = tripMapper;
+        this.odsayApiConst = odsayApiConst;
+        this.webClient = webClient;
+        this.objectMapper = objectMapper;
+        this.ADD_USER_LINK = ADD_USER_LINK;
+    }
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
@@ -443,6 +461,35 @@ public class TripService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResultResponse.severError();
+        }
+    }
+
+    public ResponseWrapper<String> getAddLink(Long tripId) {
+
+        String uuid = UUID.randomUUID().toString();
+        String url = ADD_USER_LINK + "?id=" + uuid;
+
+        addUserLinkMap.put(uuid, tripId);
+
+        Runnable addUserLinkThread = new AddUserLinkThread(uuid);
+        new Thread(addUserLinkThread).start();
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), url);
+    }
+
+    public String addTripUser(String uuid) {
+        Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+//        Long signedUserId = 1L;
+        try {
+            Long tripId = addUserLinkMap.get(uuid);
+            if(tripId == null) {
+                return "잘못된 id";
+            }
+            tripMapper.insTripUser(tripId, List.of(signedUserId));
+            return "리다이렉션 URL"; // 리다이렉션 필요
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

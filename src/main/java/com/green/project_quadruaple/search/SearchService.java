@@ -50,7 +50,7 @@ public class SearchService {
 
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(long tripId, int lastIdx) {
         if(tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         int more = 1;
         try {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
@@ -82,7 +82,7 @@ public class SearchService {
         if(category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         int more = 1;
         try {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
@@ -98,10 +98,6 @@ public class SearchService {
             throw new RuntimeException();
         }
     }
-
-
-
-
 
     // 검색창 - 최근 검색어 출력
     public ResponseWrapper<List<SearchGetRes>> searchGetList (){

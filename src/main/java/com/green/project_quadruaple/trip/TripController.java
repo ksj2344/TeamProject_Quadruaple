@@ -86,6 +86,18 @@ public class TripController {
         return tripService.deleteSchedule(scheduleId);
     }
 
+    @GetMapping("/trip/add-link")
+    @Operation(summary = "구성원 추가 링크 생성", description = "로그인유저가 요청하는 여행ID의 구성원에 추가되는 URL 생성")
+    public ResponseWrapper<String> getAddLink(@RequestParam("trip_id") Long tripId) {
+        return tripService.getAddLink(tripId);
+    }
+
+    @GetMapping("/trip/user")
+    @Operation(summary = "구성원 추가", description = "해당 URL 접근시 로그인유저가 여행 구성원에 추가")
+    public String addTripUser(@RequestParam("id") String id) {
+        return tripService.addTripUser(id);
+    }
+
     @DeleteMapping("/trip/user")
     @Operation(summary = "구성원 제외", description = "여행 구성원 제외하기, 여행 팀장과 본인만 가능")
     public ResultResponse deleteTripUser(@RequestBody DeleteTripUserReq req) {
