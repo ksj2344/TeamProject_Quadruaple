@@ -9,20 +9,15 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class TripReviewScrapDto {
-    @JsonIgnore
-    private long scrapId;
+public class CopyInsertTripDto {
     @JsonIgnore
     private long tripId;
     private long copyTripId;
-    private long tripReviewId;
     @JsonIgnore
     private long userId;
-    private long scheMemoId;
-    private long originalScheduleId;
-    private int day;
     @Schema(title = "여행 시작 일자", type= "string", example = "2025-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String startAt;
+    private String newStartAt;
     @Schema(title = "여행 완료 일자", type= "string", example = "2025-01-11", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String endAt;
+    private String newEndAt;
+
 }
