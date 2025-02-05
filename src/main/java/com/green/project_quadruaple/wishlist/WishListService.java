@@ -1,9 +1,12 @@
 package com.green.project_quadruaple.wishlist;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,79 +19,52 @@ public class WishListService {
     private final AuthenticationFacade authenticationFacade;
     private final WishListMapper wishlistMapper;
 
-    /*public String toggleWishList( long strfId) {
-        long userId=authenticationFacade.getSignedUserId();
-        boolean isWishListed = wishlistMapper.isWishListExists(userId, strfId);
-
-        if (isWishListed) {
-            wishlistMapper.deleteWishList(userId, strfId);
-            return "찜이 삭제되었습니다.";
-        } else {
-            WishListReq wishListReq = new WishListReq();
-            wishListReq.setStrfId(strfId);
-
-
-            wishlistMapper.insertWishList(wishListReq);
-            return "찜이 추가되었습니다.";
-        }
-    }*/
     public WishListService(AuthenticationFacade authenticationFacade, WishListMapper wishListMapper) {
         this.authenticationFacade = authenticationFacade;
         this.wishlistMapper = wishListMapper;
     }
 
-    public String toggleWishList(long strfId) {
-        // 사용자 ID를 AuthenticationFacade로 가져오기
+    public ResponseEntity<ResponseWrapper<String>> toggleWishList(long strfId) {
         long userId = authenticationFacade.getSignedUserId();
 
-        // 위시리스트 존재 여부 확인
+        // 찜 상태 확인
         boolean isWishListed = wishlistMapper.isWishListExists(userId, strfId);
 
         if (isWishListed) {
+            // 찜 삭제
             wishlistMapper.deleteWishList(userId, strfId);
-            return "찜이 삭제되었습니다.";
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), "찜이 삭제되었습니다."));
         } else {
+            // 찜 추가
             wishlistMapper.insertWishList(userId, strfId);
-            return "찜이 추가되었습니다.";
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), "찜이 추가되었습니다."));
         }
     }
 
-    public Map<String, Object> getWishListWithPagingNew(long userId, List<String> categoryList, int page) {
-        int offset = (page - 1) * 10; // 페이지네이션 offset 계산
+    public ResponseWrapper<Map<String, Object>> getWishList(List<String> categoryList, int page) {
+        int limit = 10;
+        int offset = (page - 1) * limit;
 
+        List<Map<String, Object>> wishList = wishlistMapper.getWishList(categoryList, offset, limit);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), Map.of("wishList", wishList));
+    }
+
+
+    }
+
+    /*public Map<String, Object> getWishListWithPagingNew(long userId, List<String> categoryList, int page) {
+        int offset = (page - 1) * 10; // 페이징 offset 계산
+
+        // DB에서 찜 목록 조회
         List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset);
 
         // 응답 데이터 구성
         Map<String, Object> result = new HashMap<>();
-        result.put("isMore", wishLists.size() > 10); // 다음 페이지 여부 확인
-        result.put("wishList", wishLists);
-
-        return result;
-    }
-
-    /*public Map<String, Object> getWishListWithPagingNew(Long userId, List<String> categoryList, int page) {
-        int offset = (page - 1) * 10;
-
-        List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("isMore", wishLists.size() > 10); // 다음 페이지 여부 확인
-        result.put("wishList", wishLists);
+        result.put("isMore", wishLists.size() > 10); // 10개 이상일 경우 추가 페이지 존재
+        result.put("wishList", wishLists.size() > 10 ? wishLists.subList(0, 10) : wishLists);
 
         return result;
     }*/
-    /*// 페이징 처리가 포함된 위시리스트 가져오기
-    public Map<String, Object> getWishListWithPaging(Long userId, List<String> categoryList, int page) {
-        int pageSize = 10; // 기본 페이지 사이즈 설정
-        int offset = (page - 1) * pageSize; // 페이징 계산
 
-        // 위시리스트 데이터 가져오기
-        List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset, pageSize);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("isMore", wishLists.size() == pageSize); // 다음 페이지 존재 여부 확인
-        result.put("wishlist", wishLists); // 현재 페이지의 데이터
 
-        return result;
-    }*/
-    }

@@ -159,12 +159,14 @@ public class SearchService {
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
 
-    public ResponseWrapper<List<StayAmenity>> searchStayByAmenity(SearchAmenityReq req) {
+    public List<StayAmenity> searchStayByAmenity(SearchAmenityReq req) {
         Long userId = authenticationFacade.getSignedUserId();
 
-        List<StayAmenity> list = searchMapper.searchStayByAmenity(req,userId);
+        List<StayAmenity> stayAmenities = new ArrayList<>();
 
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), list);
+        List<StayAmenity> list = searchMapper.searchStayByAmenity(req.getAmenityId(),userId,req.getSearchWord());
+
+        return list;
     }
 
 //    public ResponseWrapper<List<SearchCategoryList>> searchCategoryWithFilters(String searchWord , String category, Long userId, List<Long> amenityIds) {

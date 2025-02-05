@@ -7,6 +7,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.MenuDto;
 import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
+import com.green.project_quadruaple.datamanager.model.UserProfile;
 import com.green.project_quadruaple.review.ReviewService;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Log4j2
@@ -201,4 +205,67 @@ public class DataService {
 //        }
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
 //    }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> updateInvalidProfilePics() {
+        List<UserProfile> users = dataMapper.getAllUsersProfilePics(); // 모든 사용자 profilePic 조회
+        if (users.isEmpty()) {
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
+        }
+
+        List<Long> updateUserIds = new ArrayList<>();
+
+        // 기본 프로필 사진의 절대 경로 (파일 디렉토리 내)
+        String defaultPicSourcePath = Paths.get(myFileUtils.getUploadPath(), "common", "user.png").toString();
+
+        for (UserProfile user : users) {
+            String profilePic = user.getProfilePic();
+            if (profilePic == null || !profilePic.contains(".")) { // NULL 이거나 확장자 없음
+                updateUserIds.add(user.getUserId());
+
+                // 사용자별 폴더 생성 경로 (절대 경로로 설정)
+                String userFolderPath = Paths.get(myFileUtils.getUploadPath(), "user", user.getUserId().toString()).toString(); // profile 폴더 없앰
+                String defaultPicPath = Paths.get(userFolderPath, "user.png").toString();
+
+                // 프로필 사진 폴더가 없으면 생성
+                myFileUtils.makeFolders(userFolderPath);
+
+                // 기본 이미지가 이미 존재하는지 확인하고 복사
+                File sourceFile = new File(defaultPicSourcePath);
+                File destinationFile = new File(defaultPicPath);
+
+                // 디버깅: 경로 확인
+                System.out.println("소스 파일 경로: " + sourceFile.getAbsolutePath());
+                System.out.println("목적지 파일 경로: " + destinationFile.getAbsolutePath());
+
+                if (!destinationFile.exists()) {
+                    try {
+                        // 목적지 폴더가 존재하는지 확인하고 없으면 생성
+                        File parentFolder = destinationFile.getParentFile();
+                        if (!parentFolder.exists()) {
+                            parentFolder.mkdirs(); // 폴더 생성
+                            System.out.println("목적지 폴더를 생성했습니다: " + parentFolder.getAbsolutePath());
+                        }
+
+                        // 기본 프로필 사진을 해당 사용자 폴더로 복사
+                        Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);  // 기존 파일 덮어쓰기
+                        System.out.println("기본 프로필 사진 복사 완료!");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                    }
+                } else {
+                    System.out.println("목적지 파일이 이미 존재합니다: " + destinationFile.getAbsolutePath());
+                }
+            }
+        }
+
+        if (!updateUserIds.isEmpty()) {
+            int updatedCount = dataMapper.updateProfilePicsToDefault(updateUserIds, "user.png");
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), updatedCount));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
+    }
 }

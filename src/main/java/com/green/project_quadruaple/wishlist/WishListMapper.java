@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Mapper
@@ -24,6 +25,15 @@ public interface WishListMapper {
             @Param("categoryList") List<String> categoryList,
             @Param("offset") int offset
     );
+
+
+    List<Map<String, Object>> getWishList(@Param("categoryList") List<String> categoryList,
+                                          @Param("offset") int offset,
+                                          @Param("limit") int limit);
+
+    int getWishListCount(@Param("categoryList") List<String> categoryList);
+
+
 
     // 위시리스트 조회 쿼리
     /*List<WishListRes> findWishList(@Param("userId") Long userId,
