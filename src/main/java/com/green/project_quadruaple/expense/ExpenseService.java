@@ -68,6 +68,7 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
+        if(p.getExceptUsers()==null){p.setExceptUsers(new ArrayList<>());}
         int totalPrice=p.getTotalPrice();
         List<DutchPaidUserDto> dutchPaidUserDtos=expenseMapper.selDutchUsers(p);
         int price = (int) (Math.round((double) totalPrice / dutchPaidUserDtos.size() / 10) * 10);

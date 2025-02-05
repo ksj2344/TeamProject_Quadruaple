@@ -61,10 +61,12 @@
         LEFT JOIN trip_user TU
         ON TU.user_id= U.user_id
         WHERE TU.trip_id=#{tripId}
-        AND U.user_id NOT IN
-        <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
-            #{userId}
-        </foreach>
+        <if test="exceptUsers != null and exceptUsers.size() > 0">
+            AND U.user_id NOT IN
+            <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </if>
     </select>
 
 

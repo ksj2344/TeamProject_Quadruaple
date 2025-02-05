@@ -31,7 +31,7 @@ public class ExpenseController {
     @Operation(summary = "정산하기", description = "비용추가 누르면 나오는 페이지")
     public ResponseEntity<?> dutchExpenses(@RequestParam("total_price") int totalPrice,
                                            @RequestParam("trip_id") long tripId,
-                                           @RequestParam("except_users") List<Long> exceptUsers){
+                                           @RequestParam(value = "except_users", required = false) List<Long> exceptUsers){
         DutchReq p = new DutchReq(totalPrice,tripId,exceptUsers);
         return expenseService.dutchExpenses(p);
     }

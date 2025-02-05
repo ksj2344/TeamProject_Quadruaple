@@ -39,7 +39,7 @@ public class DataService {
     }
 
 
-    //strf 사진 등록
+    //strf 사진, 메뉴 등록
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p){
         List<Long> strfIds= dataMapper.selectStrfId(p);
@@ -48,8 +48,8 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
 
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
-        List<MenuDto> menus=p.getMenus();
+        List<MenuDto> menus=p.getMenus()==null||p.getMenus().size()==0?new ArrayList<>():p.getMenus();
+        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*menus.size());
         String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         int strfCnt;

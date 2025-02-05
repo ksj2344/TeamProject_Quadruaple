@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper=true)
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class ReviewDummyReq extends ReviewPostReq {
     private int num;
 }
