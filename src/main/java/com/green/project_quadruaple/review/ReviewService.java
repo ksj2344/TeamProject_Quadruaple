@@ -25,43 +25,39 @@ public class ReviewService {
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
-    public ResponseWrapper<List<ReviewSelRes>> getReviewWithPics(ReviewSelReq req) {
+    public List<ReviewSelRes> getReviewWithPics(ReviewSelReq req) {
         List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(req);
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (ReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
             ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), dtoList);
+        return dtoList;
     }
-    public ResponseWrapper<List<MyReviewSelRes>> getMyReviews(MyReviewSelReq req) {
-        Long userId = authenticationFacade.getSignedUserId();
+    public List<MyReviewSelRes> getMyReviews(MyReviewSelReq req) {
 
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(req, userId);
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(req);
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
 
         for (MyReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
             ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), dtoList);
+        return dtoList;
     }
 
 
 
     @Transactional
     public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
-        Long userId = authenticationFacade.getSignedUserId();
-
-//        p.setUserId(authenticationFacade.getSignedUserId());
-
+        p.setUserId(authenticationFacade.getSignedUserId());
 //        if (p.getReviewId() <= 0) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND)
 //                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
 //        }
 
         // 리뷰 저장
-        int result = reviewMapper.postRating(p,userId);
+        int result = reviewMapper.postRating(p);
         if (result == 0) {
             return 0;
         }
@@ -133,14 +129,13 @@ public class ReviewService {
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
 //    }
 
-    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(Long reviewId) {
-        Long userId = authenticationFacade.getSignedUserId();
-
+    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(ReviewDelReq req) {
+        req.setUserId(authenticationFacade.getSignedUserId());
         ReviewDelPicReq picReq = new ReviewDelPicReq();
-        picReq.setReviewId(reviewId);
+        picReq.setReviewId(req.getReviewId());
         int affectedRowsPic = reviewMapper.deleteReviewPic(picReq);
-        int affectedRowsReview = reviewMapper.deleteReview(userId,reviewId);
-        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(),reviewId);
+        int affectedRowsReview = reviewMapper.deleteReview(req);
+        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), req.getReviewId());
         myFileUtils.deleteFolder(deletePath, true);
         if (affectedRowsReview > 0) {
             return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), affectedRowsReview));

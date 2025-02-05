@@ -223,12 +223,11 @@
         LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
         WHERE
-        <if test="amenity_id != null and amenity_id.size() > 0">
-            d.amenity_id IN
-            <foreach collection="amenity_id" item="id" open="(" separator="," close=")">
+        <if test="amenityId != null and amenityId.size() > 0">
+            AND d.amenity_id IN
+            <foreach item="id" collection="amenityId" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            OR #{amenity_id} IS NULL
         </if>
         AND a.category = 'STAY'
         AND (
@@ -236,7 +235,7 @@
         a.address LIKE CONCAT('%', #{search_word}, '%') OR
         b.detail_title LIKE CONCAT('%', #{search_word}, '%')
         )
-        GROUP BY a.strf_id, a.title, a.category, e.title, h.pic_name, d.title
+        GROUP BY a.strf_id
         ORDER BY a.created_at DESC
         LIMIT #{start_idx}, #{size}
     </select>
@@ -249,7 +248,7 @@
         <result property="locationName" column="locationName" />
         <result property="strfPic" column="strfPic" />
         <result property="averageRating" column="averageRating" />
-        <result property="reviewCount" column="reviewCount" />
+        <result property="reviewCnt" column="reviewCnt" />
         <result property="wishlistCnt" column="wishlistCnt" />
         <result property="wishIn" column="wishIn" />
         <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.SearchAmenity">
@@ -257,4 +256,6 @@
             <result property="amenityTitle" column="amenityTitle"/>
         </collection>
     </resultMap>
+
+
 </mapper>
