@@ -113,6 +113,7 @@
 
     <!-- 상품 검색 쿼리 -->
 
+
     <select id="searchBasicRecent">
         SELECT a.user_id AS userId , b.title AS strfName , a.inquired_at AS inquiredAt
         , c.pic_name AS strfPic ,  b.category , e.title AS locationTitle , b.strf_id AS strfId
@@ -122,6 +123,7 @@
         LEFT JOIN location_detail d ON b.location_detail_id = d.location_detail_id
         LEFT JOIN location e ON d.location_id = e.location_id
         WHERE a.user_id = #{userId} AND a.undo_recent = 0
+        GROUP BY a.user_id, b.title, a.inquired_at, b.category, e.title, b.strf_id
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
@@ -201,40 +203,58 @@
 
 
     <select id="searchStayByAmenity" resultMap="stayAmenityResultMap">
-        SELECT
-        s.strf_id AS strfId, s.title AS strfTitle, s.category, l.title AS locationName,
-        c.pic_name AS strfPic, AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount,
-        COUNT(w.user_id) AS wishlistCount, a.amenity_id AS amenityId, a.title AS amenityTitle,
-        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist
-        FROM stay_tour_restaur_fest s
-        JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
-        JOIN location l ON ld.location_id = l.location_id
-        LEFT JOIN review r ON s.strf_id = r.strf_id
-        LEFT JOIN wishlist w ON s.strf_id = w.strf_id AND w.user_id = #{userId}
-        LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
-        LEFT JOIN strf_pic c ON c.strf_id = s.strf_id
-        LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
-        WHERE ap.amenity_id = #{amenityId}
-        GROUP BY s.strf_id, s.title, s.category, l.title, c.pic_name, a.amenity_id, a.title
-        ORDER BY s.created_at DESC
-        LIMIT #{startIdx}, #{size}
+        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category, b.detail_title AS locationName,
+        h.pic_name AS strfPic, AVG(f.rating) AS averageRating, COUNT(f.review_id) AS reviewCnt,
+        (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
+        d.amenity_id AS amenityId, d.title AS amenityTitle,
+        IF(
+        EXISTS(
+        SELECT 1
+        FROM wishlist
+        WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
+        ), 1, 0
+        ) AS wishIn
+        FROM stay_tour_restaur_fest a
+        LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+        JOIN amenipoint c ON a.strf_id = c.strf_id
+        JOIN amenity d ON c.amenity_id = d.amenity_id
+        JOIN location e ON e.location_id = b.location_id
+        LEFT JOIN review f ON a.strf_id = f.strf_id
+        LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
+        LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
+        WHERE
+        <if test="amenity_id != null and amenity_id.size() > 0">
+            d.amenity_id IN
+            <foreach collection="amenity_id" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            OR #{amenity_id} IS NULL
+        </if>
+        AND a.category = 'STAY'
+        AND (
+        a.title LIKE CONCAT('%', #{search_word}, '%') OR
+        a.address LIKE CONCAT('%', #{search_word}, '%') OR
+        b.detail_title LIKE CONCAT('%', #{search_word}, '%')
+        )
+        GROUP BY a.strf_id, a.title, a.category, e.title, h.pic_name, d.title
+        ORDER BY a.created_at DESC
+        LIMIT #{start_idx}, #{size}
     </select>
 
-    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
+    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.StayAmenity">
         <id property="strfId" column="strfId" />
-        <result property="title" column="strfTitle" />
+        <result property="strfId" column="strfId" />
+        <result property="strfTitle" column="strfTitle" />
         <result property="category" column="category" />
         <result property="locationName" column="locationName" />
         <result property="strfPic" column="strfPic" />
         <result property="averageRating" column="averageRating" />
         <result property="reviewCount" column="reviewCount" />
-        <result property="wishlistCount" column="wishlistCount" />
-        <result property="userWishlist" column="userWishlist" />
-        <collection property="amenities" resultMap="stayAmenity"/>
+        <result property="wishlistCnt" column="wishlistCnt" />
+        <result property="wishIn" column="wishIn" />
+        <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.SearchAmenity">
+            <id property="amenityId" column="amenityId"/>
+            <result property="amenityTitle" column="amenityTitle"/>
+        </collection>
     </resultMap>
-    <resultMap id="stayAmenity" type="com.green.project_quadruaple.search.model.filter.Stay">
-        <result property="amenityTitle" column="amenityTitle"/>
-    </resultMap>
-
-
 </mapper>

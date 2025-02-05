@@ -3,7 +3,9 @@ package com.green.project_quadruaple.search;
 import com.green.project_quadruaple.common.config.enumdata.StrfCategory;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.SearchBasicReq;
+import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
+import com.green.project_quadruaple.search.model.filter.StayAmenity;
 import com.green.project_quadruaple.search.model.filter.StaySearchReq;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
@@ -39,8 +41,9 @@ public interface SearchMapper {
                                         , Long userId);
 
     // 숙소 카테고리에서
-    List<Stay> searchStayByAmenity(@Param("amenity_id") Long amenityId
-                                        , @Param("start_idx") int startIdx
-                                        , @Param("size") int size
-                                        , Long userId);
+    List<StayAmenity> searchStayByAmenity(@Param("search_word") String searchWord,
+                                          @Param("amenity_id") List<Long> amenityId,
+                                          @Param("start_idx") int startIdx,
+                                          @Param("size") int size,
+                                          Long userId);
 }

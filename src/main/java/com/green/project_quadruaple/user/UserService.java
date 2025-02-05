@@ -175,7 +175,7 @@ public class UserService {
                     .signedUserId(signedUserId)
                     .name(userInfo.getName())
                     .email(userInfo.getEmail())
-                    .profilePIc(userInfo.getProfilePIc())
+                    .profilePic(userInfo.getProfilePic())
                     .build();
         } catch (ExpiredJwtException e) {
             // 토큰 만료 에러 처리
