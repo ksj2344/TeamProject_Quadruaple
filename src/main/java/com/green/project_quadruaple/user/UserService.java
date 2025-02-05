@@ -220,6 +220,7 @@ public class UserService {
 
         return UserUpdateRes.builder()
                 .signedUserId(signedUserId)
+                .profilePic(req.getProfilePic())
                 .build();
     }
 
