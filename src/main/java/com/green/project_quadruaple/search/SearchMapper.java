@@ -41,9 +41,5 @@ public interface SearchMapper {
                                         , Long userId);
 
     // 숙소 카테고리에서
-    List<StayAmenity> searchStayByAmenity(@Param("search_word") String searchWord,
-                                          @Param("amenity_id") List<Long> amenityId,
-                                          @Param("start_idx") int startIdx,
-                                          @Param("size") int size,
-                                          Long userId);
+    List<StayAmenity> searchStayByAmenity(SearchAmenityReq req, Long userId);
 }
