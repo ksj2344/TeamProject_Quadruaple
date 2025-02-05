@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.memo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -7,18 +8,32 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
 public class MemoDto {
-    private Long scheduleMemoId;
+    @JsonIgnore
     private Long memoId;
     private Long tripId;
-    private Integer day;
-    private Integer seq;
     private Long userId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String title;
     private String content;
-    private String category;
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+
+
 }
 
 
