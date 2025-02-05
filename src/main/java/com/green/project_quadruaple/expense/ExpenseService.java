@@ -1,22 +1,24 @@
 package com.green.project_quadruaple.expense;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
+import com.green.project_quadruaple.expense.model.dto.UserPriceDto;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseSameReq;
-import com.green.project_quadruaple.expense.model.res.DutchRes;
+import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
+import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -26,20 +28,32 @@ public class ExpenseService {
     private final AuthenticationFacade authenticationFacade;
 
     //추가하기
-    public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseSameReq p){
-        if(!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
+    public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseInsReq p){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser) ||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        DeDto d=new DeDto(null, p.getForText());
+        DeDto d=new DeDto(null, p.getPaidFor());
         expenseMapper.insDe(d);
         Long deId=d.getDeId();
         if(deId==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
-        p.setDeId(deId);
-        log.info("service>p:{}",p);
-        int result=expenseMapper.insPaidUserSamePrice(p);
+        List<UserPriceDto> dtos=p.getPriceList();
+        List<Map<String, Object>> userPaid = new ArrayList<>();
+        for(UserPriceDto u:dtos){
+            Map<String, Object> map=new HashMap<>();
+            map.put("price",u.getPrice());
+            map.put("userId",u.getUserId());
+            userPaid.add(map);
+        }
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("deId", deId);
+        paramMap.put("tripId", p.getTripId());
+        paramMap.put("userPaid", userPaid);
+        log.info("service>paramMap:{}",paramMap);
+        int result=expenseMapper.insPaid(paramMap);
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
@@ -48,22 +62,33 @@ public class ExpenseService {
     }
 
     //정산하기
-    public ResponseEntity<ResponseWrapper<DutchRes>> dutchExpenses(DutchReq p){
-        if(!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
+    public ResponseEntity<ResponseWrapper<List<DutchPaidUserDto>>> dutchExpenses(DutchReq p){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
+        int totalPrice=p.getTotalPrice();
         List<DutchPaidUserDto> dutchPaidUserDtos=expenseMapper.selDutchUsers(p);
-        int price=p.getTotalPrice()/dutchPaidUserDtos.size();
+        int price = (int) (Math.round((double) totalPrice / dutchPaidUserDtos.size() / 10) * 10);
         for(DutchPaidUserDto dto:dutchPaidUserDtos){
             dto.setPrice(price);
         }
-        DutchRes res=new DutchRes(p.getPaidFor(),p.getTotalPrice(),dutchPaidUserDtos);
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),res));
+        if(price*dutchPaidUserDtos.size() != totalPrice){
+            Random r=new Random();
+            int morePrice=totalPrice-price*dutchPaidUserDtos.size()+price;
+            dutchPaidUserDtos.get(r.nextInt(dutchPaidUserDtos.size())).setPrice(morePrice);
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),dutchPaidUserDtos));
     }
 
     //가계부 보기
     public ResponseEntity<ResponseWrapper<ExpensesRes>> getExpenses(long tripId){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         long userId=authenticationFacade.getSignedUserId();
         if(!expenseMapper.IsUserInTrip(tripId,userId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -75,5 +100,20 @@ public class ExpenseService {
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
+    }
+
+    //가계부 한줄 보기
+    public ResponseEntity<ResponseWrapper<ExpenseOneRes>> selectExpenses(long deId, long tripId){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)||!expenseMapper.IsUserInTrip(tripId,authenticationFacade.getSignedUserId())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
+        ExpenseOneRes res=expenseMapper.selExpenseOne(deId);
+        if(res==null){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
     }
 }
