@@ -113,6 +113,7 @@
 
     <!-- 상품 검색 쿼리 -->
 
+
     <select id="searchBasicRecent">
         SELECT a.user_id AS userId , b.title AS strfName , a.inquired_at AS inquiredAt
         , c.pic_name AS strfPic ,  b.category , e.title AS locationTitle , b.strf_id AS strfId
