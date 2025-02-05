@@ -10,7 +10,7 @@ import lombok.ToString;
 @ToString
 public class ReviewUpdDto {
     private long reviewId;
-//    private long userId;
+    private long userId;
     private String content;
     private int rating;
 }

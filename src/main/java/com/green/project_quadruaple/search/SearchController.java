@@ -1,9 +1,11 @@
 package com.green.project_quadruaple.search;
 
+import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
+import com.green.project_quadruaple.search.model.filter.StayAmenity;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -115,11 +117,14 @@ public class SearchController {
     }
 
     @GetMapping("/amenity")
-    @Operation(summary = "숙소 카테고리 - 편의 필터", description = "편의 id -> 편의 정보에 맞춰 숙소 리스트 반환")
-    public ResponseWrapper<?> searchStayByAmenity(@RequestParam("search_word") String searchWord
-                                                , @RequestParam(value = "amenity_id",required = false) List<Long> amenityId
-                                                , @RequestParam("start_idx") int startIdx
-                                                , @RequestParam("size") int size) {
-        return searchService.searchStayByAmenity(searchWord,amenityId,startIdx,size);
+    public ResponseEntity<?> searchStayByAmenity(
+            @RequestParam(name = "amenityId", required = false) List<Long> amenityId,
+            @RequestParam(name = "searchWord", required = false) String searchWord,
+            @RequestParam(name = "page") Integer page,
+            @RequestParam(name = "size") Integer size) {
+
+        SearchAmenityReq req = new SearchAmenityReq(page, size, amenityId, searchWord);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
     }
+
 }
