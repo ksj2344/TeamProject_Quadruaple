@@ -51,4 +51,20 @@
             #{strfId}
         </foreach>
     </delete>
+
+
+
+    <select id="getAllUsersProfilePics">
+        SELECT user_id, profile_pic
+          FROM user
+    </select>
+
+    <update id="updateProfilePicsToDefault">
+        UPDATE user
+           SET profile_pic = #{defaultPic}
+         WHERE user_id IN
+        <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </update>
 </mapper>
