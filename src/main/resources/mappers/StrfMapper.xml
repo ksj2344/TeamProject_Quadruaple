@@ -93,6 +93,7 @@
         <result property="inquiredAt" column="inquiredAt" />
 
 
+
         <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
             <id property="amenityId" column="amenityId" />
             <result property="amenityTitle" column="amenityTitle" />

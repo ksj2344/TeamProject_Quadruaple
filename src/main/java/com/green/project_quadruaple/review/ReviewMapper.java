@@ -9,16 +9,17 @@ import java.util.List;
 @Mapper
 public interface ReviewMapper {
     List<ReviewSelRes> getReviewWithPics(ReviewSelReq req);
-    List<MyReviewSelRes> getMyReviews(MyReviewSelReq req);
+    List<MyReviewSelRes> getMyReviews(MyReviewSelReq req , Long userId);
 
-    int postRating(ReviewPostReq p);
+    int postRating(ReviewPostReq p, Long userId);
     int postReviewPic(ReviewPicDto pics);
 
     int patchReview(ReviewUpdReq req);
     int patchReviewPic(@Param("pics") List<ReviewPicDto> reviewPicList);
 
-    int deleteReview (ReviewDelReq req);
+    int deleteReview (Long userId ,@Param("review_id") Long reviewId);
     int deleteReviewPic(ReviewDelPicReq p);
 
+//    int deleteReview (ReviewDelReq req);
 
 }
