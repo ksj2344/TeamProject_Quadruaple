@@ -11,5 +11,6 @@ import java.util.List;
 @ToString
 public class CouponResponse {
     private long userId;
+    private int availableCouponCount;
     private List<CouponDto> coupons;
 }
