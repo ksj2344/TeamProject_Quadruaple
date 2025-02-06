@@ -43,8 +43,8 @@ public class WeatherApiCall {
             urlBuilder.append("&" + URLEncoder.encode("pageNo",StandardCharsets.UTF_8) + "=" + URLEncoder.encode("1", StandardCharsets.UTF_8)); /*페이지번호*/
             urlBuilder.append("&" + URLEncoder.encode("numOfRows",StandardCharsets.UTF_8) + "=" + URLEncoder.encode("15", StandardCharsets.UTF_8)); /*한 페이지 결과 수*/
             urlBuilder.append("&" + URLEncoder.encode("dataType",StandardCharsets.UTF_8) + "=" + URLEncoder.encode("JSON", StandardCharsets.UTF_8)); /*요청자료형식(XML/JSON) Default: XML*/
-            urlBuilder.append("&" + URLEncoder.encode("base_date",StandardCharsets.UTF_8) + "=" + URLEncoder.encode(nowFormat, StandardCharsets.UTF_8)); /*‘21년 6월 28일 발표*/
-            urlBuilder.append("&" + URLEncoder.encode("base_time",StandardCharsets.UTF_8) + "=" + URLEncoder.encode("0500", StandardCharsets.UTF_8)); /*06시 발표(정시단위) */
+            urlBuilder.append("&" + URLEncoder.encode("base_date",StandardCharsets.UTF_8) + "=" + URLEncoder.encode(nowFormat, StandardCharsets.UTF_8));
+            urlBuilder.append("&" + URLEncoder.encode("base_time",StandardCharsets.UTF_8) + "=" + URLEncoder.encode("0500", StandardCharsets.UTF_8)); /*05시 발표(정시단위) */
             urlBuilder.append("&" + URLEncoder.encode("nx",StandardCharsets.UTF_8) + "=" + URLEncoder.encode(strX, StandardCharsets.UTF_8)); /*예보지점의 X 좌표값*/
             urlBuilder.append("&" + URLEncoder.encode("ny",StandardCharsets.UTF_8) + "=" + URLEncoder.encode(strY, StandardCharsets.UTF_8)); /*예보지점의 Y 좌표값*/
             URL url = new URL(urlBuilder.toString());

@@ -10,7 +10,6 @@ import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.green.project_quadruaple.common.config.constant.OdsayApiConst;
@@ -51,13 +50,15 @@ public class TripService {
                        OdsayApiConst odsayApiConst,
                        WebClient webClient,
                        ObjectMapper objectMapper,
-                       @Value("${add-user-link}") String ADD_USER_LINK)
+                       @Value("${add-user-link}") String ADD_USER_LINK,
+                       WeatherApiCall weatherApiCall)
     {
         this.tripMapper = tripMapper;
         this.odsayApiConst = odsayApiConst;
         this.webClient = webClient;
         this.objectMapper = objectMapper;
         this.ADD_USER_LINK = ADD_USER_LINK;
+        this.weatherApiCall = weatherApiCall;
     }
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
@@ -109,8 +110,14 @@ public class TripService {
         }
         for (TripDetailDto detailDto : tripDetailDto) {
 //            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
-            detailDto.setWeather(weatherApiCall.call(webClient, objectMapper, detailDto.getSchedules().get(0).getLat(), detailDto.getSchedules().get(0).getLng()));
-            for (ScheduleResDto schedule : detailDto.getSchedules()) {
+            List<ScheduleResDto> schedules = detailDto.getSchedules();
+            ScheduleResDto weatherSchedule = null;
+            for (ScheduleResDto schedule : schedules) {
+                if(weatherSchedule == null) {
+                    if(schedule.getScheOrMemo().equals("SCHE")) {
+                            weatherSchedule = schedule;
+                    }
+                }
                 Long distance = schedule.getDistance();
                 Long duration = schedule.getDuration();
                 if(distance == null || duration == null) {
@@ -118,6 +125,9 @@ public class TripService {
                 }
                 totalDistance += distance;
                 totalDuration += duration;
+            }
+            if(weatherSchedule != null) {
+                detailDto.setWeather(weatherApiCall.call(webClient, objectMapper, weatherSchedule.getLat(), weatherSchedule.getLng()));
             }
         }
         TripDetailRes res = new TripDetailRes();
@@ -469,26 +479,25 @@ public class TripService {
         }
     }
 
-    public ResponseWrapper<String> getAddLink(Long tripId) {
-
+    public ResponseWrapper<String> getInviteKey(Long tripId) {
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        if(signedUserId != tripMapper.selTripManagerId(tripId)) {
+            throw new RuntimeException("여행의 팀장이 아님");
+        }
         String uuid = UUID.randomUUID().toString();
-        String url = ADD_USER_LINK + "?id=" + uuid;
-
         addUserLinkMap.put(uuid, tripId);
-
         Runnable addUserLinkThread = new AddUserLinkThread(uuid);
         new Thread(addUserLinkThread).start();
 
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), url);
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), uuid);
     }
 
     public String addTripUser(String uuid) {
-        Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
-//        Long signedUserId = 1L;
+        Long signedUserId = AuthenticationFacade.getSignedUserId();
         try {
             Long tripId = addUserLinkMap.get(uuid);
             if(tripId == null) {
-                return "잘못된 id";
+                return "잘못된 inviteKey";
             }
             tripMapper.insTripUser(tripId, List.of(signedUserId));
             return "리다이렉션 URL"; // 리다이렉션 필요
