@@ -270,7 +270,7 @@
 
 
 
-
+<!--
     <select id="searchStayFilter" resultMap="stayAmenityResultMap">
         SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category, b.detail_title AS locationName,
         h.pic_name AS strfPic, AVG(f.rating) AS averageRating, COUNT(f.review_id) AS reviewCnt,
@@ -307,7 +307,7 @@
         GROUP BY a.strf_id
         ORDER BY a.created_at DESC
     </select>
-<!--
+
     <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchFilterDto">
         <id property="strfId" column="strfId" />
         <result property="strfId" column="strfId" />
@@ -323,8 +323,8 @@
             <id property="amenityId" column="amenityId"/>
             <result property="amenityTitle" column="amenityTitle"/>
         </collection>
-
     </resultMap>
 -->
+
 
 </mapper>
