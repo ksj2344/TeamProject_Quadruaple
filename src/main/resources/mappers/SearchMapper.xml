@@ -225,12 +225,12 @@
         SELECT
         a.strf_id AS strfId, a.title AS strfTitle, a.category, c.title AS locationName,
         f.pic_name AS strfPic, AVG(d.rating) AS averageRating, COUNT(d.review_id) AS reviewCount,
-        COUNT(e.user_id) AS wishlistCount, h.amenity_id AS amenityId, h.title AS amenityTitle,
+        COUNT(e.user_id) AS wishlistCount,
         <if test="userId != null">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS userWishlist
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == null">
-            0 AS userWishlist
+            0 AS wishIn
         </if>
         FROM stay_tour_restaur_fest a
         JOIN location_detail b ON a.location_detail_id = b.location_detail_id
@@ -238,17 +238,13 @@
         LEFT JOIN review d ON a.strf_id = d.strf_id
         LEFT JOIN wishlist e ON a.strf_id = e.strf_id
         LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
-        LEFT JOIN amenipoint g ON a.strf_id = g.strf_id
-        LEFT JOIN amenity h ON g.amenity_id = h.amenity_id
         WHERE a.category = #{category}
         <if test="searchWord != null and searchWord != ''">
-            AND (
-            a.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.address LIKE CONCAT('%', #{searchWord}, '%') OR
             c.title LIKE CONCAT('%', #{searchWord}, '%') OR
             h.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            a.category LIKE CONCAT('%', #{searchWord}, '%')
-            )
+            a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
         ORDER BY a.created_at DESC
@@ -263,15 +259,83 @@
         <result property="averageRating" column="averageRating"/>
         <result property="reviewCount" column="reviewCount"/>
         <result property="wishlistCount" column="wishlistCount"/>
-        <result property="userWishlist" column="userWishlist"/>
-        <result property="amenityId" column="amenityId"/>
+        <result property="wishIn" column="wishIn"/>
+    </resultMap>
+
+    <select id="searchStay" resultMap="searchStayResultMap">
+        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
+        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
+        COUNT(f.review_id) AS reviewCnt,
+        (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
+        <if test="userId != 0">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == 0">
+            0 AS wishIn
+        </if>, j.amenity_id AS amenityId,
+        MAX(a.created_at) AS createdAt
+        FROM stay_tour_restaur_fest a
+        LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
+        JOIN location e ON e.location_id = b.location_id
+        LEFT JOIN review f ON a.strf_id = f.strf_id
+        LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
+        LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
+        LEFT JOIN amenipoint i ON i.strf_id = a.strf_id
+        LEFT JOIN amenity j ON i.amenity_id = j.amenity_id
+        WHERE a.category = 'STAY'
+        <if test="searchWord != null and searchWord != ''">
+            AND (
+            a.title LIKE CONCAT('%', #{searchWord}, '%')
+            OR a.address LIKE CONCAT('%', #{searchWord}, '%')
+            OR b.detail_title LIKE CONCAT('%', #{searchWord}, '%')
+            )
+        </if>
+        <if test="amenityId != null">
+            AND (
+            j.amenity_id IN
+            <foreach item="id" collection="amenityId" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            )
+        </if>
+        GROUP BY a.strf_id
+        ORDER BY MAX(a.created_at) DESC
+        LIMIT #{startIdx}, #{size}
+    </select>
+    <resultMap id="searchStayResultMap" type="com.green.project_quadruaple.search.model.filter.SearchStay">
+        <id property="strfId" column="strfId"/>
+        <result property="strfTitle" column="strfTitle"/>
+        <result property="category" column="category"/>
+        <result property="locationName" column="locationName"/>
+        <result property="strfPic" column="strfPic"/>
+        <result property="averageRating" column="averageRating"/>
+        <result property="reviewCnt" column="reviewCnt"/>
+        <result property="wishIn" column="wishIn"/>
+        <result property="createdAt" column="createdAt"/>
+    </resultMap>
+
+    <select id="searchAmenity" resultMap="searchAmenityResultMap">
+        SELECT
+         d.amenity_id AS amenityId,
+         d.title AS amenityTitle
+        FROM stay_tour_restaur_fest a
+        JOIN amenipoint c ON a.strf_id = c.strf_id
+        JOIN amenity d ON c.amenity_id = d.amenity_id
+        WHERE d.amenity_id IN
+        <foreach item="id" collection="amenityIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY d.amenity_id
+
+    </select>
+
+    <resultMap id="searchAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchAmenity">
+        <id property="amenityId" column="amenityId"/>
         <result property="amenityTitle" column="amenityTitle"/>
     </resultMap>
 
 
-
-
-
+    <!--
     <select id="searchStayFilter" resultMap="stayAmenityResultMap">
         SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
         b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
@@ -331,6 +395,24 @@
             <result property="amenityTitle" column="amenityTitle"/>
         </collection>
     </resultMap>
-
+    <select id="searchAmenity" resultMap="searchAmenityResultMap">
+        SELECT
+        MAX(a.created_at) AS createdAt
+        FROM stay_tour_restaur_fest a
+        JOIN amenipoint c ON a.strf_id = c.strf_id
+        JOIN amenity d ON c.amenity_id = d.amenity_id
+        WHERE a.category = 'STAY'
+         <if test="amenityId != null and amenityId.size() > 0">
+    AND d.amenity_id IN
+    <foreach item="id" collection="amenityId" open="(" separator="," close=")">
+        #{id}
+    </foreach>
+     </if>
+    GROUP BY a.strf_id
+    <if test="amenityId != null and amenityId.size() > 0">
+        HAVING COUNT(DISTINCT d.amenity_id) = #{amenityId.size()}
+    </if>
+</select>
+    -->
 
 </mapper>
