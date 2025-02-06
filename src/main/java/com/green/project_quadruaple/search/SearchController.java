@@ -3,13 +3,11 @@ package com.green.project_quadruaple.search;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
-import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.SearchCategoryRes;
+import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
-import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.ServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -96,6 +94,15 @@ public class SearchController {
 
         ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord);
         return ResponseEntity.ok(list);
+    }
+    @GetMapping("/filter")
+    public ResponseWrapper<?> searchStayFilter(@RequestParam("last_index") int lastIdx,
+                                              @RequestParam String category,
+                                              @RequestParam(value = "search_word") String searchWord,
+                                              @RequestParam(value = "amenity_id") List<Long> amenityId){
+
+
+        return searchService.searchStayFilter(lastIdx,category,searchWord,amenityId);
     }
 
 }
