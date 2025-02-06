@@ -64,14 +64,14 @@
     </update>
 
     <!-- 메모 삭제 -->
-    <delete id="deleteMemo">
+    <update id="deleteMemo">
         DELETE FROM memo
         WHERE
         memo_id = #{memoId};
         delete from sche_memo
         where
         schedule_memo_id = #{memoId};
-    </delete>
+    </update>
 
     <!--<select id="findMemoOwnerId" parameterType="Long" resultType="Long">
         SELECT trip_user_id
