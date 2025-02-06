@@ -94,6 +94,10 @@ public class SearchService {
         }
     }
 
+
+
+
+
     // 검색창 - 최근 검색어 출력
     public ResponseWrapper<List<SearchGetRes>> searchGetList (){
        Long userId = authenticationFacade.getSignedUserId();
@@ -168,7 +172,7 @@ public class SearchService {
         return searchMapper.searchCategory(category, searchWord, userId);
     }
 
-    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
+    public List<SearchFilter> searchStayFilter (SearchAmenityReq req){
         Long userId = authenticationFacade.getSignedUserId();
         if (req.getSearchWord() == null ){
             return new ArrayList<>();

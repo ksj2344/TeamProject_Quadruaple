@@ -2,7 +2,7 @@ package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.SearchFilterReq;
+
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
@@ -10,6 +10,7 @@ import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.ServletRequest;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -126,12 +127,13 @@ public class SearchController {
     }
 
 
-    @GetMapping("/filter")
-    @Operation(summary = "숙소 카테고리 + 필터" , description = "숙소 카테고리 + 편의 id 에 따라 추가 설정")
-    public List<SearchFilter> searchStayFilter (@ModelAttribute SearchFilterReq req){
-
-        return searchService.searchStayFilter(req);
-    }
+//    @GetMapping("/filter")
+//    @Operation(summary = "숙소 카테고리 + 필터" , description = "숙소 카테고리 + 편의 id 에 따라 추가 설정")
+//    public ResponseEntity<?> searchStayFilter (@RequestBody SearchFilterReq req){
+//        ResponseWrapper<List<SearchFilter>> searchFilters = searchService.searchStayFilter(req);
+//
+//        return ResponseEntity.ok(searchFilters);
+//    }
 
 //    @GetMapping("/amenity")
 //    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
