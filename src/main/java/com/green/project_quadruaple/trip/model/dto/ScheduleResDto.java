@@ -22,7 +22,6 @@ public class ScheduleResDto {
     private String lng;
     private Integer pathType;
     private long tripId;
-    private String title;
     private String content;
     private boolean reviewed;
 }

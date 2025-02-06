@@ -163,11 +163,6 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
-        Long userId = authenticationFacade.getSignedUserId();
-        return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
-    }
-
     public List<SearchFilter> searchStayFilter (SearchAmenityReq req){
         Long userId = authenticationFacade.getSignedUserId();
         if (req.getSearchWord() == null ){
