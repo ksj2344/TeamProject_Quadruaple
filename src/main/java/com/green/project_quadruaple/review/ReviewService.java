@@ -51,17 +51,6 @@ public class ReviewService {
     @Transactional
     public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
         Long userId = authenticationFacade.getSignedUserId();
-//        if (p.getReviewId() <= 0) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-//        }
-
-        // 리뷰 저장
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("content", p.getContent());
-//        params.put("rating", p.getRating());
-//        params.put("strfId", p.getStrfId());
-//        params.put("userId", userId);
 
         int result = reviewMapper.postRating(p,userId);
         if (result == 0) {
