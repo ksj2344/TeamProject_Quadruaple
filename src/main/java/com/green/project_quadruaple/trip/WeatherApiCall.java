@@ -3,7 +3,9 @@ package com.green.project_quadruaple.trip;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.green.project_quadruaple.trip.model.Weather;
 import com.green.project_quadruaple.trip.model.dto.WeatherDto;
+import com.green.project_quadruaple.trip.model.dto.WeatherItem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -50,8 +52,15 @@ public class WeatherApiCall {
             URL url = new URL(urlBuilder.toString());
             String json = httpPostRequestReturnJson(webClient, url);
             WeatherDto weatherList = getWeatherList(json, objectMapper);
-            System.out.println(json);
-            return "";
+//            System.out.println(weatherList);
+            for (WeatherItem item : weatherList.getItem()) {
+                if(item.getCategory().equals("SKY")) {
+                    return Weather.getNameByValue(Integer.parseInt(item.getFcstValue()));
+                } else if(item.getCategory().equals("PTY") && !item.getFcstValue().equals("0")) {
+                    return Weather.getNameByValue(Integer.parseInt(item.getFcstValue())+10);
+                }
+            }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
@@ -71,7 +80,6 @@ public class WeatherApiCall {
             JsonNode jsonNode = objectMapper.readTree(json);
             WeatherDto weatherDto =  objectMapper.convertValue(jsonNode.at("/response/body/items")
                     , new TypeReference<>() {});
-            System.out.println(weatherDto);
             return weatherDto;
         } catch (Exception e) {
             throw new RuntimeException(e);
