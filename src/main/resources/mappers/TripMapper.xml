@@ -26,6 +26,7 @@
             , t.title AS title
             , t.start_at AS startAt
             , t.end_at AS endAt
+            , tl.location_id
             , l.location_pic AS locationPic
             , count(sm.schedule_memo_id) AS scheduleCnt
         FROM trip t
@@ -36,7 +37,7 @@
             ON tl.trip_id = t.trip_id
         LEFT JOIN location l
             ON l.location_id = tl.location_id
-        JOIN sche_memo sm
+        LEFT JOIN sche_memo sm
             ON sm.trip_id = t.trip_id
             AND sm.category = 'SCHE'
         GROUP BY t.trip_id
