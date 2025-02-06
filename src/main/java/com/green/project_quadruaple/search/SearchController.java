@@ -4,13 +4,12 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
 import com.green.project_quadruaple.search.model.filter.Stay;
-import com.green.project_quadruaple.search.model.StayCategory;
+import com.green.project_quadruaple.search.model.SearchCategoryRes;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.ServletRequest;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,25 +29,6 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    /*@GetMapping
-    public ResponseEntity<Map<String, Object>> getTripLocation(
-            @RequestParam(value = "search_word", required = false) String searchWord) {
-        long userId = AuthenticationFacade.getSignedUserId(); // JWT에서 유저 ID 추출
-        Map<String, Object> response = searchService.getTripLocation(userId, searchWord);
-        return ResponseEntity.ok(response);
-    }*/
-
-
-    /*@GetMapping("/location")
-    public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
-        System.out.println("Received search_word: " + search_word);
-        List<LocationResponse> locations = searchService.getTripLocation(search_word);
-        System.out.println("Search results: " + locations);
-        if (locations.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("검색 결과가 없습니다.");
-        }
-        return ResponseEntity.ok(locations);
-    }*/
     @GetMapping("/location")
     public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
         System.out.println("Received search_word: " + search_word); // 디버깅용 로그 추가
@@ -110,37 +90,12 @@ public class SearchController {
     }
 
     @GetMapping("/category")
-    @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
-    public List<Stay> searchCategoryWithFilters(@RequestParam("category") Category category
-                                                , @RequestParam("start_idx") int startIdx
-                                                , @RequestParam("size") int size) {
-        return searchService.searchCategoryWithFilters(category, startIdx, size);
+    public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
+                                            @RequestParam String category,
+                                            @RequestParam(value = "search_word", required = false) String searchWord) {
+
+        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord);
+        return ResponseEntity.ok(list);
     }
-    @GetMapping("/category/ver2")
-    public ResponseEntity<List<StayCategory>> searchCategory(
-            @RequestParam("category") String category,
-            @RequestParam(value = "search_word", required = false) String searchWord,
-            @RequestParam(value = "user_id", required = false) Long userId) {
-
-        List<StayCategory> stayCategories = searchService.searchCategory(category, searchWord, userId);
-        return ResponseEntity.ok(stayCategories);
-    }
-
-
-//    @GetMapping("/filter")
-//    @Operation(summary = "숙소 카테고리 + 필터" , description = "숙소 카테고리 + 편의 id 에 따라 추가 설정")
-//    public ResponseEntity<?> searchStayFilter (@RequestBody SearchFilterReq req){
-//        ResponseWrapper<List<SearchFilter>> searchFilters = searchService.searchStayFilter(req);
-//
-//        return ResponseEntity.ok(searchFilters);
-//    }
-
-//    @GetMapping("/amenity")
-//    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
-//
-//        List<SearchFilterDto> searchAmenityReq = searchService.searchStayByAmenity(req);
-//        return searchAmenityReq;
-////                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
-//    }
 
 }

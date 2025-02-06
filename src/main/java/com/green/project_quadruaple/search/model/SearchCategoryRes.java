@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.search.model;
 
+import com.green.project_quadruaple.trip.model.Category;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +10,10 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class StayCategory {
+public class SearchCategoryRes {
     private Long strfId;
     private String strfTitle;
-    private String category;
+    private Category category;
     private String locationName;
     private String strfPic;
     private Double averageRating;
@@ -21,4 +22,7 @@ public class StayCategory {
     private Integer userWishlist;
     private Long amenityId;
     private String amenityTitle;
+
+//    private boolean isMore;
+
 }
