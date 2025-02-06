@@ -111,9 +111,8 @@ CREATE TABLE sche_memo(
 CREATE TABLE memo(
                      memo_id BIGINT PRIMARY KEY
     , trip_user_id bigint NOT null
-    , title varchar(50) NOT NULL
     , content varchar(1000) NOT NULL
-    , updated_at datetime
+    , updated_at datetime ON UPDATE CURRENT_TIMESTAMP
     , FOREIGN KEY(memo_id) REFERENCES sche_memo (schedule_memo_id)
     , FOREIGN KEY(trip_user_id) REFERENCES trip_user(trip_user_id)
 );
@@ -477,7 +476,7 @@ FROM sche_memo SM
 
 # 메모 view
 CREATE VIEW memo_with_model AS
-SELECT M.memo_id, M.title, M.content, M.updated_at, M.trip_user_id
+SELECT M.memo_id, M.content, M.updated_at, M.trip_user_id
      , SM.trip_id, SM.`day`, SM.seq, SM.created_at
 FROM sche_memo SM
          JOIN memo M
