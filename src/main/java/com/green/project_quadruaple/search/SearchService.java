@@ -95,6 +95,10 @@ public class SearchService {
         }
     }
 
+
+
+
+
     // 검색창 - 최근 검색어 출력
     public ResponseWrapper<List<SearchGetRes>> searchGetList (){
        Long userId = authenticationFacade.getSignedUserId();
@@ -138,38 +142,33 @@ public class SearchService {
 
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long signedUserId = authenticationFacade.getSignedUserId();
-//        if (signedUserId <= 0){
-//            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-//        }
-        // 검색어 search_word 테이블 insert + update 작업용
         searchMapper.searchIns(searchWord,signedUserId);
         List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
-    /*
-    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
-    Long signedUserId = authenticationFacade.getSignedUserId();
-    if (searchWord == null) {
-        return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
+
+    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord) {
+
+        Long userId = authenticationFacade.getSignedUserId();
+
+        String categoryValue = null;
+        if(category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
+        }
+        int more = 1;
+        List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId);
+
+
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
-    if (signedUserId == null) {
-        signedUserId = 0L; // NOT NULL 조건 충족
-    }
-    searchMapper.searchIns(searchWord, signedUserId);
-    List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId);
-    return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
-}
-     */
 
     public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
         Long userId = authenticationFacade.getSignedUserId();
         return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
-    public List<StayCategory> searchCategory(String category, String searchWord, Long userId) {
-        return searchMapper.searchCategory(category, searchWord, userId);
-    }
 
-    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
+    public List<SearchFilter> searchStayFilter (SearchAmenityReq req){
         Long userId = authenticationFacade.getSignedUserId();
         if (req.getSearchWord() == null ){
             return new ArrayList<>();

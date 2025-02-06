@@ -5,20 +5,22 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface ReviewMapper {
     List<ReviewSelRes> getReviewWithPics(ReviewSelReq req);
-    List<MyReviewSelRes> getMyReviews(MyReviewSelReq req);
+    List<MyReviewSelRes> getMyReviews(Long userId);
 
-    int postRating(ReviewPostReq p);
+    int postRating(@Param("req") ReviewPostReq req, @Param("userId") Long userId);
+
     int postReviewPic(ReviewPicDto pics);
 
     int patchReview(ReviewUpdReq req);
     int patchReviewPic(@Param("pics") List<ReviewPicDto> reviewPicList);
 
-    int deleteReview (ReviewDelReq req);
-    int deleteReviewPic(ReviewDelPicReq p);
+    int deleteReview (Long reviewId,Long userId);
+    int deleteReviewPic(Long reviewId);
 
 
 }

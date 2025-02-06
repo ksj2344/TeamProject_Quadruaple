@@ -3,7 +3,7 @@ package com.green.project_quadruaple.search;
 import com.green.project_quadruaple.search.model.*;
 import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
-import com.green.project_quadruaple.search.model.StayCategory;
+import com.green.project_quadruaple.search.model.SearchCategoryRes;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
 import com.green.project_quadruaple.search.model.strf_list.StrfShortInfoDto;
 import com.green.project_quadruaple.trip.model.Category;
@@ -20,6 +20,9 @@ public interface SearchMapper {
     List<StrfShortInfoDto> selStrfShortInfoBasic(long userId, List<LocationIdAndTitleDto> locationIdList, int startIdx, int size, String category, String searchWord);
     List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
 
+
+
+
     // 검색창 출력 + 검색어 저장
     List<SearchGetRes> searchGetList (Long userId);
     void searchIns (@Param("search_word")String searchWord ,Long userId);
@@ -33,7 +36,8 @@ public interface SearchMapper {
                                         , @Param("start_idx") int startIdx
                                         , @Param("size") int size
                                         , Long userId);
-    List<StayCategory> searchCategory(String category, String searchWord, Long userId);
+
+    List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId);
 
     // 숙소 카테고리에서
 //    List<SearchFilterDto> searchStayByAmenity(@Param("amenityId") List<Long> amenityId,

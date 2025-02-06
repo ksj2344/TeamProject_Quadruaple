@@ -221,10 +221,10 @@
     </resultMap>
 
 
-    <select id="searchCategory" resultMap="stayCategoryResultMap">
+    <select id="searchCategory" resultMap="searchCategoryResultMap">
         SELECT
         a.strf_id AS strfId, a.title AS strfTitle, a.category, c.title AS locationName,
-        f.pic_name AS strfPic, AVG(r.rating) AS averageRating, COUNT(d.review_id) AS reviewCount,
+        f.pic_name AS strfPic, AVG(d.rating) AS averageRating, COUNT(d.review_id) AS reviewCount,
         COUNT(e.user_id) AS wishlistCount, h.amenity_id AS amenityId, h.title AS amenityTitle,
         <if test="userId != null">
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS userWishlist
@@ -232,7 +232,6 @@
         <if test="userId == null">
             0 AS userWishlist
         </if>
-
         FROM stay_tour_restaur_fest a
         JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location c ON b.location_id = c.location_id
@@ -253,8 +252,9 @@
         </if>
         GROUP BY a.strf_id
         ORDER BY a.created_at DESC
+        LIMIT #{startIdx}, #{size}
     </select>
-    <resultMap id="stayCategoryResultMap" type="com.green.project_quadruaple.search.model.StayCategory">
+    <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
         <id property="strfId" column="strfId"/>
         <result property="strfTitle" column="strfTitle"/>
         <result property="category" column="category"/>
@@ -315,7 +315,7 @@
         ORDER BY MAX(a.created_at) DESC
     </select>
 
-    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchFilterDto">
+    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.SearchFilter">
         <id property="strfId" column="strfId" />
         <result property="strfTitle" column="strfTitle" />
         <result property="category" column="category" />
