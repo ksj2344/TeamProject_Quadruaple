@@ -89,20 +89,13 @@ public class SearchController {
         return searchService.searchAll(searchWord);
     }
 
-    @GetMapping("/category/ver2")
+    @GetMapping("/category")
     public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
                                             @RequestParam String category,
-                                            @RequestParam(value = "search_word", required = false) String searchWord, ServletRequest servletRequest) {
+                                            @RequestParam(value = "search_word", required = false) String searchWord) {
 
         ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord);
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/category")
-    @Operation(summary = "카테고리 검색 ", description = "최대10개 출력 + 더 보기 누르면 계속 10개로 ")
-    public List<Stay> searchCategoryWithFilters(@RequestParam("category") Category category
-                                                , @RequestParam("start_idx") int startIdx
-                                                , @RequestParam("size") int size) {
-        return searchService.searchCategoryWithFilters(category, startIdx, size);
-    }
 }
