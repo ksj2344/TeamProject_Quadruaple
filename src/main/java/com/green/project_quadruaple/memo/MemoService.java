@@ -1,15 +1,23 @@
 package com.green.project_quadruaple.memo;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.memo.model.ForbiddenException;
 import com.green.project_quadruaple.memo.model.MemoDto;
+import com.green.project_quadruaple.memo.model.Req.MemoPostReq;
+import com.green.project_quadruaple.memo.model.Req.MemoUpReq;
+import com.green.project_quadruaple.memo.model.Res.MemoGetRes;
+import com.green.project_quadruaple.trip.TripMapper;
+import com.green.project_quadruaple.user.UserService;
 import com.green.project_quadruaple.user.exception.CustomException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,60 +30,84 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MemoService {
     private final MemoMapper memoMapper;
+    private final AuthenticationFacade authenticationFacade;
+    private final TripMapper tripMapper;
 
     @Transactional
-    public MemoDto getMemo(Long memoId, Long signedUserId) {
-        MemoDto memo = memoMapper.selectMemo(memoId);
+    public  ResponseEntity<ResponseWrapper<MemoGetRes>> getMemo(Long memoId) {
+        long signedUserId=authenticationFacade.getSignedUserId();
+        if(signedUserId==0){ return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));}
+        MemoGetRes memo = memoMapper.selectMemo(memoId);
 
-        if (memo == null) {
-            throw new ForbiddenException("조회 권한이 없습니다.");
-        }
-
-        if (!memo.getUserId().equals(signedUserId)) {
-            throw new ForbiddenException("조회 권한이 없습니다.");
-        }
-
-        if (memo.getUpdatedAt() == null) {
-            memo.setUpdatedAt(memo.getCreatedAt());
-        }
-
-        return memo;
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),memo));
     }
 
+
     @Transactional
-    public Long addMemo(MemoDto memoDto, Long signedUserId) {
-        memoDto.setUserId(signedUserId);
-        memoDto.setCreatedAt(LocalDateTime.now());
-        memoMapper.postMemo(memoDto);
-        return memoDto.getMemoId();
+    public ResponseWrapper<Long> addMemo(MemoPostReq memoDto) {
+        long signedUserId=authenticationFacade.getSignedUserId();
+        Long tripId = memoDto.getTripId();
+        if(signedUserId==0){
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), 0L);
+        }
+        Long tripUserId = memoMapper.selTripUserId(tripId, signedUserId); // trip_user_id 가져오기
+
+        if(tripUserId == null) {
+            return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null);
+        }
+
+        tripMapper.updateSeqScheMemo(tripId, memoDto.getSeq(), false); // 등록할 메모의 다음 일정,메모들의 seq + 1
+        memoMapper.postScheMemo(memoDto); // sche_memo 에 저장
+
+        memoDto.setTripUserId(tripUserId); // dto 에 trip_user_id 세팅
+        memoMapper.insMemo(memoDto); // memo 에 저장
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), memoDto.getScheMemoId());
     }
 
+
+
+    // 메모 수정 권한
     @Transactional
-    public void updateMemo(MemoDto memoDto, Long signedUserId) {
-        Long memoOwnerId = memoMapper.findMemoOwnerId(memoDto.getMemoId());
-
-        if (!memoOwnerId.equals(signedUserId)) {
-            throw new ForbiddenException("403", "수정 권한이 없습니다.");
+    public ResponseEntity<ResponseWrapper<Integer>> updateMemo(MemoUpReq memoDto) {
+        long signedUserId=authenticationFacade.getSignedUserId();
+        if(signedUserId==0){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
+        MemoUpReq userIdAndTripUserId = memoMapper.selUserIdByMemoId(memoDto.getMemoId());
 
-        if (memoDto.getUpdatedAt() == null) {
-            memoDto.setUpdatedAt(memoDto.getCreatedAt());
-        } else {
-            memoDto.setUpdatedAt(LocalDateTime.now());
+        if (userIdAndTripUserId.getUserId() != signedUserId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-
+        memoDto.setTripUserId(userIdAndTripUserId.getTripUserId());
         memoMapper.patchMemo(memoDto);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 
+
+    // 메모 삭제 권한
     @Transactional
-    public void deleteMemo(Long memoId, Long signedUserId) {
+    public ResponseEntity<ResponseWrapper<Integer>> deleteMemo(Long memoId) {
+
+        long signedUserId=authenticationFacade.getSignedUserId();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)){
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         Long memoOwnerId = memoMapper.findMemoOwnerId(memoId);
 
         if (!memoOwnerId.equals(signedUserId)) {
-            throw new ForbiddenException("403", "삭제 권한이 없습니다.");
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
 
         memoMapper.deleteMemo(memoId);
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 }
 
@@ -83,24 +115,6 @@ public class MemoService {
 
 
 
-    /*// 메모 삭제 로직 (day별 삭제)
-    public ResponseEntity<ResponseWrapper<String>> deleteMemo(Long memoId, Integer day) {
-        // Step 1. memo 테이블에서 관련된 메모 삭제
-        int memoDeleted = memoMapper.deleteMemoById(memoId);
-        if (memoDeleted == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), "삭제할 메모가 없습니다."));
-        }
-
-        // Step 2. sche_memo 테이블에서 day에 해당하는 데이터 삭제
-        int scheMemoDeleted = memoMapper.deleteScheMemoByDay(memoId, day);
-        if (scheMemoDeleted == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), "삭제할 스케줄 메모가 없습니다."));
-        }
-
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), "삭제 완료"));
-    }*/
 
 
 

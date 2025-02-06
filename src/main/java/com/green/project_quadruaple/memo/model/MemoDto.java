@@ -32,8 +32,6 @@ public class MemoDto {
         this.updatedAt = updatedAt;
     }
 
-
-
 }
 
 

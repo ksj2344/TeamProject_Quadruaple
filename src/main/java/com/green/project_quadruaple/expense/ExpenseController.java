@@ -1,5 +1,6 @@
 package com.green.project_quadruaple.expense;
 
+import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
@@ -27,15 +28,6 @@ public class ExpenseController {
         return expenseService.getExpenses(tripId);
     }
 
-    //정산하기
-    @GetMapping("dutch")
-    @Operation(summary = "정산하기", description = "비용추가 누르면 나오는 페이지")
-    public ResponseEntity<?> dutchExpenses(@RequestParam("total_price") int totalPrice,
-                                           @RequestParam("trip_id") long tripId,
-                                           @RequestParam(value = "except_users", required = false) List<Long> exceptUsers){
-        DutchReq p = new DutchReq(totalPrice,tripId,exceptUsers);
-        return expenseService.dutchExpenses(p);
-    }
 
     //가계부 추가
     @PostMapping
@@ -51,18 +43,18 @@ public class ExpenseController {
         return expenseService.selectExpenses(deId,tripId);
     }
 
-    //가계부 제외된 목록 보기
-    @GetMapping("excepted")
-    @Operation(summary = "제외된 유저들 불러오기", description = "해당 정산에서 이미 제외되었던 인원 불러오기")
-    public ResponseEntity exceptedMember(@RequestParam ("de_id") long deId){
-        return null;
+    //결제할 인원 가져오기
+    @GetMapping("trip_user")
+    @Operation(summary = "결제할 인원가져오기", description = "de_id가 null이 아니라면 수정화면에서 호출하는것")
+    public ResponseEntity<?> exceptedMember(@RequestParam (value = "de_id", required = false) Long deId,@RequestParam ("trip_id") long tripId){
+        return expenseService.getTripUser(deId,tripId);
     }
 
     //가계부 수정
     @PutMapping
     @Operation(summary = "가계부 수정", description = "금액 혹은 인원수정")
-    public ResponseEntity<?> updateExpenses(){
-        return null;
+    public ResponseEntity<?> updateExpenses(@RequestBody ExpensesUpdReq p){
+        return expenseService.updateExpenses(p);
     }
 
     //가계부 삭제
