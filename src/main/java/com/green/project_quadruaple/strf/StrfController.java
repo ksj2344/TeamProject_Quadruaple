@@ -17,10 +17,10 @@ public class StrfController {
 
     @GetMapping("member")
     @Operation(summary = "회원 상품 조회")
-    public ResponseWrapper<StrfSelRes> getMemberDetail(
-                                                 @RequestParam("strf_id") Long strfId) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(@RequestParam("strf_id") Long strfId,
+                                                       @RequestParam("last_index")int lastIdx) {
 
-        return strfService.getMemberDetail(strfId);
+        return strfService.getMemberDetail(strfId,lastIdx);
     }
 
     @GetMapping("member/non")
