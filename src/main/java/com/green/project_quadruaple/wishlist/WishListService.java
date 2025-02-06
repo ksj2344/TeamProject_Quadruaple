@@ -52,19 +52,7 @@ public class WishListService {
 
     }
 
-    /*public Map<String, Object> getWishListWithPagingNew(long userId, List<String> categoryList, int page) {
-        int offset = (page - 1) * 10; // 페이징 offset 계산
 
-        // DB에서 찜 목록 조회
-        List<WishListRes> wishLists = wishlistMapper.findWishList(userId, categoryList, offset);
-
-        // 응답 데이터 구성
-        Map<String, Object> result = new HashMap<>();
-        result.put("isMore", wishLists.size() > 10); // 10개 이상일 경우 추가 페이지 존재
-        result.put("wishList", wishLists.size() > 10 ? wishLists.subList(0, 10) : wishLists);
-
-        return result;
-    }*/
 
 
 
