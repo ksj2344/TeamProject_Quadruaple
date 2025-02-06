@@ -52,7 +52,7 @@ public class SearchService {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
-            if(dto.size() >= size) {
+            if(dto.size() > size) {
                 res.setMore(true);
             }
             res.setList(dto);
@@ -140,10 +140,17 @@ public class SearchService {
         }
     }
 
-    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
+    public ResponseWrapper<List<Stay>> searchAll(String searchWord,int lastIdx) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         searchMapper.searchIns(searchWord,signedUserId);
-        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
+        int more = 1;
+        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId,lastIdx,size+more);
+
+        boolean hasMore = stays.size() > size;
+        if (hasMore) {
+            stays.get(stays.size()-1).setMore(true);
+            stays.remove(stays.size()-1);
+        }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
 
@@ -176,6 +183,11 @@ public class SearchService {
         int more = 1;
         List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId);
 
+        boolean hasMore = res.size() > size;
+        if (hasMore) {
+            res.get(res.size()-1).setMore(true);
+            res.remove(res.size()-1);
+        }
 
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
@@ -190,9 +202,6 @@ public class SearchService {
         int more = 1;
 
         try {
-            // amenityIds가 불변 리스트일 경우 가변 리스트로 변환
-
-
             List<SearchAmenity> amenities = searchMapper.searchAmenity(amenityIds);
             List<SearchStay> stays = searchMapper.searchStay(categoryValue, searchWord, lastIdx, size + more, userId,amenityIds);
             StaySearchRes res = new StaySearchRes();

@@ -32,5 +32,6 @@ public class MyReviewSelRes {
     private String reviewWriteDate;
     @Schema(description = "리뷰 사진 목록")
     private List<ReviewPic> myReviewPic;
+    private boolean isMore;
 }
 

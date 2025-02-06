@@ -7,6 +7,7 @@ import com.green.project_quadruaple.strf.model.GetNonDetail;
 import com.green.project_quadruaple.strf.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,15 +19,22 @@ public class StrfService {
     private final StrfMapper strfMapper;
     private final AuthenticationFacade authenticationFacade;
 
-    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
+    @Value("${const.default-review-size}")
+    private int size;
+
+    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId,int lastIdx) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         if (signedUserId == null || strfId == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-        StrfSelRes res = strfMapper.getMemberDetail(signedUserId , strfId);
+
+        int more = 1;
+        StrfSelRes res = strfMapper.getMemberDetail(signedUserId , strfId,lastIdx,size+more);
+
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
         }
+
         strfMapper.strfUpsert(signedUserId,strfId);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);

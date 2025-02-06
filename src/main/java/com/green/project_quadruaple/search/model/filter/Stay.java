@@ -23,5 +23,6 @@ public class Stay {
     private int wishlistCount;
     private int wishIn;
     private List<SearchAmenity> amenities;
+    private boolean isMore;
 }
 

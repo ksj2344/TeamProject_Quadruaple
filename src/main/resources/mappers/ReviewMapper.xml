@@ -13,6 +13,7 @@
         LEFT JOIN review_pic rp ON a.review_id = rp.review_id
         WHERE a.strf_id = #{strfId}
         ORDER BY a.review_id DESC
+        LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
         <id property="reviewId" column="reviewId"/>
@@ -89,6 +90,7 @@
         LEFT JOIN user c ON a.user_id = c.user_id
         WHERE a.user_id = #{userId}
         ORDER BY a.review_id DESC
+        LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
         <id property="reviewId" column="reviewId"/>

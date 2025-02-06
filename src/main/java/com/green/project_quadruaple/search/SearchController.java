@@ -83,8 +83,9 @@ public class SearchController {
 
     @PostMapping("/all")
     @Operation(summary = "검색 - 전체 페이지 리스트", description = "최대 3개 출력 - 나머지는 더 보기 누르면 category 로 이전")
-    public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord) {
-        return searchService.searchAll(searchWord);
+    public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord,
+                                        @RequestParam("last_index") int lastIdx) {
+        return searchService.searchAll(searchWord,lastIdx);
     }
 
     @GetMapping("/category")
