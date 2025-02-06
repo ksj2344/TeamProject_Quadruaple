@@ -23,13 +23,13 @@ public class PostTripReq {
     private long tripId;
 
     @NotBlank
-    @JsonProperty("location_id")
-    @Schema(title = "여행 지역 ID", type= "long", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private List<Long> locationId;
-
-    @NotBlank
     @Schema(title = "여행 제목", type= "string", example = "여행 제목 입니다.", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
+
+    @NotBlank
+    @JsonProperty("location_id")
+    @Schema(title = "여행 지역 ID", type= "list", example = "[1,2]", requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<Long> locationId;
 
     @NotBlank
     @JsonProperty("start_at")

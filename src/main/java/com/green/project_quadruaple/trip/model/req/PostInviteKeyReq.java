@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.review.model;
+package com.green.project_quadruaple.trip.model.req;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class ReviewDelReq {
-    private Long userId;
-    private Long reviewId;
+public class PostInviteKeyReq {
+
+    private String inviteKey;
 }
