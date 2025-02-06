@@ -214,55 +214,54 @@ public class DataService {
         }
 
         List<Long> updateUserIds = new ArrayList<>();
-
-        // 기본 프로필 사진의 절대 경로 (파일 디렉토리 내)
-        String defaultPicSourcePath = Paths.get(myFileUtils.getUploadPath(), "common", "user.png").toString();
+        String defaultPicName = "user_profile.png";  // 새로운 기본 프로필 파일명
+        String oldPicName = "user.png"; // 기존 잘못된 프로필 파일명
+        String defaultPicSourcePath = Paths.get(myFileUtils.getUploadPath(), "common", defaultPicName).toString();
+        File sourceFile = new File(defaultPicSourcePath);
 
         for (UserProfile user : users) {
             String profilePic = user.getProfilePic();
-            if (profilePic == null || !profilePic.contains(".")) { // NULL 이거나 확장자 없음
+
+            // user.png를 사용 중이거나 잘못된 프로필인 경우 변경
+            if (profilePic == null || !profilePic.contains(".") || profilePic.equalsIgnoreCase(oldPicName)) {
                 updateUserIds.add(user.getUserId());
 
-                // 사용자별 폴더 생성 경로 (절대 경로로 설정)
-                String userFolderPath = Paths.get(myFileUtils.getUploadPath(), "user", user.getUserId().toString()).toString(); // profile 폴더 없앰
-                String defaultPicPath = Paths.get(userFolderPath, "user.png").toString();
+                // 사용자별 프로필 사진 폴더
+                String userFolderPath = Paths.get(myFileUtils.getUploadPath(), "user", user.getUserId().toString()).toString();
+                File userFolder = new File(userFolderPath);
 
                 // 프로필 사진 폴더가 없으면 생성
                 myFileUtils.makeFolders(userFolderPath);
 
-                // 기본 이미지가 이미 존재하는지 확인하고 복사
-                File sourceFile = new File(defaultPicSourcePath);
-                File destinationFile = new File(defaultPicPath);
+                // 기존 `user.png` 파일 삭제
+                File oldFile = new File(userFolder, oldPicName);
+                if (oldFile.exists()) {
+                    System.out.println("기존 user.png 삭제: " + oldFile.getAbsolutePath());
+                    oldFile.delete();
+                }
 
-                // 디버깅: 경로 확인
-                System.out.println("소스 파일 경로: " + sourceFile.getAbsolutePath());
-                System.out.println("목적지 파일 경로: " + destinationFile.getAbsolutePath());
+                // 기본 프로필 적용할 경로
+                File destinationFile = new File(userFolder, defaultPicName);
 
-                if (!destinationFile.exists()) {
-                    try {
-                        // 목적지 폴더가 존재하는지 확인하고 없으면 생성
-                        File parentFolder = destinationFile.getParentFile();
-                        if (!parentFolder.exists()) {
-                            parentFolder.mkdirs(); // 폴더 생성
-                            System.out.println("목적지 폴더를 생성했습니다: " + parentFolder.getAbsolutePath());
-                        }
-
-                        // 기본 프로필 사진을 해당 사용자 폴더로 복사
-                        Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);  // 기존 파일 덮어쓰기
-                        System.out.println("기본 프로필 사진 복사 완료!");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                try {
+                    // 기본 프로필 복사 (이미 최신 파일이 아니면 덮어쓰기)
+                    if (!destinationFile.exists() || Files.mismatch(sourceFile.toPath(), destinationFile.toPath()) != -1) {
+                        Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        System.out.println("기본 프로필 사진 업데이트 완료! (사용자: " + user.getUserId() + ")");
+                    } else {
+                        System.out.println("이미 최신 기본 프로필 사진이 적용됨: " + destinationFile.getAbsolutePath());
                     }
-                } else {
-                    System.out.println("목적지 파일이 이미 존재합니다: " + destinationFile.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
                 }
             }
         }
 
+        // DB에서 user.png → user_profile.png로 변경
         if (!updateUserIds.isEmpty()) {
-            int updatedCount = dataMapper.updateProfilePicsToDefault(updateUserIds, "user.png");
+            int updatedCount = dataMapper.updateProfilePicsToDefault(updateUserIds, defaultPicName);
             return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), updatedCount));
         }
 
