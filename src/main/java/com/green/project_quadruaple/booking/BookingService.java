@@ -3,6 +3,7 @@ package com.green.project_quadruaple.booking;
 import com.green.project_quadruaple.booking.model.*;
 import com.green.project_quadruaple.booking.model.dto.*;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class BookingService {
     private final String secretKey;
     private final String payUrl;
 
-    public static final Map<Long, KakaoReadyDto> kakaoTidSession = new HashMap<>();
+    public KakaoReadyDto kakaoReadyDto;
 
     public BookingService(BookingMapper bookingMapper,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
@@ -66,12 +67,12 @@ public class BookingService {
     // final_paymaent = 실제 결제 금액 맞는지 비교 필요
     // strf id 가 실제 상품과 맞는지 체크
     public ResponseWrapper<String> postBooking(BookingPostReq req) {
-        Long userId = 101L;
+        Long signedUserId = AuthenticationFacade.getSignedUserId();
         Long couponId = req.getCouponId();
         List<MenuIdAndQuantityDto> orderList = req.getOrderList();
 
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
-            CouponDto couponDto = bookingMapper.selExistUserCoupon(userId, couponId);
+            CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null) { // 쿠폰 미소지시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
@@ -112,7 +113,7 @@ public class BookingService {
 
         params.put("cid", affiliateCode); // 가맹점 코드 - 테스트용
         params.put("partner_order_id", orderNo); // 주문 번호
-        params.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
+        params.put("partner_user_id", String.valueOf(signedUserId)); // 회원 아이디
         params.put("item_name", "테스트 상품1"); // 상품 명
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
@@ -124,15 +125,12 @@ public class BookingService {
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
         try {
-            KakaoReadyDto kakaoReadyDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
+            kakaoReadyDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/ready"), body, KakaoReadyDto.class);
             log.info("kakaoDto = {}", kakaoReadyDto);
             if(kakaoReadyDto != null) {
                 kakaoReadyDto.setPartnerOrderId(orderNo);
-                kakaoReadyDto.setPartnerUserId(String.valueOf(userId));
+                kakaoReadyDto.setPartnerUserId(String.valueOf(signedUserId));
                 kakaoReadyDto.setBookingPostReq(req);
-                kakaoTidSession.put(userId, kakaoReadyDto);
-                OrderThread orderThread = new OrderThread(userId);
-                new Thread(orderThread); // 3분 대기후 주문 세션 삭제
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
         } catch (Exception e) {
@@ -142,7 +140,8 @@ public class BookingService {
     }
 
     public String approve(String pgToken) {
-        Long userId = 101L;
+
+        String userId = kakaoReadyDto.getPartnerUserId();
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -150,28 +149,27 @@ public class BookingService {
         headers.add("Content-Type", "application/json");
 
         HashMap<String, String> params = new HashMap<>();
-        KakaoReadyDto session = kakaoTidSession.get(userId);
 
         params.put("cid", affiliateCode); // 가맹점 코드 - 테스트용
-        params.put("tid", session.getTid()); // 결제 고유 번호, 준비단계 응답에서 가져옴
-        params.put("partner_order_id", session.getPartnerOrderId()); // 주문 번호
+        params.put("tid", kakaoReadyDto.getTid()); // 결제 고유 번호, 준비단계 응답에서 가져옴
+        params.put("partner_order_id", kakaoReadyDto.getPartnerOrderId()); // 주문 번호
         params.put("partner_user_id", String.valueOf(userId)); // 회원 아이디
         params.put("pg_token", pgToken); // 준비 단계에서 리다이렉트떄 받은 param 값
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
         try {
-            BookingPostReq bookingPostReq = session.getBookingPostReq();
-            bookingPostReq.setUserId(userId);
-            bookingPostReq.setTid(session.getTid());
-            bookingMapper.insBooking(bookingPostReq);
-            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+            BookingPostReq bookingPostReq = kakaoReadyDto.getBookingPostReq();
+            bookingPostReq.setUserId(Long.parseLong(userId));
+            bookingPostReq.setTid(kakaoReadyDto.getTid());
+//            bookingMapper.insBooking(bookingPostReq);
+//            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
             if(approveDto == null) {
                 throw new RuntimeException();
             }
-            return "complete";
+            return "http://localhost:5173/booking/complete?bookingId=" + bookingPostReq.getBookingId();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
