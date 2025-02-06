@@ -6,6 +6,7 @@ import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
+import com.green.project_quadruaple.expense.model.res.TripUser;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,11 +18,6 @@ public interface ExpenseMapper {
     void insDe(DeDto d);
     //가계부 insert
     int insPaid (Map<String, Object> paramMap);
-    //정산하기
-    List<DutchPaidUserDto> selDutchUsers (DutchReq p);
-
-    //정산에서 제외되었던 인원 불러오기
-    List<PaidUser> exceptedMember(long deId, long tripId);
 
     //가계부 보기
     ExpensesRes getExpenses(long tripId, long userId);
@@ -31,6 +27,9 @@ public interface ExpenseMapper {
 
     //참여유저인지 확인하기
     boolean IsUserInTrip(long tripId, long userId);
+
+    //결제인원 정보 가져오기
+    List<TripUser> getTripUser(long tripId, Long deId);
 
     //가계부 삭제
     int delExpenses(long deId);

@@ -9,6 +9,7 @@ import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
+import com.green.project_quadruaple.expense.model.res.TripUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -64,7 +65,7 @@ public class ExpenseService {
         for(int i=0;i<userList.size();i++){
             Map<String, Object> map=new HashMap<>();
             if(randomNum != null && randomNum==i){
-                map.put("user", price+totalPrice-price*userList.size());
+                map.put("price", price+totalPrice-price*userList.size());
             }else {
                 map.put("price",price);
             }
@@ -78,7 +79,7 @@ public class ExpenseService {
         return expenseMapper.insPaid(paramMap);
     }
 
-    //가계부 업뎃
+    //가계부 수정
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> updateExpenses(ExpensesUpdReq p){
         if(isUserJoinTrip(p.getTripId())){
@@ -106,17 +107,17 @@ public class ExpenseService {
     }
 
     //이 결제에서 제외된 인원보기
-    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId, long tripId){
+    public ResponseEntity<ResponseWrapper<List<TripUser>>> getTripUser(Long deId, long tripId){
         if(isUserJoinTrip(tripId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<PaidUser> exceptUsers=expenseMapper.exceptedMember(deId, tripId);
-        if(exceptUsers==null){
+        List<TripUser> tripUser=expenseMapper.getTripUser(tripId, deId);
+        if(tripUser==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),exceptUsers));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),tripUser));
     }
 
 

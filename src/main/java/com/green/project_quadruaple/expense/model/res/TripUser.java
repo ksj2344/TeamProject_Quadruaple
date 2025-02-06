@@ -14,4 +14,5 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TripUser extends PaidUser {
+    private Boolean isJoin;
 }

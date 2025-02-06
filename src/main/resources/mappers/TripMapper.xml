@@ -97,7 +97,6 @@
             , strf.address AS address
             , strf.lat AS lat
             , strf.lng as lng
-            , m.title AS title
             , m.content AS content
             , if(r.user_id = #{userId}, 1, 0) AS reviewed
         FROM sche_memo sm
