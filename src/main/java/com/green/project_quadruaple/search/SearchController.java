@@ -2,6 +2,7 @@ package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
+
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
