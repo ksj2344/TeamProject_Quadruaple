@@ -9,8 +9,8 @@ import java.util.Map;
 
 @Mapper
 public interface ReviewMapper {
-    List<ReviewSelRes> getReviewWithPics(ReviewSelReq req);
-    List<MyReviewSelRes> getMyReviews(Long userId);
+    List<ReviewSelRes> getReviewWithPics(ReviewSelReq req,int startIdx , int size);
+    List<MyReviewSelRes> getMyReviews(Long userId, int startIdx , int size);
 
     int postRating(@Param("req") ReviewPostReq req, @Param("userId") Long userId);
 

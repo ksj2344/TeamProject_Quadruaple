@@ -44,6 +44,8 @@ public class StrfSelRes {
     private String inquiredAt;
     private String reviewCnt;
 
+    private boolean isMore;
+
 
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;

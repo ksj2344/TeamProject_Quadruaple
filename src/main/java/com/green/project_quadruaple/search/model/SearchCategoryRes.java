@@ -21,6 +21,6 @@ public class SearchCategoryRes {
     private Integer wishlistCount;
     private Integer wishIn;
 
-//    private boolean isMore;
+    private boolean isMore;
 
 }

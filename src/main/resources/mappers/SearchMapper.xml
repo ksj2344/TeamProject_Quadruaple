@@ -171,7 +171,8 @@
         GROUP BY s.strf_id, s.title, s.created_at, l.title, c.pic_name, s.category, a.amenity_id, a.title
         ) AS categorized_results
         WHERE row_num <![CDATA[ <= ]]> 3
-        ORDER BY category, created_at DESC;
+        ORDER BY category, created_at DESC
+        LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
