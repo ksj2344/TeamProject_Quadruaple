@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class SearchFilterReq {
+public class SearchAmenityReq{
     @Schema(title = "편의시설 ID 목록", example = "[35, 36]")
     private List<Long> amenityId;
 

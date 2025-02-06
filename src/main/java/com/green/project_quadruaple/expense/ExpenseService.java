@@ -11,7 +11,6 @@ import com.green.project_quadruaple.expense.model.dto.UserPriceDto;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
-import com.green.project_quadruaple.expense.model.req.ExpensesUpdReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +30,11 @@ public class ExpenseService {
     private final ExpenseMapper expenseMapper;
     private final AuthenticationFacade authenticationFacade;
 
-    //trip 참여객 체크
-    boolean isUserJoinTrip(long tripId){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return !(principal instanceof JwtUser) ||!expenseMapper.IsUserInTrip(tripId,authenticationFacade.getSignedUserId());
-    }
-
     //추가하기
     @Transactional
     public ResponseEntity<ResponseWrapper<Long>> insSamePrice(ExpenseInsReq p){
-        if(isUserJoinTrip(p.getTripId())){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser) ||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
@@ -50,15 +44,7 @@ public class ExpenseService {
         if(deId==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
-        int result=insPaidUsers(p.getPriceList(),deId,p.getTripId());
-        if(result==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),deId));
-    }
-    //paidUsers에 입력하기
-    int insPaidUsers(List<UserPriceDto> dtos, long deId, long tripId){
+        List<UserPriceDto> dtos=p.getPriceList();
         List<Map<String, Object>> userPaid = new ArrayList<>();
         for(UserPriceDto u:dtos){
             Map<String, Object> map=new HashMap<>();
@@ -68,14 +54,21 @@ public class ExpenseService {
         }
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("deId", deId);
-        paramMap.put("tripId", tripId);
+        paramMap.put("tripId", p.getTripId());
         paramMap.put("userPaid", userPaid);
-        return expenseMapper.insPaid(paramMap);
+        log.info("service>paramMap:{}",paramMap);
+        int result=expenseMapper.insPaid(paramMap);
+        if(result==0){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),deId));
     }
 
     //정산하기
     public ResponseEntity<ResponseWrapper<List<DutchPaidUserDto>>> dutchExpenses(DutchReq p){
-        if(isUserJoinTrip(p.getTripId())){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
@@ -94,33 +87,14 @@ public class ExpenseService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),dutchPaidUserDtos));
     }
 
-    //가계부 업뎃
-    @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> updateExpenses(ExpensesUpdReq p){
-        if(isUserJoinTrip(p.getTripId())){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
-        }
-        int delRes= expenseMapper.delPaidUser(p.getDeId());
-        if(delRes==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        int result=insPaidUsers(p.getPriceList(),p.getDeId(),p.getTripId());
-        if(result==0){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
-    }
-
     //이 결제에서 제외된 인원보기
-    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId, long tripId){
-        if(isUserJoinTrip(tripId)){
+    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<PaidUser> exceptUsers=expenseMapper.exceptedMember(deId, tripId);
+        List<PaidUser> exceptUsers=new ArrayList<>();
         if(exceptUsers==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
@@ -128,14 +102,18 @@ public class ExpenseService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),exceptUsers));
     }
 
-
     //가계부 보기
     public ResponseEntity<ResponseWrapper<ExpensesRes>> getExpenses(long tripId){
-        if(isUserJoinTrip(tripId)){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
         long userId=authenticationFacade.getSignedUserId();
+        if(!expenseMapper.IsUserInTrip(tripId,userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
+        }
         ExpensesRes result= expenseMapper.getExpenses(tripId,userId);
         if(result==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -146,7 +124,8 @@ public class ExpenseService {
 
     //가계부 한줄 보기
     public ResponseEntity<ResponseWrapper<ExpenseOneRes>> selectExpenses(long deId, long tripId){
-        if(isUserJoinTrip(tripId)){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)||!expenseMapper.IsUserInTrip(tripId,authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
@@ -161,7 +140,8 @@ public class ExpenseService {
     //가계부 삭제하기
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> delExpenses(ExpenseDelReq p){
-        if(isUserJoinTrip(p.getTripId())){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!(principal instanceof JwtUser)||!expenseMapper.IsUserInTrip(p.getTripId(),authenticationFacade.getSignedUserId())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }

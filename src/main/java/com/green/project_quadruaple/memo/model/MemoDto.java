@@ -17,9 +17,8 @@ public class MemoDto {
     private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String title;
     private String content;
-    private Long day;
-    private Long seq;
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
