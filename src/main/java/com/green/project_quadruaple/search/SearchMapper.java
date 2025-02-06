@@ -1,7 +1,6 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.SearchFilterReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
@@ -41,5 +40,4 @@ public interface SearchMapper {
 //                                              @Param("search_word") String searchWord);
 
     // 숙소 카테고리 필터 부분
-    List<SearchFilter> searchStayFilter (SearchFilterReq req, Long userId);
 }

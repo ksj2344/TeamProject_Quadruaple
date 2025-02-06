@@ -315,7 +315,7 @@
         ORDER BY MAX(a.created_at) DESC
     </select>
 
-    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchFilterDto">
+    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.SearchFilter">
         <id property="strfId" column="strfId" />
         <result property="strfTitle" column="strfTitle" />
         <result property="category" column="category" />
