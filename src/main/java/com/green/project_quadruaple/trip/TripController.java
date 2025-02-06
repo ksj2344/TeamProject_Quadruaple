@@ -28,7 +28,7 @@ public class TripController {
     private final TripService tripService;
 
     @GetMapping("/trip-list")
-    @Operation(summary = "로그인 유저의 여행 목록 불러오기", description = "로그인 유저의 여행 목록 불러오기")
+    @Operation(summary = "로그인 유저의 여행 목록 불러오기", description = "로그인 유저의 여행 목록 불러오기. after 가 완료된 여행, before 가 미완료된 여행")
     public ResponseWrapper<MyTripListRes> getTripList() {
         return tripService.getMyTripList();
     }
