@@ -4,26 +4,18 @@ import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.memo.model.ForbiddenException;
-import com.green.project_quadruaple.memo.model.MemoDto;
 import com.green.project_quadruaple.memo.model.Req.MemoPostReq;
 import com.green.project_quadruaple.memo.model.Req.MemoUpReq;
 import com.green.project_quadruaple.memo.model.Res.MemoGetRes;
 import com.green.project_quadruaple.trip.TripMapper;
-import com.green.project_quadruaple.user.UserService;
-import com.green.project_quadruaple.user.exception.CustomException;
+
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -107,6 +99,7 @@ public class MemoService {
         }
 
         memoMapper.deleteMemo(memoId);
+        memoMapper.deleteMemoTest(memoId);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 }
