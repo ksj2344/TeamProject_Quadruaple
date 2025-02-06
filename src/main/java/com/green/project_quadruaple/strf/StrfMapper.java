@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 public interface StrfMapper {
 
     StrfSelRes getMemberDetail(Long userId, @Param("strfId") Long strfId);
-    void strfUpsert(Long userId, @Param("strfId") Long strfId);
+    void strfUpsert(@Param("userId") Long userId, @Param("strfId") Long strfId);
 
     GetNonDetail getNonMemberDetail (@Param("strfId") Long strfId);
 }

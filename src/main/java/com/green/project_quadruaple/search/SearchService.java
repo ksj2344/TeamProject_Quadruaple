@@ -45,7 +45,7 @@ public class SearchService {
 
     public ResponseWrapper<GetSearchStrfListBasicRes> getStrfListBasic(long tripId, int lastIdx) {
         if(tripId == 0) return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         int more = 1;
         try {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
@@ -77,7 +77,7 @@ public class SearchService {
         if(category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
-        long signedUserId = 101L;
+        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         int more = 1;
         try {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
@@ -172,12 +172,22 @@ public class SearchService {
         return searchMapper.searchCategory(category, searchWord, userId);
     }
 
+    public List<SearchFilter> searchStayFilter (SearchAmenityReq req){
+        Long userId = authenticationFacade.getSignedUserId();
+        if (req.getSearchWord() == null ){
+            return new ArrayList<>();
+        }
 
-    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
-       Long userId = authenticationFacade.getSignedUserId();
-       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
-       return null;
+        List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+
+        return res;
     }
+
+//    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
+//       Long userId = authenticationFacade.getSignedUserId();
+//       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+//       return null;
+//    }
 //    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
 //        Long userId = authenticationFacade.getSignedUserId();
 //

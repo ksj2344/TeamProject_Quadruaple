@@ -22,4 +22,3 @@ public class StayCategory {
     private Long amenityId;
     private String amenityTitle;
 }
-
