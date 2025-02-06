@@ -232,6 +232,7 @@
         <if test="userId == null">
             0 AS userWishlist
         </if>
+
         FROM stay_tour_restaur_fest a
         JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN location c ON b.location_id = c.location_id
@@ -270,19 +271,21 @@
 
 
 
-<!--
+
     <select id="searchStayFilter" resultMap="stayAmenityResultMap">
-        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category, b.detail_title AS locationName,
-        h.pic_name AS strfPic, AVG(f.rating) AS averageRating, COUNT(f.review_id) AS reviewCnt,
+        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
+        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
+        COUNT(f.review_id) AS reviewCnt, d.amenity_id AS amenityId, d.title AS amenityTitle,
         (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
-        d.amenity_id AS amenityId, d.title AS amenityTitle,
-        IF(
-        EXISTS(
-        SELECT 1
-        FROM wishlist
-        WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
-        ), 1, 0
-        ) AS wishIn
+
+        <if test="userId != 0">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == 0">
+            0 AS wishIn
+        </if>,
+
+        MAX(a.created_at) AS createdAt
         FROM stay_tour_restaur_fest a
         LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
         JOIN amenipoint c ON a.strf_id = c.strf_id
@@ -291,26 +294,29 @@
         LEFT JOIN review f ON a.strf_id = f.strf_id
         LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
         LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
-        WHERE
-        <if test="amenityId != null and amenityId.size() > 0">
-            d.amenity_id IN
-            <foreach item="id" collection="amenityId" open="(" separator="," close=")">
+        WHERE a.category = 'STAY'
+        <if test="req.amenityId != null and req.amenityId.size() > 0">
+            AND d.amenity_id IN
+            <foreach item="id" collection="req.amenityId" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            AND
         </if>
-        a.category = 'STAY' AND (
-        (#{search_word} IS NOT NULL AND a.title LIKE CONCAT('%', #{search_word}, '%')) OR
-        (#{search_word} IS NOT NULL AND a.address LIKE CONCAT('%', #{search_word}, '%')) OR
-        (#{search_word} IS NOT NULL AND b.detail_title LIKE CONCAT('%', #{search_word}, '%'))
-        )
+        <if test="req.searchWord != null and req.searchWord != ''">
+            AND (
+            a.title LIKE CONCAT('%', #{req.searchWord}, '%')
+            OR a.address LIKE CONCAT('%', #{req.searchWord}, '%')
+            OR b.detail_title LIKE CONCAT('%', #{req.searchWord}, '%')
+            )
+        </if>
         GROUP BY a.strf_id
-        ORDER BY a.created_at DESC
+        <if test="req.amenityId != null and req.amenityId.size() > 0">
+            HAVING COUNT(DISTINCT d.amenity_id) = #{req.amenityId.size()}
+        </if>
+        ORDER BY MAX(a.created_at) DESC
     </select>
 
     <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.filter.SearchFilterDto">
         <id property="strfId" column="strfId" />
-        <result property="strfId" column="strfId" />
         <result property="strfTitle" column="strfTitle" />
         <result property="category" column="category" />
         <result property="locationName" column="locationName" />
@@ -319,12 +325,12 @@
         <result property="reviewCnt" column="reviewCnt" />
         <result property="wishlistCnt" column="wishlistCnt" />
         <result property="wishIn" column="wishIn" />
+        <result property="createdAt" column="createdAt" />
         <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.SearchAmenity">
             <id property="amenityId" column="amenityId"/>
             <result property="amenityTitle" column="amenityTitle"/>
         </collection>
     </resultMap>
--->
 
 
 </mapper>

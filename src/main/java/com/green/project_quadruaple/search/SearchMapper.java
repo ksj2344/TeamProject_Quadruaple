@@ -43,5 +43,6 @@ public interface SearchMapper {
 //                                              @Param("userId") Long userId,
 //                                              @Param("search_word") String searchWord);
 
+    // 숙소 카테고리 필터 부분
     List<SearchFilter> searchStayFilter (SearchFilterReq req, Long userId);
 }
