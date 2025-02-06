@@ -12,6 +12,8 @@ import java.util.List;
 @ToString
 public class UsedExpiredCouponResponse {
     private long userId;
+    private int usedCouponCount;
+    private int expiredCouponCount;
     private List<CouponDto> usedCoupons;
     private List<CouponDto> expiredCoupons;
 }

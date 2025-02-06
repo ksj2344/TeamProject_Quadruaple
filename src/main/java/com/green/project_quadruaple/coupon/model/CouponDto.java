@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class CouponDto {
+    private String couponId;
     private String title;
     private LocalDateTime expiredAt;
     private int discountPer;
