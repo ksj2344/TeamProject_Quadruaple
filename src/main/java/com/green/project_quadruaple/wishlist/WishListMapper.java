@@ -15,7 +15,6 @@ import java.util.Map;
 public interface WishListMapper {
 
     boolean isWishListExists(@Param("userId") long userId, @Param("strfId") long strfId);
-    void insertWishList(WishListReq wishListReq);
     void deleteWishList(@Param("userId") long userId, @Param("strfId") long strfId);
 
 

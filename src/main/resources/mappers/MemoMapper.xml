@@ -4,55 +4,94 @@
 <mapper namespace="com.green.project_quadruaple.memo.MemoMapper">
 
     <!-- 메모 조회 -->
-    <select id="selectMemo" parameterType="long" resultType="com.green.project_quadruaple.memo.model.MemoDto">
+    <select id="selectMemo" resultType="com.green.project_quadruaple.memo.model.MemoDto">
         SELECT
         memo_id AS memoId,
         trip_id AS tripId,
-        day,
-        seq,
-        title,
-        content,
         user_id AS userId,
         created_at AS createdAt,
-        updated_at AS updatedAt
-        FROM
-        memo
-        WHERE
-        memo_id = #{memoId}
-    </select>
-
-    <!-- 메모 추가 -->
-    <insert id="postMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
-        INSERT INTO memo (
-        trip_id, day, seq, title, content, user_id, created_at
-        ) VALUES (
-        #{tripId}, #{day}, #{seq}, #{title}, #{content}, #{userId}, #{createdAt}
-        )
-    </insert>
-
-    <!-- 메모 작성자 조회 -->
-    <select id="findMemoOwnerId" parameterType="long" resultType="long">
-        SELECT user_id
+        updated_at AS updatedAt,
+        content,
+        seq,
+        day
         FROM memo
         WHERE memo_id = #{memoId}
     </select>
 
+    <!-- 메모 추가 -->
+    <insert id="postScheMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
+        INSERT INTO sche_memo
+        (trip_id, day, seq, category)
+        VALUES
+        (#{tripId}, #{day}, #{seq}, 'MEMO')
+    </insert>
+
+    <insert id="insMemo">
+        INSERT INTO memo
+        (memo_id, content, trip_user_id)
+        VALUES
+        (#{scheMemoId}, #{content}, #{tripUserId})
+    </insert>
+
+    <select id="selTripUserId">
+        SELECT
+            trip_user_id
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+            AND user_id = #{userId}
+    </select>
+
+    <select id="selUserIdByMemoId">
+        SELECT
+        tu.user_id , tu.trip_user_id
+        FROM
+        memo m
+        JOIN
+        trip_user tu
+        ON
+        m.trip_user_id = tu.trip_user_id
+        WHERE memo_id = #{memoId};
+    </select>
+
+
     <!-- 메모 수정 -->
-    <update id="patchMemo" parameterType="com.green.project_quadruaple.memo.model.MemoDto">
+    <update id="patchMemo">
         UPDATE memo
         SET
-        title = #{title},
-        content = #{content},
-        updated_at = #{updatedAt}
+        content = #{content}
         WHERE
-        memo_id = #{memoId}
+        memo_id = #{memoId} AND trip_user_id = #{tripUserId}
     </update>
 
     <!-- 메모 삭제 -->
-    <delete id="deleteMemo" parameterType="long">
+    <delete id="deleteMemo">
         DELETE FROM memo
-        WHERE memo_id = #{memoId}
+        WHERE
+        memo_id = #{memoId};
+        delete from sche_memo
+        where
+        schedule_memo_id = #{memoId};
     </delete>
+
+    <!--<select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT trip_user_id
+        FROM memo
+        WHERE memo_id = #{memoId}
+        JOIN
+    </select>-->
+
+    <select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT user_id
+        FROM trip_user
+        WHERE trip_user_id = (
+        SELECT trip_user_id
+        FROM memo
+        WHERE memo_id = #{memoId}
+        )
+    </select>
+
+
+
 
 
 </mapper>
