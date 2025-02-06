@@ -22,65 +22,48 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "메모")
 public class MemoController {
-
     private final MemoService memoService;
-
-    @Operation(summary = "유저 여행 메모 확인")
     @GetMapping("/select")
     public ResponseEntity<?> selectMemo(@RequestParam Long memoId, Authentication authentication) {
-        Long signedUserId = getUserIdFromAuthentication(authentication);
+        Long signedUserId = (Long) authentication.getPrincipal();
         MemoDto memo = memoService.getMemo(memoId, signedUserId);
 
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
-        response.put("memo_id", memo.getMemoId());
-        response.put("title", memo.getTitle());
         response.put("content", memo.getContent());
-        response.put("date", memo.getUpdatedAt() == null ? memo.getCreatedAt() : memo.getUpdatedAt());
-
         return ResponseEntity.ok(response);
     }
-
-    @Operation(summary = "유저 여행 메모 추가")
     @PostMapping("/post")
     public ResponseEntity<?> postMemo(@RequestBody MemoDto memoDto, Authentication authentication) {
-        Long signedUserId = getUserIdFromAuthentication(authentication);
+        Long signedUserId = (Long) authentication.getPrincipal();
         Long memoId = memoService.addMemo(memoDto, signedUserId);
-
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
-        response.put("memo_id", memoId);
-
+        response.put("tripId", memoDto.getTripId());
+        response.put("day", memoDto.getDay());
+        response.put("seq", memoDto.getSeq());
+        response.put("content", memoDto.getContent());
         return ResponseEntity.ok(response);
     }
-
-    @Operation(summary = "유저 여행 메모 수정")
     @PatchMapping("/upd")
     public ResponseEntity<?> updateMemo(@RequestBody MemoDto memoDto, Authentication authentication) {
-        Long signedUserId = getUserIdFromAuthentication(authentication);
+        Long signedUserId = (Long) authentication.getPrincipal();
         memoService.updateMemo(memoDto, signedUserId);
-
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
-
+        response.put("memoId", memoDto.getMemoId());
+        response.put("tripId", memoDto.getTripId());
+        response.put("content", memoDto.getContent());
         return ResponseEntity.ok(response);
     }
-
-    @Operation(summary = "유저 여행 메모 삭제")
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteMemo(@RequestParam Long memoId, Authentication authentication) {
-        Long signedUserId = getUserIdFromAuthentication(authentication);
+        Long signedUserId = (Long) authentication.getPrincipal();
         memoService.deleteMemo(memoId, signedUserId);
-
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
-
+        response.put("memoId", memoId);
         return ResponseEntity.ok(response);
-    }
-
-    private Long getUserIdFromAuthentication(Authentication authentication) {
-        // Replace with your actual logic to extract signedUserId
-        return (Long) authentication.getPrincipal();
     }
 
 

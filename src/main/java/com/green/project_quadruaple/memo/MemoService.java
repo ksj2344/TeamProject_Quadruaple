@@ -26,19 +26,15 @@ public class MemoService {
     @Transactional
     public MemoDto getMemo(Long memoId, Long signedUserId) {
         MemoDto memo = memoMapper.selectMemo(memoId);
-
         if (memo == null) {
             throw new ForbiddenException("조회 권한이 없습니다.");
         }
-
         if (!memo.getUserId().equals(signedUserId)) {
             throw new ForbiddenException("조회 권한이 없습니다.");
         }
-
         if (memo.getUpdatedAt() == null) {
             memo.setUpdatedAt(memo.getCreatedAt());
         }
-
         return memo;
     }
 
@@ -56,12 +52,6 @@ public class MemoService {
 
         if (!memoOwnerId.equals(signedUserId)) {
             throw new ForbiddenException("403", "수정 권한이 없습니다.");
-        }
-
-        if (memoDto.getUpdatedAt() == null) {
-            memoDto.setUpdatedAt(memoDto.getCreatedAt());
-        } else {
-            memoDto.setUpdatedAt(LocalDateTime.now());
         }
 
         memoMapper.patchMemo(memoDto);
