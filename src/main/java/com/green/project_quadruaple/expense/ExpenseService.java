@@ -115,13 +115,12 @@ public class ExpenseService {
     }
 
     //이 결제에서 제외된 인원보기
-    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(!(principal instanceof JwtUser)){
+    public ResponseEntity<ResponseWrapper<List<PaidUser>>> exceptedMember(long deId, long tripId){
+        if(isUserJoinTrip(tripId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        List<PaidUser> exceptUsers=expenseMapper.exceptedMember(deId);
+        List<PaidUser> exceptUsers=expenseMapper.exceptedMember(deId, tripId);
         if(exceptUsers==null){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
