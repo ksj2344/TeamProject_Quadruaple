@@ -28,5 +28,7 @@ public interface MemoMapper {
 
     void deleteMemo(Long memoId);
 
+    void deleteMemoTest(Long memoId);
+
     Long selTripUserId(Long tripId, Long userId);
 }
