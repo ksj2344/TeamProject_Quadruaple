@@ -22,7 +22,7 @@ public interface ExpenseMapper {
     List<DutchPaidUserDto> selDutchUsers (DutchReq p);
 
     //정산에서 제외되었던 인원 불러오기
-    List<PaidUser> exceptedMember(long deId);
+    List<PaidUser> exceptedMember(long deId, long tripId);
 
     //가계부 보기
     ExpensesRes getExpenses(long tripId, long userId);

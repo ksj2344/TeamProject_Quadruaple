@@ -167,15 +167,15 @@
     </update>
 
     <select id="exceptedMember">
-        SELECT DISTINCT U.user_id, U.profile_pic, U.name
+        SELECT U.user_id, U.profile_pic, U.name
         FROM user U
         JOIN trip_user TU
         ON U.user_id = TU.user_id
+        AND TU.trip_id=#{tripId}
         LEFT JOIN paid_user P
         ON TU.trip_user_id = P.trip_user_id
         AND P.de_id = #{deId}
         WHERE P.trip_user_id IS NULL
-        )
     </select>
 
     <delete id="delPaidUser">
