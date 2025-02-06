@@ -71,9 +71,9 @@ public class TripService {
         for (TripDto trip : TripList) {
             long tripEndTime = getMilliTime(trip.getEndAt());
             if(now > tripEndTime) {
-                beforeTripList.add(trip);
-            } else {
                 afterTripList.add(trip);
+            } else {
+                beforeTripList.add(trip);
             }
         }
         MyTripListRes res = new MyTripListRes();
