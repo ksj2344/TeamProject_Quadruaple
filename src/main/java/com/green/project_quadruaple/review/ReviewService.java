@@ -34,9 +34,9 @@ public class ReviewService {
         }
         return dtoList;
     }
-    public List<MyReviewSelRes> getMyReviews() {
-        Long userId = authenticationFacade.getSignedUserId();
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId);
+    public List<MyReviewSelRes> getMyReviews(MyReviewSelReq req) {
+
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(req);
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
 
         for (MyReviewSelRes item : dtoList) {
@@ -50,20 +50,14 @@ public class ReviewService {
 
     @Transactional
     public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
-        Long userId = authenticationFacade.getSignedUserId();
+        p.setUserId(authenticationFacade.getSignedUserId());
 //        if (p.getReviewId() <= 0) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND)
 //                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
 //        }
 
         // 리뷰 저장
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("content", p.getContent());
-//        params.put("rating", p.getRating());
-//        params.put("strfId", p.getStrfId());
-//        params.put("userId", userId);
-
-        int result = reviewMapper.postRating(p,userId);
+        int result = reviewMapper.postRating(p);
         if (result == 0) {
             return 0;
         }
@@ -92,10 +86,6 @@ public class ReviewService {
 
         // DB에 사진 저장
         int resultPics = reviewMapper.postReviewPic(reviewPicDto);
-        if (resultPics == 0) {
-            throw new RuntimeException("리뷰 사진 저장 실패");
-        }
-
         return 1;
     }
 
@@ -139,19 +129,14 @@ public class ReviewService {
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resultPics));
 //    }
 
-    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(Long reviewId) {
-        Long userId = authenticationFacade.getSignedUserId();
-
+    public ResponseEntity<ResponseWrapper<Integer>> deleteReview(ReviewDelReq req) {
+        req.setUserId(authenticationFacade.getSignedUserId());
         ReviewDelPicReq picReq = new ReviewDelPicReq();
-        picReq.setReviewId(reviewId);
-
-        int affectedRowsPic = reviewMapper.deleteReviewPic(reviewId);
-        int affectedRowsReview = reviewMapper.deleteReview(reviewId,userId);
-
-        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), reviewId);
-
+        picReq.setReviewId(req.getReviewId());
+        int affectedRowsPic = reviewMapper.deleteReviewPic(picReq);
+        int affectedRowsReview = reviewMapper.deleteReview(req);
+        String deletePath = String.format("%s/feed/%d", myFileUtils.getUploadPath(), req.getReviewId());
         myFileUtils.deleteFolder(deletePath, true);
-
         if (affectedRowsReview > 0) {
             return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), affectedRowsReview));
         } else {
