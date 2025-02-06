@@ -4,7 +4,6 @@ import com.green.project_quadruaple.expense.model.dto.DeDto;
 import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
 import com.green.project_quadruaple.expense.model.dto.PaidUser;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import org.apache.ibatis.annotations.Mapper;
@@ -37,4 +36,7 @@ public interface ExpenseMapper {
     int delExpenses(long deId);
     //paidUser 삭제
     int delPaidUser(long deId);
+
+    //사용목적 수정
+    int udpFor(String paidFor, long deId);
 }

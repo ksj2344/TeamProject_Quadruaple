@@ -5,13 +5,8 @@ import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.expense.model.dto.DeDto;
-import com.green.project_quadruaple.expense.model.dto.DutchPaidUserDto;
 import com.green.project_quadruaple.expense.model.dto.PaidUser;
-import com.green.project_quadruaple.expense.model.dto.UserPriceDto;
-import com.green.project_quadruaple.expense.model.req.DutchReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
-import com.green.project_quadruaple.expense.model.req.ExpensesUpdReq;
+import com.green.project_quadruaple.expense.model.req.*;
 import com.green.project_quadruaple.expense.model.res.ExpenseOneRes;
 import com.green.project_quadruaple.expense.model.res.ExpensesRes;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +45,7 @@ public class ExpenseService {
         if(deId==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
-        int result=insPaidUsers(p.getPriceList(),deId,p.getTripId());
+        int result=insPaidUsers(p.getPaidUserList(),deId,p.getTripId(),p.getTotalPrice());
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
@@ -58,12 +53,22 @@ public class ExpenseService {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),deId));
     }
     //paidUsers에 입력하기
-    int insPaidUsers(List<UserPriceDto> dtos, long deId, long tripId){
-        List<Map<String, Object>> userPaid = new ArrayList<>();
-        for(UserPriceDto u:dtos){
+    int insPaidUsers(List<Long> userList, long deId, long tripId, int totalPrice){
+        List<Map<String, Object>> userPaid = new ArrayList<>(userList.size());
+        int price = (int) (Math.round((double) totalPrice / userList.size() / 10) * 10);
+        Integer randomNum=null;
+        if(price*userList.size()!=totalPrice){
+            Random r=new Random();
+            randomNum=r.nextInt(userList.size());
+        }
+        for(int i=0;i<userList.size();i++){
             Map<String, Object> map=new HashMap<>();
-            map.put("price",u.getPrice());
-            map.put("userId",u.getUserId());
+            if(randomNum != null && randomNum==i){
+                map.put("user", price+totalPrice-price*userList.size());
+            }else {
+                map.put("price",price);
+            }
+            map.put("userId",userList.get(i));
             userPaid.add(map);
         }
         Map<String, Object> paramMap = new HashMap<>();
@@ -71,27 +76,6 @@ public class ExpenseService {
         paramMap.put("tripId", tripId);
         paramMap.put("userPaid", userPaid);
         return expenseMapper.insPaid(paramMap);
-    }
-
-    //정산하기
-    public ResponseEntity<ResponseWrapper<List<DutchPaidUserDto>>> dutchExpenses(DutchReq p){
-        if(isUserJoinTrip(p.getTripId())){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
-        }
-        if(p.getExceptUsers()==null){p.setExceptUsers(new ArrayList<>());}
-        int totalPrice=p.getTotalPrice();
-        List<DutchPaidUserDto> dutchPaidUserDtos=expenseMapper.selDutchUsers(p);
-        int price = (int) (Math.round((double) totalPrice / dutchPaidUserDtos.size() / 10) * 10);
-        for(DutchPaidUserDto dto:dutchPaidUserDtos){
-            dto.setPrice(price);
-        }
-        if(price*dutchPaidUserDtos.size() != totalPrice){
-            Random r=new Random();
-            int morePrice=totalPrice-price*dutchPaidUserDtos.size()+price;
-            dutchPaidUserDtos.get(r.nextInt(dutchPaidUserDtos.size())).setPrice(morePrice);
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),dutchPaidUserDtos));
     }
 
     //가계부 업뎃
@@ -106,10 +90,17 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        int result=insPaidUsers(p.getPriceList(),p.getDeId(),p.getTripId());
+        int result=insPaidUsers(p.getPaidUserList(),p.getDeId(),p.getTripId(),p.getTotalPrice());
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        if(p.getPaidFor()!=null){
+            int updRes=expenseMapper.udpFor(p.getPaidFor(),p.getDeId());
+            if(updRes==0){
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
     }

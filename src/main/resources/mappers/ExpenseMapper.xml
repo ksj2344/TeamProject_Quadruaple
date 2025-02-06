@@ -164,4 +164,10 @@
     <delete id="delPaidUser">
         DELETE FROM paid_user WHERE de_id = #{deId}
     </delete>
+
+    <update id="udpFor">
+        UPDATE daily_expense
+        SET `for`=#{paidFor}
+        WHERE de_id=#{deId}
+    </update>
 </mapper>

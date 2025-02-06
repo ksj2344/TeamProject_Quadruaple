@@ -1,17 +1,12 @@
 package com.green.project_quadruaple.expense;
 
-import com.green.project_quadruaple.expense.model.req.DutchReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
-import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
-import com.green.project_quadruaple.expense.model.req.ExpensesUpdReq;
+import com.green.project_quadruaple.expense.model.req.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,15 +23,6 @@ public class ExpenseController {
         return expenseService.getExpenses(tripId);
     }
 
-    //정산하기
-    @GetMapping("dutch")
-    @Operation(summary = "정산하기", description = "비용추가 누르면 나오는 페이지")
-    public ResponseEntity<?> dutchExpenses(@RequestParam("total_price") int totalPrice,
-                                           @RequestParam("trip_id") long tripId,
-                                           @RequestParam(value = "except_users", required = false) List<Long> exceptUsers){
-        DutchReq p = new DutchReq(totalPrice,tripId,exceptUsers);
-        return expenseService.dutchExpenses(p);
-    }
 
     //가계부 추가
     @PostMapping
