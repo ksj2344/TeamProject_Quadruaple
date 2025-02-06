@@ -9,6 +9,7 @@ import com.green.project_quadruaple.trip.model.PathType;
 import com.green.project_quadruaple.trip.model.PathTypeVo;
 import com.green.project_quadruaple.trip.model.PubTransPathVo;
 import com.green.project_quadruaple.trip.model.req.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.green.project_quadruaple.common.config.constant.OdsayApiConst;
@@ -33,13 +34,32 @@ import java.util.*;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor
 public class TripService {
 
     private final TripMapper tripMapper;
     private final OdsayApiConst odsayApiConst;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final WeatherApiCall weatherApiCall;
+
+    private final String ADD_USER_LINK;
+
+    public static final Map<String, Long> addUserLinkMap = new HashMap<>();
+
+    public TripService(TripMapper tripMapper,
+                       OdsayApiConst odsayApiConst,
+                       WebClient webClient,
+                       ObjectMapper objectMapper,
+                       @Value("${add-user-link}") String ADD_USER_LINK,
+                       WeatherApiCall weatherApiCall)
+    {
+        this.tripMapper = tripMapper;
+        this.odsayApiConst = odsayApiConst;
+        this.webClient = webClient;
+        this.objectMapper = objectMapper;
+        this.ADD_USER_LINK = ADD_USER_LINK;
+        this.weatherApiCall = weatherApiCall;
+    }
 
     public ResponseWrapper<MyTripListRes> getMyTripList() {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
@@ -85,9 +105,19 @@ public class TripService {
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         long totalDistance = 0L;
         long totalDuration = 0L;
+        if(tripDetailDto.isEmpty()) {
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), null);
+        }
         for (TripDetailDto detailDto : tripDetailDto) {
-            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
-            for (ScheduleResDto schedule : detailDto.getSchedules()) {
+//            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
+            List<ScheduleResDto> schedules = detailDto.getSchedules();
+            ScheduleResDto weatherSchedule = null;
+            for (ScheduleResDto schedule : schedules) {
+                if(weatherSchedule == null) {
+                    if(schedule.getScheOrMemo().equals("SCHE")) {
+                            weatherSchedule = schedule;
+                    }
+                }
                 Long distance = schedule.getDistance();
                 Long duration = schedule.getDuration();
                 if(distance == null || duration == null) {
@@ -95,6 +125,9 @@ public class TripService {
                 }
                 totalDistance += distance;
                 totalDuration += duration;
+            }
+            if(weatherSchedule != null) {
+                detailDto.setWeather(weatherApiCall.call(webClient, objectMapper, weatherSchedule.getLat(), weatherSchedule.getLng()));
             }
         }
         TripDetailRes res = new TripDetailRes();
@@ -443,6 +476,34 @@ public class TripService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResultResponse.severError();
+        }
+    }
+
+    public ResponseWrapper<String> getInviteKey(Long tripId) {
+        long signedUserId = AuthenticationFacade.getSignedUserId();
+        if(signedUserId != tripMapper.selTripManagerId(tripId)) {
+            throw new RuntimeException("여행의 팀장이 아님");
+        }
+        String uuid = UUID.randomUUID().toString();
+        addUserLinkMap.put(uuid, tripId);
+        Runnable addUserLinkThread = new AddUserLinkThread(uuid);
+        new Thread(addUserLinkThread).start();
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), uuid);
+    }
+
+    public String addTripUser(String uuid) {
+        Long signedUserId = AuthenticationFacade.getSignedUserId();
+        try {
+            Long tripId = addUserLinkMap.get(uuid);
+            if(tripId == null) {
+                return "잘못된 inviteKey";
+            }
+            tripMapper.insTripUser(tripId, List.of(signedUserId));
+            return "리다이렉션 URL"; // 리다이렉션 필요
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

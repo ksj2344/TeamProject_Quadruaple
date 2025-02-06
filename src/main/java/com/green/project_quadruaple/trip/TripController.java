@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -84,6 +85,18 @@ public class TripController {
     @Operation(summary = "일정 삭제", description = "선택한 일정을 삭제")
     public ResultResponse deleteSchedule(@RequestParam("schedule_id") long scheduleId) {
         return tripService.deleteSchedule(scheduleId);
+    }
+
+    @GetMapping("/trip/add-link")
+    @Operation(summary = "구성원 추가 초대 키 생성", description = "로그인유저가 요청하는 여행ID의 구성원에 추가되는 URL 생성")
+    public ResponseWrapper<String> getInviteKey(@RequestParam("trip_id") Long tripId) {
+        return tripService.getInviteKey(tripId);
+    }
+
+    @PostMapping("/trip/user")
+    @Operation(summary = "구성원 추가", description = "여행 초대 키 입력 페이지에서 공유받은 inviteKey 입력 시 로그인유저가 여행 구성원에 추가")
+    public String addTripUser(@RequestBody PostInviteKeyReq inviteKey) {
+        return tripService.addTripUser(inviteKey.getInviteKey());
     }
 
     @DeleteMapping("/trip/user")
