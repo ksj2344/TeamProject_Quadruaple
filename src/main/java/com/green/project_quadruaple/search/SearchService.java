@@ -36,6 +36,7 @@ public class SearchService {
 
    /* public List<LocationResponse> getTripLocation(String searchWord) {
         return searchMapper.getTripLocation(searchWord);
+        // asdasd
     }*/
    public List<LocationResponse> getTripLocation(String searchWord) {
        List<LocationResponse> locations = searchMapper.getTripLocation(searchWord);
