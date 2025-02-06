@@ -22,6 +22,7 @@ public class SearchFilter {
     private int reviewCnt;
     private int wishlistCnt;
     private int wishIn;
-    private List<SearchFilter> searchFilters;
+    private String createdAt;
+    private List<SearchAmenity> amenities;
 
 }

@@ -172,12 +172,22 @@ public class SearchService {
         return searchMapper.searchCategory(category, searchWord, userId);
     }
 
-
     public List<SearchFilter> searchStayFilter (SearchFilterReq req){
-       Long userId = authenticationFacade.getSignedUserId();
-       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
-       return null;
+        Long userId = authenticationFacade.getSignedUserId();
+        if (req.getSearchWord() == null ){
+            return new ArrayList<>();
+        }
+
+        List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+
+        return res;
     }
+
+//    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
+//       Long userId = authenticationFacade.getSignedUserId();
+//       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+//       return null;
+//    }
 //    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
 //        Long userId = authenticationFacade.getSignedUserId();
 //
