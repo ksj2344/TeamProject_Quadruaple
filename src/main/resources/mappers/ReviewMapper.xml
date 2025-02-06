@@ -2,6 +2,146 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.review.ReviewMapper">
+    <select id="getReviewWithPics" resultMap="reviewPicResultMap">
+        SELECT
+        a.review_id AS reviewId, a.strf_id AS strfId, a.content, a.user_id AS writerUserId,
+        a.rating, c.name AS writerUserName, c.profile_pic AS writerUserPic,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate, rp.`title` AS pic
+        FROM review a
+        LEFT JOIN user c ON a.user_id = c.user_id
+        LEFT JOIN review_pic rp ON a.review_id = rp.review_id
+        WHERE a.strf_id = #{strfId}
+        ORDER BY a.review_id DESC
+    </select>
+    <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="writerUserId" column="writerUserId"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <collection property="reviewPic" resultMap="reviewPic"/>
+    </resultMap>
+    <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+        <result property="pic" column="pic"/>
+    </resultMap>
 
+    <select id="getReviewPics">
+        SELECT review_id AS reviewId , title
+        FROM review_pic
+        WHERE review_id IN
+        <foreach collection="reviewIds" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY review_id DESC
+    </select>
+
+    <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
+        INSERT INTO review (content, rating, strf_id, user_id)
+        VALUES (#{content}, #{rating}, #{strfId}, #{userId})
+    </insert>
+
+    <insert id="postReviewPic">
+        INSERT INTO review_pic (title , review_id)
+        VALUES
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            #{pic}, #{reviewId}
+        </foreach>
+    </insert>
+    <!--
+ <select id="getReview" resultMap="reviewPicResultMap">
+        SELECT
+        a.content , a.rating , a.review_id AS reviewId ,
+        b.title AS reviewPics,
+        c.name AS writerUserName , c.profile_pic AS writerUserPic ,
+        a.strf_id AS strfId ,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        a.user_id AS writerUserId ,
+        CASE
+        WHEN a.updated_at IS NOT NULL THEN a.updated_at
+        ELSE a.created_at
+        END AS reviewWriteDate
+
+        FROM review a
+        LEFT JOIN review_pic b ON a.review_id = b.review_id
+        LEFT JOIN user c ON a.user_id = c.user_id
+        WHERE a.strf_id = #{strfId}
+
+        GROUP BY a.review_id, a.content, a.rating, a.user_id, c.name, c.profile_pic, a.updated_at, a.created_at
+
+    ORDER BY a.review_id DESC
+    LIMIT #{startIdx}, #{size}
+</select>
+<resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
+<id property="reviewId" column="reviewId"/>
+<result property="strfId" column="strfId"/>
+<result property="content" column="content"/>
+<result property="rating" column="rating"/>
+<result property="writerUserName" column="writerUserName"/>
+<result property="writerUserPic" column="writerUserPic"/>
+<result property="writerUserId" column="writerUserId"/>
+<result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+<result property="reviewWriteDate" column="reviewWriteDate"/>
+<collection property="reviewPics" ofType="com.green.project_quadruaple.review.model.ReviewPicSel">
+    <result column="reviewPics" property="pic"/>
+</collection>
+</resultMap>
+    -->
+
+    <update id="patchReview">
+        UPDATE review
+        SET content = #{content},
+        rating = #{rating},
+        updated_at = NOW()
+        WHERE review_id = #{reviewId}
+        AND user_id = #{userId}
+    </update>
+    <insert id="patchReviewPic">
+        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
+            INSERT INTO review_pic (title , review_id) VALUES (#{pic}, #{reviewId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteReview">
+        DELETE FROM review
+        WHERE review_id = #{reviewId}
+        AND user_id = #{userId}
+    </delete>
+    <delete id="deleteReviewPic">
+        DELETE FROM review_pic
+        WHERE review_id = #{reviewId}
+    </delete>
+
+
+    <select id="getMyReviews" resultMap="myReviewResultMap">
+        SELECT
+        a.review_id AS reviewId, a.content, c.profile_pic AS writerUserPic,
+        a.rating, a.strf_id AS strfId, c.name AS writerUserName, b.title AS pic,
+        (SELECT COUNT(*) FROM review WHERE user_id = #{userId}) AS userWriteReviewCnt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
+        FROM review a
+        LEFT JOIN review_pic b ON a.review_id = b.review_id
+        LEFT JOIN user c ON a.user_id = c.user_id
+        WHERE a.user_id = #{userId}
+        ORDER BY a.review_id DESC
+    </select>
+    <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
+        <id property="reviewId" column="reviewId"/>
+        <result property="strfId" column="strfId"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="writerUserName" column="writerUserName"/>
+        <result property="writerUserPic" column="writerUserPic"/>
+        <result property="userWriteReviewCnt" column="userWriteReviewCnt"/>
+        <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <collection property="myReviewPic" resultMap="myReviewPic"/>
+    </resultMap>
+    <resultMap id="myReviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">
+        <result property="pic" column="pic"/>
+    </resultMap>
 
 </mapper>

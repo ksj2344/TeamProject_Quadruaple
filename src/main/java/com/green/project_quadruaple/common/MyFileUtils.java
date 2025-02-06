@@ -7,7 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component //빈등록
@@ -58,10 +61,41 @@ public class MyFileUtils {
         return makeRandomFileName(pic.getOriginalFilename());
     }
 
-    //파일을 원하는 경로에 저장
+    //파일을 원하는 경로에 저장(이동)
     public void transferTo(MultipartFile mf, String path) throws IOException {
          File file = new File(uploadPath, path);
          mf.transferTo(file);
+    }
+
+    //파일을 원하는 경로에 저장(복사)
+    public void copyFolder(Path source, Path destination) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetPath = destination.resolve(source.relativize(dir));
+                if (!Files.exists(targetPath)) {
+                    Files.createDirectories(targetPath);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Path targetPath = destination.resolve(source.relativize(file));
+                Files.copy(file, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    //폴더 내 파일 갯수 체크
+    public static long countFiles(String directoryPath) throws IOException {
+        Path path = Paths.get(directoryPath);
+         if (!Files.exists(path) || !Files.isDirectory(path)) {
+            return 0;
+        }
+        try (Stream<Path> files = Files.list(path)) {
+            return files.count();
+        }
     }
 
     //폴더 지우기, ex) "user/1"
@@ -82,6 +116,4 @@ public class MyFileUtils {
              }
          }
     }
-
-
 }

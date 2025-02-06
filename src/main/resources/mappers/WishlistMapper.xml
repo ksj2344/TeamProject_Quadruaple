@@ -1,7 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.green.project_quadruaple.wishlist.WishlistMapper">
+<mapper namespace="com.green.project_quadruaple.wishlist.WishListMapper">
+
+    <select id="isWishListExists" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM wishlist
+        WHERE user_id = #{userId} AND strf_id = #{strfId}
+    </select>
+
+    <insert id="insertWishList">
+        INSERT INTO wishlist (user_id, strf_id)
+        VALUES (#{userId}, #{strfId})
+    </insert>
+
+    <delete id="deleteWishList">
+        DELETE FROM wishlist
+        WHERE user_id = #{userId} AND strf_id = #{strfId}
+    </delete>
+
+    <!-- 위시리스트 조회 -->
+    <select id="getWishList" parameterType="map" resultType="HashMap">
+        SELECT
+        s.strf_id AS strfId,
+        s.category AS category,
+        p.pic_name AS strfPic,
+        s.title AS title,
+        l.detail_title AS locationTitle,
+        IFNULL(r.rating_cnt, 0) AS ratingCnt,
+        IFNULL(r.average_rating, 0) AS averageRating,
+        IFNULL(w.wish_cnt, 0) AS wishCnt
+        FROM
+        quadruaple.stay_tour_restaru_fest s
+        LEFT JOIN
+        quadruaple.location_detail l ON s.location_detail_id = l.location_detail_id
+        LEFT JOIN
+        quadruaple.strf_pic p ON s.strf_id = p.strf_id
+        LEFT JOIN (
+        SELECT
+        strf_id,
+        COUNT(*) AS rating_cnt,
+        AVG(rating) AS average_rating
+        FROM quadruaple.review
+        GROUP BY strf_id
+        ) r ON s.strf_id = r.strf_id
+        LEFT JOIN (
+        SELECT
+        strf_id,
+        COUNT(*) AS wish_cnt
+        FROM quadruaple.wishlist
+        GROUP BY strf_id
+        ) w ON s.strf_id = w.strf_id
+        WHERE
+        s.category IN
+        <foreach collection="categoryList" item="category" open="(" separator="," close=")">
+            #{category}
+        </foreach>
+        LIMIT #{offset}, #{limit};
+    </select>
 
 
 </mapper>
