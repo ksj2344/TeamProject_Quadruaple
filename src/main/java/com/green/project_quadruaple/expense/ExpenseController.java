@@ -55,8 +55,8 @@ public class ExpenseController {
     //가계부 제외된 목록 보기
     @GetMapping("excepted")
     @Operation(summary = "제외된 유저들 불러오기", description = "해당 정산에서 이미 제외되었던 인원 불러오기")
-    public ResponseEntity<?> exceptedMember(@RequestParam ("de_id") long deId){
-        return expenseService.exceptedMember(deId);
+    public ResponseEntity<?> exceptedMember(@RequestParam ("de_id") long deId,@RequestParam ("trip_id") long tripId){
+        return expenseService.exceptedMember(deId,tripId);
     }
 
     //가계부 수정
