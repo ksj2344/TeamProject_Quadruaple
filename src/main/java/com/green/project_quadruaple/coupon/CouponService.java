@@ -30,7 +30,7 @@ public class CouponService {
 
         // 사용된 쿠폰의 title, expiredAt, distributeAt을 Set으로 저장
         Set<String> usedCouponsSet = usedCoupons.stream()
-                .map(coupon -> coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString())  // 쿠폰 고유 정보를 하나로 묶어서 사용
+                .map(coupon -> coupon.getCouponId() + coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString())  // 쿠폰 고유 정보를 하나로 묶어서 사용
                 .collect(Collectors.toSet());
 
         // 해당 사용자의 모든 쿠폰 목록 조회
@@ -42,12 +42,13 @@ public class CouponService {
         // 만료되지 않았고 사용되지 않은 쿠폰만 필터링
         List<CouponDto> validCoupons = allCoupons.stream()
                 .filter(coupon -> coupon.getExpiredAt().isAfter(now))  // 만료되지 않은 쿠폰
-                .filter(coupon -> !usedCouponsSet.contains(coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString())) // 사용된 쿠폰 제외
+                .filter(coupon -> !usedCouponsSet.contains(coupon.getCouponId() + coupon.getTitle() + coupon.getExpiredAt().toString() + coupon.getDistributeAt().toString())) // 사용된 쿠폰 제외
                 .collect(Collectors.toList());
 
         // CouponResponse 생성 및 값 설정
         CouponResponse couponResponse = new CouponResponse();
         couponResponse.setUserId(signedUserId);
+        couponResponse.setAvailableCouponCount(validCoupons.size());
         couponResponse.setCoupons(validCoupons);
 
         return couponResponse;
@@ -83,6 +84,8 @@ public class CouponService {
         // UsedExpiredCouponResponse 생성 및 값 설정
         UsedExpiredCouponResponse usedExpiredCouponResponse = new UsedExpiredCouponResponse();
         usedExpiredCouponResponse.setUserId(signedUserId);
+        usedExpiredCouponResponse.setUsedCouponCount(usedCoupons.size());  // 사용한 쿠폰 개수 추가
+        usedExpiredCouponResponse.setExpiredCouponCount(validExpiredCoupons.size()); // 만료된 쿠폰 개수
         usedExpiredCouponResponse.setUsedCoupons(usedCoupons);
         usedExpiredCouponResponse.setExpiredCoupons(validExpiredCoupons);
 
