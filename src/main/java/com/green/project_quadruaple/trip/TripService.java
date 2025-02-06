@@ -71,9 +71,9 @@ public class TripService {
         for (TripDto trip : TripList) {
             long tripEndTime = getMilliTime(trip.getEndAt());
             if(now > tripEndTime) {
-                beforeTripList.add(trip);
-            } else {
                 afterTripList.add(trip);
+            } else {
+                beforeTripList.add(trip);
             }
         }
         MyTripListRes res = new MyTripListRes();
@@ -93,6 +93,7 @@ public class TripService {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         req.setManagerId(signedUserId);
         tripMapper.insTrip(req);
+        tripMapper.insTripUser(req.getTripId(), List.of(signedUserId));
         tripMapper.insTripLocation(req.getTripId(), req.getLocationId());
         PostTripRes res = new PostTripRes();
         res.setTripId(req.getTripId());
