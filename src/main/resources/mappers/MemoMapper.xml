@@ -19,20 +19,39 @@
     </select>
 
     <!-- 메모 추가 -->
-    <insert id="postMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
+    <insert id="postScheMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
         INSERT INTO sche_memo
         (trip_id, day, seq, category)
         VALUES
         (#{tripId}, #{day}, #{seq}, 'MEMO')
     </insert>
 
-    <insert id="insertMemo">
+    <insert id="insMemo">
         INSERT INTO memo
-        (memo_id, trip_user_id, title, content)
-        VALUES (#{scheMemoId}, #{tripUserId}, #{title}, #{content})
+        (memo_id, content, trip_user_id)
+        VALUES
+        (#{scheMemoId}, #{content}, #{tripUserId})
     </insert>
 
+    <select id="selTripUserId">
+        SELECT
+            trip_user_id
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+            AND user_id = #{userId}
+    </select>
 
+    <select id="selUserIdByMemoId">
+        SELECT
+        tu.user_id , tu.trip_user_id
+        FROM
+        memo m
+        JOIN
+        trip_user tu
+        ON
+        m.trip_user_id = tu.trip_user_id
+        WHERE memo_id = #{memoId};
+    </select>
 
 
     <!-- 메모 수정 -->
@@ -41,25 +60,38 @@
         SET
         content = #{content}
         WHERE
-        memo_id = #{memoId} AND user_id = #{userId}
+        memo_id = #{memoId} AND trip_user_id = #{tripUserId}
     </update>
 
     <!-- 메모 삭제 -->
-    <update id="deleteMemo">
+    <delete id="deleteMemo">
         DELETE FROM memo
         WHERE
         memo_id = #{memoId};
         delete from sche_memo
         where
         schedule_memo_id = #{memoId};
-    </update>
+    </delete>
 
-    <!-- 작성자 확인 -->
-    <select id="findMemoOwnerId" resultType="java.lang.Long">
-        SELECT user_id
+    <!--<select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT trip_user_id
         FROM memo
         WHERE memo_id = #{memoId}
+        JOIN
+    </select>-->
+
+    <select id="findMemoOwnerId" parameterType="Long" resultType="Long">
+        SELECT user_id
+        FROM trip_user
+        WHERE trip_user_id = (
+        SELECT trip_user_id
+        FROM memo
+        WHERE memo_id = #{memoId}
+        )
     </select>
+
+
+
 
 
 </mapper>

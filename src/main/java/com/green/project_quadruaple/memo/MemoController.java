@@ -33,7 +33,7 @@ public class MemoController {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<?> postMemo(@RequestBody MemoPostReq memoDto) {
+    public ResponseWrapper<Long> postMemo(@RequestBody MemoPostReq memoDto) {
         return memoService.addMemo(memoDto);
 
     }

@@ -15,9 +15,12 @@ import lombok.ToString;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MemoPostReq {
     @JsonIgnore
-    private Long memoId;
+    private Long scheMemoId;
     private Long tripId;
-    private Long day;
-    private Long seq;
+    private Integer day;
+    private Integer seq;
     private String content;
+
+    @JsonIgnore
+    private Long tripUserId;
 }

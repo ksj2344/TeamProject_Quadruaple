@@ -14,14 +14,19 @@ import java.util.Optional;
 @Mapper
 public interface MemoMapper {
 
+    MemoUpReq selUserIdByMemoId(Long memoId);
 
     MemoGetRes selectMemo(Long memoId);
 
-    void postMemo(MemoPostReq memoDto);
+    void postScheMemo(MemoPostReq scheMemoDto);
+
+    void insMemo(MemoPostReq memoDto);
 
     Long findMemoOwnerId(Long memoId);
 
     void patchMemo(MemoUpReq memoDto);
 
     void deleteMemo(Long memoId);
+
+    Long selTripUserId(Long tripId, Long userId);
 }
