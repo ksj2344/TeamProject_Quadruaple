@@ -34,34 +34,21 @@ public class MemoController {
 
     @PostMapping("/post")
     public ResponseEntity<?> postMemo(@RequestBody MemoPostReq memoDto) {
+        return memoService.addMemo(memoDto);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", "200 성공");
-        response.put("tripId", memoDto.getTripId());
-        response.put("day", memoDto.getDay());
-        response.put("seq", memoDto.getSeq());
-        response.put("content", memoDto.getContent());
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/upd")
     public ResponseEntity<?> updateMemo(@RequestBody MemoUpReq memoDto) {
-        memoService.updateMemo(memoDto);
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", "200 성공");
-        response.put("memoId", memoDto.getMemoId());
-        response.put("tripId", memoDto.getTripId());
-        response.put("content", memoDto.getContent());
-        return ResponseEntity.ok(response);
+        return memoService.updateMemo(memoDto);
+
+
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteMemo(@RequestParam Long memoId) {
-        memoService.deleteMemo(memoId);
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", "200 성공");
-        response.put("memoId", memoId);
-        return ResponseEntity.ok(response);
+        return memoService.deleteMemo(memoId);
+
     }
 
 
