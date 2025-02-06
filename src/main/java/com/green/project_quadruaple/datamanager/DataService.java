@@ -49,7 +49,8 @@ public class DataService {
         List<Long> strfIds= dataMapper.selectStrfId(p);
         if(strfIds==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
 
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
         List<MenuDto> menus=p.getMenus()==null||p.getMenus().size()==0?new ArrayList<>():p.getMenus();
