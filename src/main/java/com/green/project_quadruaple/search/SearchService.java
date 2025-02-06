@@ -163,29 +163,31 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
-    public List<SearchFilter> searchStayFilter (SearchAmenityReq req){
+    public ResponseWrapper<StaySearchRes> searchStayFilter(int lastIdx, String category, String searchWord, List<Long> amenityIds) {
         Long userId = authenticationFacade.getSignedUserId();
-        if (req.getSearchWord() == null ){
-            return new ArrayList<>();
+        String categoryValue = null;
+        if (category != null && Category.getKeyByName(category) != null) {
+            categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
+        int more = 1;
 
-        List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
+        try {
+            // amenityIds가 불변 리스트일 경우 가변 리스트로 변환
 
-        return res;
+
+            List<SearchAmenity> amenities = searchMapper.searchAmenity(amenityIds);
+            List<SearchStay> stays = searchMapper.searchStay(categoryValue, searchWord, lastIdx, size + more, userId,amenityIds);
+            StaySearchRes res = new StaySearchRes();
+            if (stays.size() >= size) {
+                res.setMore(true);
+            }
+            res.setStays(stays);
+            res.setAmenities(amenities);
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
     }
 
-//    public List<SearchFilter> searchStayFilter (SearchFilterReq req){
-//       Long userId = authenticationFacade.getSignedUserId();
-//       List<SearchFilter> res = searchMapper.searchStayFilter(req,userId);
-//       return null;
-//    }
-//    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
-//        Long userId = authenticationFacade.getSignedUserId();
-//
-//        List<SearchFilterDto> stayAmenities = new ArrayList<>();
-//
-//        List<SearchFilterDto> list = searchMapper.searchStayByAmenity(req.getAmenityId(),userId,req.getSearchWord());
-//
-//        return list;
-//    }
 }
