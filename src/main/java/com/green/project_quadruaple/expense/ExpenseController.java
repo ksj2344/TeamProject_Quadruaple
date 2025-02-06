@@ -3,6 +3,7 @@ package com.green.project_quadruaple.expense;
 import com.green.project_quadruaple.expense.model.req.DutchReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseDelReq;
 import com.green.project_quadruaple.expense.model.req.ExpenseInsReq;
+import com.green.project_quadruaple.expense.model.req.ExpensesUpdReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -54,15 +55,15 @@ public class ExpenseController {
     //가계부 제외된 목록 보기
     @GetMapping("excepted")
     @Operation(summary = "제외된 유저들 불러오기", description = "해당 정산에서 이미 제외되었던 인원 불러오기")
-    public ResponseEntity exceptedMember(@RequestParam ("de_id") long deId){
-        return null;
+    public ResponseEntity<?> exceptedMember(@RequestParam ("de_id") long deId,@RequestParam ("trip_id") long tripId){
+        return expenseService.exceptedMember(deId,tripId);
     }
 
     //가계부 수정
     @PutMapping
     @Operation(summary = "가계부 수정", description = "금액 혹은 인원수정")
-    public ResponseEntity<?> updateExpenses(){
-        return null;
+    public ResponseEntity<?> updateExpenses(@RequestBody ExpensesUpdReq p){
+        return expenseService.updateExpenses(p);
     }
 
     //가계부 삭제

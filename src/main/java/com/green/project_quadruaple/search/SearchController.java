@@ -1,12 +1,9 @@
 package com.green.project_quadruaple.search;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.SearchAmenity;
-import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
-import com.green.project_quadruaple.search.model.filter.StayAmenity;
+import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -116,13 +113,24 @@ public class SearchController {
                                                 , @RequestParam("size") int size) {
         return searchService.searchCategoryWithFilters(category, startIdx, size);
     }
+    @GetMapping("/category/ver2")
+    public ResponseEntity<List<StayCategory>> searchCategory(
+            @RequestParam("category") String category,
+            @RequestParam(value = "search_word", required = false) String searchWord,
+            @RequestParam(value = "user_id", required = false) Long userId) {
 
-    @GetMapping("/amenity")
-    public List<StayAmenity> searchStayByAmenity(SearchAmenityReq req) {
-
-        List<StayAmenity> searchAmenityReq = searchService.searchStayByAmenity(req);
-        return searchAmenityReq;
-//                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
+        List<StayCategory> stayCategories = searchService.searchCategory(category, searchWord, userId);
+        return ResponseEntity.ok(stayCategories);
     }
+
+
+
+//    @GetMapping("/amenity")
+//    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
+//
+//        List<SearchFilterDto> searchAmenityReq = searchService.searchStayByAmenity(req);
+//        return searchAmenityReq;
+////                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
+//    }
 
 }

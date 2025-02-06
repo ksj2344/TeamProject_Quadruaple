@@ -5,7 +5,7 @@
     <select id="IsUserInTrip">
         SELECT IF(EXISTS (
         SELECT 1 FROM trip_user TU
-        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId}
+        WHERE TU.user_id = #{userId} AND TU.trip_id = #{tripId} AND TU.`disable`=0
         ), 1, 0)
     </select>
 
@@ -13,24 +13,6 @@
         INSERT INTO daily_expense
         SET `for`=#{paidFor}
     </insert>
-
-<!--    <select id="selTripUser">-->
-<!--        SELECT trip_user_id-->
-<!--        FROM trip_user-->
-<!--        WHERE trip_id=#{tripId}-->
-<!--        AND user_id in-->
-<!--        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">-->
-<!--            #{userId}-->
-<!--        </foreach>-->
-<!--    </select>-->
-
-<!--    <insert id="insPaid">-->
-<!--        INSERT INTO paid_user (de_id, price, trip_user_id)-->
-<!--        VALUES-->
-<!--        <foreach collection="userPaid" item="item" separator=",">-->
-<!--            (#{deId}, #{item.price}, #{item.userId})-->
-<!--        </foreach>-->
-<!--    </insert>-->
 
     <insert id="insPaid">
         INSERT INTO paid_user (de_id, price, trip_user_id)
@@ -61,6 +43,7 @@
         LEFT JOIN trip_user TU
         ON TU.user_id= U.user_id
         WHERE TU.trip_id=#{tripId}
+        AND TU.`disable`=0
         <if test="exceptUsers != null and exceptUsers.size() > 0">
             AND U.user_id NOT IN
             <foreach collection="exceptUsers" item="userId" open="(" close=")" separator=",">
@@ -169,10 +152,16 @@
     <select id="exceptedMember">
         SELECT U.user_id, U.profile_pic, U.name
         FROM user U
-        left JOIN depay D
-        ON D.user_id=U.user_id
-        WHERE D.user_id IS NULL
-        AND D.de_id=36
+        JOIN trip_user TU
+        ON U.user_id = TU.user_id
+        AND TU.trip_id=#{tripId}
+        LEFT JOIN paid_user P
+        ON TU.trip_user_id = P.trip_user_id
+        AND P.de_id = #{deId}
+        WHERE P.trip_user_id IS NULL
     </select>
 
+    <delete id="delPaidUser">
+        DELETE FROM paid_user WHERE de_id = #{deId}
+    </delete>
 </mapper>
