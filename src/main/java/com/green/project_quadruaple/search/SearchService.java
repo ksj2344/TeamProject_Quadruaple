@@ -172,7 +172,6 @@ public class SearchService {
         return searchMapper.searchCategory(category, searchWord, userId);
     }
 
-
     public List<SearchFilter> searchStayFilter (SearchFilterReq req){
         Long userId = authenticationFacade.getSignedUserId();
         if (req.getSearchWord() == null ){
