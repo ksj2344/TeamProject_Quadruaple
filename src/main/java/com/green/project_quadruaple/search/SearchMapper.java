@@ -1,7 +1,7 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.SearchFilterReq;
+import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
 import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.LocationIdAndTitleDto;
@@ -19,6 +19,9 @@ public interface SearchMapper {
     // 일정 추가 검색
     List<StrfShortInfoDto> selStrfShortInfoBasic(long userId, List<LocationIdAndTitleDto> locationIdList, int startIdx, int size, String category, String searchWord);
     List<LocationIdAndTitleDto> selLocationIdByTripId(long tripId);
+
+
+
 
     // 검색창 출력 + 검색어 저장
     List<SearchGetRes> searchGetList (Long userId);
@@ -41,5 +44,5 @@ public interface SearchMapper {
 //                                              @Param("search_word") String searchWord);
 
     // 숙소 카테고리 필터 부분
-    List<SearchFilter> searchStayFilter (SearchFilterReq req, Long userId);
+    List<SearchFilter> searchStayFilter (SearchAmenityReq req, Long userId);
 }

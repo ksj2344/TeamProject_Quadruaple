@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class SearchFilterDto {
+public class StayAmenity {
     private Long strfId;
     private String strfTitle;
     private String category;
