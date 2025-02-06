@@ -98,8 +98,8 @@ public class MemoService {
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
 
-        memoMapper.deleteMemo(memoId);
         memoMapper.deleteMemoTest(memoId);
+        memoMapper.deleteMemo(memoId);
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 }
