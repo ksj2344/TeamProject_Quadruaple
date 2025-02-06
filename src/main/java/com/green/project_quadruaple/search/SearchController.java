@@ -1,16 +1,15 @@
 package com.green.project_quadruaple.search;
 
-import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
-import com.green.project_quadruaple.search.model.filter.SearchAmenity;
-import com.green.project_quadruaple.search.model.filter.SearchAmenityReq;
+import com.green.project_quadruaple.search.model.filter.SearchFilterReq;
 import com.green.project_quadruaple.search.model.filter.Stay;
-import com.green.project_quadruaple.search.model.filter.StayAmenity;
+import com.green.project_quadruaple.search.model.StayCategory;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import com.green.project_quadruaple.trip.model.Category;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.ServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -116,13 +115,30 @@ public class SearchController {
                                                 , @RequestParam("size") int size) {
         return searchService.searchCategoryWithFilters(category, startIdx, size);
     }
+    @GetMapping("/category/ver2")
+    public ResponseEntity<List<StayCategory>> searchCategory(
+            @RequestParam("category") String category,
+            @RequestParam(value = "search_word", required = false) String searchWord,
+            @RequestParam(value = "user_id", required = false) Long userId) {
 
-    @GetMapping("/amenity")
-    public List<StayAmenity> searchStayByAmenity(SearchAmenityReq req) {
-
-        List<StayAmenity> searchAmenityReq = searchService.searchStayByAmenity(req);
-        return searchAmenityReq;
-//                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
+        List<StayCategory> stayCategories = searchService.searchCategory(category, searchWord, userId);
+        return ResponseEntity.ok(stayCategories);
     }
+
+
+    @GetMapping("/filter")
+    @Operation(summary = "숙소 카테고리 + 필터" , description = "숙소 카테고리 + 편의 id 에 따라 추가 설정")
+    public List<SearchFilter> searchStayFilter (@ModelAttribute SearchFilterReq req){
+
+        return searchService.searchStayFilter(req);
+    }
+
+//    @GetMapping("/amenity")
+//    public List<SearchFilterDto> searchStayByAmenity(SearchFilterReq req) {
+//
+//        List<SearchFilterDto> searchAmenityReq = searchService.searchStayByAmenity(req);
+//        return searchAmenityReq;
+////                ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), req));
+//    }
 
 }

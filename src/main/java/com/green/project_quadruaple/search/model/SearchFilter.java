@@ -1,10 +1,10 @@
-package com.green.project_quadruaple.search.model.filter;
+package com.green.project_quadruaple.search.model;
 
+import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class SearchFilterDto {
+public class SearchFilter {
     private Long strfId;
     private String strfTitle;
     private String category;
@@ -24,4 +24,5 @@ public class SearchFilterDto {
     private int wishIn;
     private String createdAt;
     private List<SearchAmenity> amenities;
+
 }
