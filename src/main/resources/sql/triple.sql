@@ -112,7 +112,7 @@ CREATE TABLE memo(
                      memo_id BIGINT PRIMARY KEY
     , trip_user_id bigint NOT null
     , content varchar(1000) NOT NULL
-    , updated_at datetime
+    , updated_at datetime ON UPDATE CURRENT_TIMESTAMP
     , FOREIGN KEY(memo_id) REFERENCES sche_memo (schedule_memo_id)
     , FOREIGN KEY(trip_user_id) REFERENCES trip_user(trip_user_id)
 );
