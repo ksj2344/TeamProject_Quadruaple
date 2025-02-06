@@ -36,6 +36,7 @@ public class SearchService {
 
    /* public List<LocationResponse> getTripLocation(String searchWord) {
         return searchMapper.getTripLocation(searchWord);
+        // asdasd
     }*/
    public List<LocationResponse> getTripLocation(String searchWord) {
        List<LocationResponse> locations = searchMapper.getTripLocation(searchWord);
@@ -160,11 +161,6 @@ public class SearchService {
 
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
-    }
-
-    public List<Stay> searchCategoryWithFilters(Category category, int startIdx, int size) {
-        Long userId = authenticationFacade.getSignedUserId();
-        return searchMapper.searchCategoryWithFilters(category, startIdx, size, userId);
     }
 
     public List<SearchFilter> searchStayFilter (SearchAmenityReq req){

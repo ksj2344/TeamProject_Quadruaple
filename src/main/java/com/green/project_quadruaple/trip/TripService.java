@@ -102,11 +102,23 @@ public class TripService {
     public ResponseWrapper<TripDetailRes> getTrip(Long tripId) {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
+        if(scAndMcAndTripInfoDto == null) {
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode() + " 여행이 존재하지 않음", null);
+        }
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         long totalDistance = 0L;
         long totalDuration = 0L;
+
+        TripDetailRes res = new TripDetailRes();
+        res.setScheduleCnt(scAndMcAndTripInfoDto.getScheduleCnt());
+        res.setMemoCnt(scAndMcAndTripInfoDto.getMemoCnt());
+        res.setTripId(scAndMcAndTripInfoDto.getTripId());
+        res.setTitle(scAndMcAndTripInfoDto.getTitle());
+        res.setStartAt(scAndMcAndTripInfoDto.getStartAt());
+        res.setEndAt(scAndMcAndTripInfoDto.getEndAt());
+        res.setTripLocationList(scAndMcAndTripInfoDto.getTripLocationList());
         if(tripDetailDto.isEmpty()) {
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), null);
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
         }
         for (TripDetailDto detailDto : tripDetailDto) {
 //            detailDto.setWeather("sunny"); // 날씨 API 받아와야함
@@ -130,17 +142,12 @@ public class TripService {
                 detailDto.setWeather(weatherApiCall.call(webClient, objectMapper, weatherSchedule.getLat(), weatherSchedule.getLng()));
             }
         }
-        TripDetailRes res = new TripDetailRes();
-        res.setScheduleCnt(scAndMcAndTripInfoDto.getScheduleCnt());
-        res.setMemoCnt(scAndMcAndTripInfoDto.getMemoCnt());
+
 
         res.setDays(tripDetailDto);
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
-        res.setTripId(scAndMcAndTripInfoDto.getTripId());
-        res.setTitle(scAndMcAndTripInfoDto.getTitle());
-        res.setStartAt(scAndMcAndTripInfoDto.getStartAt());
-        res.setEndAt(scAndMcAndTripInfoDto.getEndAt());
+
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 

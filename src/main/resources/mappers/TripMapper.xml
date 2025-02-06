@@ -58,28 +58,30 @@
             , end_at = #{endAt}
     </insert>
     
-    <select id="selScheduleCntAndMemoCnt">
+    <select id="selScheduleCntAndMemoCnt" resultMap="tripInfoResultMap">
         SELECT
-            count(sms.category) AS scheduleCnt
-            , count(smm.category) AS memoCnt
+            (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'SCHE') AS scheduleCnt
+            , (SELECT count(1) FROM sche_memo WHERE trip_id = #{tripId} AND category = 'MEMO') AS memoCnt
             , t.trip_id AS tripId
             , t.title AS title
             , t.start_at AS startAt
             , t.end_at AS endAt
-        FROM sche_memo sm
-        LEFT JOIN (
-            SELECT * FROM sche_memo
-            WHERE trip_id = #{tripId}
-                AND category = 'SCHE') sms
-            ON sm.schedule_memo_id = sms.schedule_memo_id
-        LEFT JOIN (
-            SELECT * FROM sche_memo
-            WHERE trip_id = #{tripId}
-                AND category = 'MEMO') smm
-            ON sm.schedule_memo_id = smm.schedule_memo_id
-        LEFT JOIN trip t
-            ON t.trip_id = sm.trip_id
+            , tl.location_id AS tripLocationList
+        FROM trip t
+        JOIN trip_location tl
+        ON tl.trip_id = t.trip_id
+        WHERE t.trip_id = #{tripId}
     </select>
+
+    <resultMap id="tripInfoResultMap" type="com.green.project_quadruaple.trip.model.dto.ScheCntAndMemoCntDto">
+        <id column="tripId" property="tripId"/>
+        <result column="title" property="title"/>
+        <result column="startAt" property="startAt"/>
+        <result column="endAt" property="endAt"/>
+        <collection property="tripLocationList" ofType="java.lang.Long">
+            <result column="tripLocationList"/>
+        </collection>
+    </resultMap>
 
     <select id="selScheduleDetail" resultMap="scheduleForDay">
         SELECT
@@ -97,7 +99,6 @@
             , strf.address AS address
             , strf.lat AS lat
             , strf.lng as lng
-            , m.title AS title
             , m.content AS content
             , if(r.user_id = #{userId}, 1, 0) AS reviewed
         FROM sche_memo sm
