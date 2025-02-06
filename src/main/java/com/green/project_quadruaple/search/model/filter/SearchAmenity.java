@@ -1,4 +1,4 @@
-package com.green.project_quadruaple.recent.model;
+package com.green.project_quadruaple.search.model.filter;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +9,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class HideRecentsUpdReq {
-    private long userId;
-
+public class SearchAmenity {
+    private Long amenityId;
+    private String amenityTitle;
 }
+

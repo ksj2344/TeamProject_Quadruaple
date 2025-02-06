@@ -157,32 +157,74 @@
 
     <!-- 여행기 스크랩 -->
     <!-- 여행기 스크랩 등록-->
-    <insert id="insTripReviewScrap">
+    <insert id="insTripReviewScrap" useGeneratedKeys="true" keyProperty="tripId">
         INSERT INTO scrap
            SET trip_review_id = #{tripReviewId}
              , trip_id = #{tripId}
     </insert>
 
+    <select id="countTripReview">
+        SELECT COUNT(*)
+          FROM trip_review
+         WHERE trip_review_id = #{tripReviewId}
+           AND trip_id = #{tripId}
+    </select>
+
     <insert id="copyInsTrip" useGeneratedKeys="true" keyProperty="tripId">
         INSERT INTO trip (title, manager_id, start_at, end_at)
-        SELECT title, #{newManagerId}, #{newStartAt}, #{newEndAt}
+        SELECT title, #{userId}, #{newStartAt}, #{newEndAt}
           FROM trip
-         WHERE trip_id = #{tripId}
+         WHERE trip_id = #{copyTripId}
     </insert>
 
-    <insert id="copyInsScheMemo">
+    <insert id="copyInsScheMemo" useGeneratedKeys="true" keyProperty="scheduleMemoId">
         INSERT INTO sche_memo (trip_id, `day`, seq, category)
-        SELECT #{tripId}, #{day}, seq, category
-          FROM sche_memo
-         WHERE sche_memo_id = #{originalScheMemoId}
+        SELECT #{tripId}, `day`, (@rownum := @rownum + 1) AS seq, category
+          FROM sche_memo, (SELECT @rownum := 0) AS r
+         WHERE trip_id = #{copyTripId} AND category = 'SCHE'
     </insert>
+
+    <select id="getOriginalScheMemoIds">
+        SELECT schedule_memo_id
+          FROM sche_memo
+         WHERE trip_id = #{tripId}
+    </select>
+
+    <select id="getNewScheMemoIds">
+        SELECT schedule_memo_id
+          FROM sche_memo
+         WHERE trip_id = #{copyTripId}
+           AND created_at >= (SELECT MAX(created_at) FROM sche_memo WHERE trip_id = #{copyTripId})
+    </select>
 
     <insert id="copyInsSchedule">
         INSERT INTO schedule
         (schedule_id, distance, duration, pathtype, strf_id)
-        SELECT #{scheMemoId}, distance, time AS duration, pathTypeValue AS pathtype, strf_id
+        SELECT #{scheduleMemoId}, distance, duration, pathtype, strf_id
           FROM schedule
          WHERE schedule_id = #{originalScheduleId}
+    </insert>
+
+    <select id="getOriginalScheduleIds">
+        SELECT schedule_id
+          FROM schedule
+         WHERE schedule_id IN
+        <foreach item="scheduleMemoId" collection="scheduleMemoIds" open="(" separator="," close=")">
+            #{scheduleMemoId}
+        </foreach>
+    </select>
+
+    <select id="getOriginalLocationIds">
+        SELECT location_id
+          FROM trip_location
+         WHERE trip_id = #{tripId}
+    </select>
+
+    <insert id="copyInsTripLocation">
+        INSERT IGNORE INTO trip_location (trip_id, location_id)
+        SELECT #{tripId}, location_id
+          FROM trip_location
+         WHERE trip_id = #{copyTripId}
     </insert>
 
     <!-- 여행기 스크랩 조회수-->

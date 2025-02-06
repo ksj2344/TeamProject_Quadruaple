@@ -15,6 +15,7 @@
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
         n.inquired_at AS inquiredAt, COUNT(m.user_id) AS wishCnt,
+        COUNT(DISTINCT h.review_id) AS reviewCnt,
 
         IF(
         EXISTS(
@@ -60,8 +61,7 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, j.`name`, l.`name`,
-        j.profile_pic, l.profile_pic , d.amenity_id, b.menu_id, e.pic_name
+        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id;
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
@@ -91,9 +91,9 @@
         <result property="recentCheck" column="recentCheck" />
         <result property="recentCheckStatus" column="recentCheckStatus" />
         <result property="inquiredAt" column="inquiredAt" />
+        <result property="reviewCnt" column="reviewCnt" />
 
-
-        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
+        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">
             <id property="amenityId" column="amenityId" />
             <result property="amenityTitle" column="amenityTitle" />
         </collection>
@@ -121,7 +121,8 @@
         f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,
         AVG(h.rating) AS ratingAvg, b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
-        l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice
+        l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
+        COUNT(DISTINCT h.review_id) AS reviewCnt
         FROM
         stay_tour_restaur_fest a
         LEFT JOIN menu b ON a.strf_id = b.strf_id
@@ -137,8 +138,7 @@
         LEFT JOIN user l ON l.user_id = k.user_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, j.`name`, l.`name`,
-        j.profile_pic, l.profile_pic , d.amenity_id, b.menu_id, e.pic_name
+        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id;
     </select>
     <resultMap id="nonMemberResultMap" type="com.green.project_quadruaple.strf.model.GetNonDetail">
         <id property="strfId" column="strfId" />
@@ -163,8 +163,9 @@
         <result property="hostProfilePic" column="hostProfilePic" />
         <result property="reviewWriterUserPic" column="reviewWriterUserPic" />
         <result property="hostName" column="hostName" />
+        <result property="reviewCnt" column="reviewCnt" />
 
-        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.Amenity">
+        <collection property="amenities" ofType="com.green.project_quadruaple.strf.model.StrfAmenity">
             <id property="amenityId" column="amenityId" />
             <result property="amenityTitle" column="amenityTitle" />
         </collection>

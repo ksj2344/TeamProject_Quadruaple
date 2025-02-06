@@ -11,5 +11,5 @@ public class UserInfoDto {
     private final long signedUserId;
     private final String email;
     private final String name;
-    private final String profilePIc;
+    private final String profilePic;
 }

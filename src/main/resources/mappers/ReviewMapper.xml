@@ -30,7 +30,6 @@
         <result property="pic" column="pic"/>
     </resultMap>
 
-
     <select id="getReviewPics">
         SELECT review_id AS reviewId , title
         FROM review_pic

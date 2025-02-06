@@ -2,6 +2,7 @@ package com.green.project_quadruaple.datamanager;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.MenuReq;
+import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,9 +49,16 @@ public class DataController {
 //        return dataService.delMenu(p);
 //    }
 
-    @PostMapping
-    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewPostReq p){
+    @PostMapping("review")
+    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewDummyReq p){
         return postreviewdummy(pics, p);
+    }
+
+    @PostMapping("default-profile-pic")
+    @Operation(summary = "프로필 사진 기본 이미지로 변경",
+            description = "profilePic이 null이거나 확장자가 없는 경우, 기본 이미지(user.png)로 변경")
+    public ResponseEntity<?> updateProfilePicsToDefault() {
+        return dataService.updateInvalidProfilePics();
     }
 
 }

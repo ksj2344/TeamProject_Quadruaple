@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Amenity {
+public class StrfAmenity {
     private long amenityId;
     private String amenityTitle;
 }

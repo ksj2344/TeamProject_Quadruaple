@@ -6,16 +6,19 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Mapper
 public interface MemoMapper {
 
 
-    MemoDto selectMemo(@Param("memoId") Long memoId);
+    MemoDto selectMemo(Long memoId);
 
-    void insertMemo(MemoDto memoDto);
-    void insertScMemo(MemoDto memoDto);
-    void updateMemo(MemoDto memoDto);
+    void postMemo(MemoDto memoDto);
 
-    void deleteMemo(@Param("memoId") Long memoId);
+    Long findMemoOwnerId(Long memoId);
+
+    void patchMemo(MemoDto memoDto);
+
+    void deleteMemo(Long memoId);
 }

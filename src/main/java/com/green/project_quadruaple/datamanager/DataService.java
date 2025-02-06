@@ -5,7 +5,9 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.MenuDto;
+import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
+import com.green.project_quadruaple.datamanager.model.UserProfile;
 import com.green.project_quadruaple.review.ReviewService;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Log4j2
@@ -29,8 +34,8 @@ public class DataService {
     private final MyFileUtils myFileUtils;
     private final ReviewService reviewService;
 
-    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewPostReq p){
-        for(Long i=1L; i<901; i*=3){
+    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewDummyReq p){
+        for(Long i=1L; i<901; i+=p.getNum()){
             p.setStrfId(i);
             reviewService.postRating(pics, p);
         }
@@ -38,7 +43,7 @@ public class DataService {
     }
 
 
-    //strf 사진 등록
+    //strf 사진, 메뉴 등록
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p){
         List<Long> strfIds= dataMapper.selectStrfId(p);
@@ -47,8 +52,8 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));}
 
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*p.getMenus().size());
-        List<MenuDto> menus=p.getMenus();
+        List<MenuDto> menus=p.getMenus()==null||p.getMenus().size()==0?new ArrayList<>():p.getMenus();
+        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*menus.size());
         String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
         int strfCnt;
@@ -64,43 +69,50 @@ public class DataService {
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
         for (long strfId : strfIds) {
-            String middlePath=String.format("strf/%d",strfId);
+            String middlePath = String.format("strf/%d", strfId);
             myFileUtils.makeFolders(middlePath);
             // ${file.directory}/pics/${category}/${picFolder} 내부의 파일을
             // ${file.directory}/strf/${strfId}/으로 파일을 붙여넣기
-            String filePath=String.format("%s/strf/%d",myFileUtils.getUploadPath(),strfId);
-            try{
+            String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
+            try {
                 Path source = Paths.get(sourcePath);
                 Path destination = Paths.get(filePath);
                 myFileUtils.copyFolder(source, destination);
-            }catch(IOException e){
+            } catch (IOException e) {
                 //폴더 삭제 처리
                 log.error("파일 저장 실패: {}", filePath, e);
-                String delFolderPath=String.format("%s/%s", myFileUtils.getUploadPath(),middlePath);
-                myFileUtils.deleteFolder(delFolderPath,true);
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                            .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
-            for(int i=0; i<strfCnt; i++){
+            for (int i = 0; i < strfCnt; i++) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("strfId",strfId);
-                map.put("picName",String.format("%d.png",i+1));
+                map.put("strfId", strfId);
+                map.put("picName", String.format("%d.png", (i + 1)));
                 picAndStrfIds.add(map);
             }
-            for(int i=0; i<menuCnt; i++){
-                Map<String, Object> menuMap = new HashMap<>();
-                MenuDto menu=menus.get(i);
-                menuMap.put("strfId",strfId);
-                menuMap.put("title",menu.getTitle());
-                menuMap.put("price",menu.getPrice());
-                menuMap.put("menuPic",String.format("%d.png",i+1));
-                menuData.add(menuMap);
+            if (menuCnt != 0) {
+                for (int i = 0; i < menus.size(); i++) {
+                    Map<String, Object> menuMap = new HashMap<>();
+                    MenuDto menu = menus.get(i);
+                    menuMap.put("strfId", strfId);
+                    menuMap.put("title", menu.getTitle());
+                    menuMap.put("price", menu.getPrice());
+                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
+                    menuData.add(menuMap);
+                }
             }
         }
         int result= dataMapper.insStrfPic(picAndStrfIds);
-        int menuResult= dataMapper.insMenu(menuData);
-        if(result==0||menuResult==0){
+        if (menuCnt != 0) { int menuResult= dataMapper.insMenu(menuData);
+            if(menuResult==0){
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+        }
+        if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
@@ -193,4 +205,67 @@ public class DataService {
 //        }
 //        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(),result));
 //    }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> updateInvalidProfilePics() {
+        List<UserProfile> users = dataMapper.getAllUsersProfilePics(); // 모든 사용자 profilePic 조회
+        if (users.isEmpty()) {
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
+        }
+
+        List<Long> updateUserIds = new ArrayList<>();
+
+        // 기본 프로필 사진의 절대 경로 (파일 디렉토리 내)
+        String defaultPicSourcePath = Paths.get(myFileUtils.getUploadPath(), "common", "user.png").toString();
+
+        for (UserProfile user : users) {
+            String profilePic = user.getProfilePic();
+            if (profilePic == null || !profilePic.contains(".")) { // NULL 이거나 확장자 없음
+                updateUserIds.add(user.getUserId());
+
+                // 사용자별 폴더 생성 경로 (절대 경로로 설정)
+                String userFolderPath = Paths.get(myFileUtils.getUploadPath(), "user", user.getUserId().toString()).toString(); // profile 폴더 없앰
+                String defaultPicPath = Paths.get(userFolderPath, "user.png").toString();
+
+                // 프로필 사진 폴더가 없으면 생성
+                myFileUtils.makeFolders(userFolderPath);
+
+                // 기본 이미지가 이미 존재하는지 확인하고 복사
+                File sourceFile = new File(defaultPicSourcePath);
+                File destinationFile = new File(defaultPicPath);
+
+                // 디버깅: 경로 확인
+                System.out.println("소스 파일 경로: " + sourceFile.getAbsolutePath());
+                System.out.println("목적지 파일 경로: " + destinationFile.getAbsolutePath());
+
+                if (!destinationFile.exists()) {
+                    try {
+                        // 목적지 폴더가 존재하는지 확인하고 없으면 생성
+                        File parentFolder = destinationFile.getParentFile();
+                        if (!parentFolder.exists()) {
+                            parentFolder.mkdirs(); // 폴더 생성
+                            System.out.println("목적지 폴더를 생성했습니다: " + parentFolder.getAbsolutePath());
+                        }
+
+                        // 기본 프로필 사진을 해당 사용자 폴더로 복사
+                        Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);  // 기존 파일 덮어쓰기
+                        System.out.println("기본 프로필 사진 복사 완료!");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                    }
+                } else {
+                    System.out.println("목적지 파일이 이미 존재합니다: " + destinationFile.getAbsolutePath());
+                }
+            }
+        }
+
+        if (!updateUserIds.isEmpty()) {
+            int updatedCount = dataMapper.updateProfilePicsToDefault(updateUserIds, "user.png");
+            return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), updatedCount));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 0));
+    }
 }

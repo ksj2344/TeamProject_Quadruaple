@@ -2,6 +2,7 @@ package com.green.project_quadruaple.expense.model.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +12,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @EqualsAndHashCode
-@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class PaidUser {
+public class UserPriceDto {
+    @Schema(example = "116")
     private long userId;
-    private String name;
-    private String profilePic;
+    @Schema(example = "3000")
+    private int price;
 }
