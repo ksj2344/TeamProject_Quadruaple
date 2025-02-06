@@ -147,9 +147,27 @@ public class SearchService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
 
+    /*
+    try {
+        Long signedUserId = authenticationFacade.getSignedUserId();
+        if (signedUserId == 0) {
+            signedUserId = 0L;
+        }
+        if (signedUserId > 0) {
+            searchMapper.searchIns(searchWord, signedUserId);
+        }
+        List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId);
+
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+
+    } catch (Exception e) {
+        return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+    }
+     */
     public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord) {
 
         Long userId = authenticationFacade.getSignedUserId();
+
 
         String categoryValue = null;
         if(category != null && Category.getKeyByName(category) != null) {

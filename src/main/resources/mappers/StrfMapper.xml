@@ -191,5 +191,4 @@
         inquired_at = NOW()
     </insert>
 
-
 </mapper>
