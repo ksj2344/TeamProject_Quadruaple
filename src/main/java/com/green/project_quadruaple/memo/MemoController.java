@@ -3,6 +3,9 @@ package com.green.project_quadruaple.memo;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.memo.model.MemoDto;
+import com.green.project_quadruaple.memo.model.Req.MemoPostReq;
+import com.green.project_quadruaple.memo.model.Req.MemoUpReq;
+import com.green.project_quadruaple.memo.model.Res.MemoGetRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +25,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "메모")
 public class MemoController {
+
     private final MemoService memoService;
     @GetMapping("/select")
-    public ResponseEntity<?> selectMemo(@RequestParam Long memoId, Authentication authentication) {
-        Long signedUserId = (Long) authentication.getPrincipal();
-        MemoDto memo = memoService.getMemo(memoId, signedUserId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", "200 성공");
-        response.put("content", memo.getContent());
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> selectMemo(@RequestParam Long memoId) {
+        return memoService.getMemo(memoId);
     }
+
     @PostMapping("/post")
-    public ResponseEntity<?> postMemo(@RequestBody MemoDto memoDto, Authentication authentication) {
-        Long signedUserId = (Long) authentication.getPrincipal();
-        Long memoId = memoService.addMemo(memoDto, signedUserId);
+    public ResponseEntity<?> postMemo(@RequestBody MemoPostReq memoDto) {
+
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
         response.put("tripId", memoDto.getTripId());
@@ -45,10 +43,10 @@ public class MemoController {
         response.put("content", memoDto.getContent());
         return ResponseEntity.ok(response);
     }
+
     @PatchMapping("/upd")
-    public ResponseEntity<?> updateMemo(@RequestBody MemoDto memoDto, Authentication authentication) {
-        Long signedUserId = (Long) authentication.getPrincipal();
-        memoService.updateMemo(memoDto, signedUserId);
+    public ResponseEntity<?> updateMemo(@RequestBody MemoUpReq memoDto) {
+        memoService.updateMemo(memoDto);
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
         response.put("memoId", memoDto.getMemoId());
@@ -56,10 +54,10 @@ public class MemoController {
         response.put("content", memoDto.getContent());
         return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteMemo(@RequestParam Long memoId, Authentication authentication) {
-        Long signedUserId = (Long) authentication.getPrincipal();
-        memoService.deleteMemo(memoId, signedUserId);
+    public ResponseEntity<?> deleteMemo(@RequestParam Long memoId) {
+        memoService.deleteMemo(memoId);
         Map<String, Object> response = new HashMap<>();
         response.put("code", "200 성공");
         response.put("memoId", memoId);

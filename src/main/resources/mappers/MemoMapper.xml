@@ -19,27 +19,40 @@
     </select>
 
     <!-- 메모 추가 -->
-    <insert id="postMemo" useGeneratedKeys="true" keyProperty="memoId">
-        INSERT INTO memo (trip_id, user_id, created_at, updated_at, content, seq, day)
-        VALUES (#{tripId}, #{userId}, #{createdAt}, #{updatedAt}, #{content}, #{seq}, #{day})
+    <insert id="postMemo" useGeneratedKeys="true" keyProperty="scheMemoId">
+        INSERT INTO sche_memo
+        (trip_id, day, seq, category)
+        VALUES
+        (#{tripId}, #{day}, #{seq}, 'MEMO')
     </insert>
+
+    <insert id="insertMemo">
+        INSERT INTO memo
+        (memo_id, trip_user_id, title, content)
+        VALUES (#{scheMemoId}, #{tripUserId}, #{title}, #{content})
+    </insert>
+
+
+
 
     <!-- 메모 수정 -->
     <update id="patchMemo">
         UPDATE memo
         SET
-        content = #{content},
-        updated_at = #{updatedAt}
+        content = #{content}
         WHERE
         memo_id = #{memoId} AND user_id = #{userId}
     </update>
 
     <!-- 메모 삭제 -->
-    <delete id="deleteMemo">
+    <update id="deleteMemo">
         DELETE FROM memo
         WHERE
-        memo_id = #{memoId} AND user_id = #{userId}
-    </delete>
+        memo_id = #{memoId};
+        delete from sche_memo
+        where
+        schedule_memo_id = #{memoId};
+    </update>
 
     <!-- 작성자 확인 -->
     <select id="findMemoOwnerId" resultType="java.lang.Long">

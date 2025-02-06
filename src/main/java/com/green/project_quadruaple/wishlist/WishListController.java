@@ -21,7 +21,6 @@ import java.util.Map;
 public class WishListController {
 
     private final WishListService wishlistService;
-    private AuthenticationFacade authenticationFacade;
 
 
 
