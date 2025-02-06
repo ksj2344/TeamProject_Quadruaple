@@ -19,9 +19,7 @@ public class SearchCategoryRes {
     private Double averageRating;
     private Integer reviewCount;
     private Integer wishlistCount;
-    private Integer userWishlist;
-    private Long amenityId;
-    private String amenityTitle;
+    private Integer wishIn;
 
 //    private boolean isMore;
 
