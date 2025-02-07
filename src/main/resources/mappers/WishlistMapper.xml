@@ -38,7 +38,7 @@
         LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
         WHERE b.user_id = #{userId}
         GROUP BY a.strf_id, a.title, d.title, a.category
-        LIMIT 11
+        LIMIT #{startIdx} , #{size}
     </select>
 
 
