@@ -304,7 +304,7 @@ public class TripService {
     public ResultResponse postSchedule(PostScheduleReq req) {
         Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         long tripId = req.getTripId();
-        if(tripMapper.selExistsTripUser(tripId, signedUserId)) {
+        if(!tripMapper.selExistsTripUser(tripId, signedUserId)) {
             return ResultResponse.forbidden();
         }
         long strfId = req.getStrfId();
