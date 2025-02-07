@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -121,9 +123,12 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://112.222.157.156:5221/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://112.222.157.156:5221/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://112.222.157.156:5221/api/booking/kakaoPayFail");
+//        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
+//        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
+//        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -167,7 +172,9 @@ public class BookingService {
             bookingPostReq.setUserId(Long.parseLong(userId));
             bookingPostReq.setTid(kakaoReadyDto.getTid());
             bookingMapper.insBooking(bookingPostReq);
-            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+            if (bookingPostReq.getReceiveId() != null) {
+                bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+            }
 
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
@@ -185,13 +192,14 @@ public class BookingService {
             }
 
             BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(bookingPostReq.getBookingId());
-            String redirectParams = "?user_name=" + bookingApproveInfoDto.getUserName() + "&"
-                    + "title=" + bookingApproveInfoDto.getTitle() + "&"
-                    + "check_in=" + bookingApproveInfoDto.getCheckIn() + "&"
-                    + "check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
+            String redirectParams = "?user_name=" + URLEncoder.encode(bookingApproveInfoDto.getUserName(), StandardCharsets.UTF_8) + "&"
+                    + "title=" + URLEncoder.encode(bookingApproveInfoDto.getTitle(), StandardCharsets.UTF_8) + "&"
+                    + "check_in=" + URLEncoder.encode(bookingApproveInfoDto.getCheckIn(), StandardCharsets.UTF_8) + "&"
+                    + "check_out=" + URLEncoder.encode(bookingApproveInfoDto.getCheckOut(), StandardCharsets.UTF_8) + "&"
                     + "personnel=" + quantity;
-//            return "http://localhost:5173/booking/complete" + bookingPostReq.getBookingId();
-            return "http://192.168.0.198:5173/booking/complete" + redirectParams;
+            String url = "http://112.222.157.156:5221/booking/complete" + redirectParams;
+//            String url = "http://localhost:8080/booking/complete" + redirectParams;
+            return url;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
