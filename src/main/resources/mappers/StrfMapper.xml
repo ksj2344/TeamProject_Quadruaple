@@ -62,7 +62,6 @@
 
         WHERE a.strf_id = #{strfId}
         GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id
-        LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
