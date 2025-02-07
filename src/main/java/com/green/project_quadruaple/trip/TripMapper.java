@@ -24,6 +24,8 @@ public interface TripMapper {
     ScheCntAndMemoCntDto selScheduleCntAndMemoCnt(long tripId);
     List<TripDetailDto> selScheduleDetail(Long tripId, Long userId);
 
+    List<Long> selTripUserList(Long tripId);
+
     // patchTrip
     void updateTrip(PatchTripReq req);
     void insTripUser(long tripId, List<Long> userIdList);

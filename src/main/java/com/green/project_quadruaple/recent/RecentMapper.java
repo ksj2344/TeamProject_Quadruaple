@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface RecentMapper {
-    List<RecentGetListRes> recentList (Long userId,int startIdx , int size);
+    List<RecentGetListRes> recentList (Long userId);
     int recentHide (Long userId , @Param("strf_id") Long strfId);
     int recentAllHide (Long userId);
 }

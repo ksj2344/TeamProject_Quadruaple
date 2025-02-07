@@ -74,6 +74,13 @@
         WHERE t.trip_id = #{tripId}
     </select>
 
+    <select id="selTripUserList">
+        SELECT
+            user_id
+        FROM trip_user
+        WHERE trip_id = #{tripId}
+    </select>
+
     <resultMap id="tripInfoResultMap" type="com.green.project_quadruaple.trip.model.dto.ScheCntAndMemoCntDto">
         <id column="tripId" property="tripId"/>
         <result column="title" property="title"/>

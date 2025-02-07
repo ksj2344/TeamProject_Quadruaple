@@ -22,21 +22,9 @@ public class RecentService {
     @Value("${const.default-review-size}")
     private int size;
 
-    public ResponseWrapper<List<RecentGetListRes>> recentList (int lastIdx){
+    public ResponseWrapper<List<RecentGetListRes>> recentList (){
         Long userId = authenticationFacade.getSignedUserId();
-        int more = 1;
-        List<RecentGetListRes> res = recentMapper.recentList(userId,lastIdx,size+more);
-
-
-        if (res.isEmpty()){
-            return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
-        }
-
-        boolean hasMore = res.size() > size;
-        if (hasMore) {
-            res.get(res.size() - 1).setMore(true); // 마지막 요소에 isMore = true 설정
-            res.remove(res.size() - 1); // 추가된 데이터 삭제
-        }
+        List<RecentGetListRes> res = recentMapper.recentList(userId);
 
         try {
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);

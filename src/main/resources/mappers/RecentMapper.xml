@@ -20,7 +20,7 @@
         WHERE a.user_id = #{userId} AND a.undo_recent = 0
         GROUP BY strf_id,b.title
         ORDER BY a.inquired_at DESC
-        LIMIT #{startIdx}, #{size}
+        LIMIT 10
     </select>
 
     <update id="recentHide">
