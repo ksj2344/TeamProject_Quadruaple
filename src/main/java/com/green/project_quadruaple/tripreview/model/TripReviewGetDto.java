@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 public class TripReviewGetDto {
     private long tripId;
+    private long userId;
     private String title;
     private String content;
     private int likeCount;

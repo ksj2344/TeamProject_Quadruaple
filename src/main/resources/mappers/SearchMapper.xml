@@ -6,11 +6,14 @@
     <!-- 여행 지역 검색 쿼리 -->
     <select id="getTripLocation" resultType="com.green.project_quadruaple.search.model.LocationResponse">
         SELECT
-        location_id AS locationId,
-        title AS locationTitle,
-        location_pic AS locationPic
-        FROM location
-        WHERE title LIKE CONCAT('%', #{search_word}, '%')
+        A.location_id AS locationId,
+        A.title AS locationTitle,
+        A.location_pic AS locationPic
+        FROM location A
+        LEFT JOIN location_detail B
+        ON A.location_id=B.location_id
+        WHERE A.title LIKE CONCAT('%', #{search_word}, '%')
+        OR B.detail_title LIKE CONCAT('%', #{search_word}, '%')
     </select>
 
     <resultMap id="LocationResponseMap" type="com.green.project_quadruaple.search.model.LocationResponse">
