@@ -131,7 +131,7 @@ public class TripReviewController {
     //--------------------------------------------------------------------
     // 여행기 스크랩
     @PostMapping("scrap")
-    @Operation(summary = "여행기 스크랩 등록")
+    @Operation(summary = "여행기 스크랩 등록(작업중)")
     public ResponseEntity<?> postScrap(@RequestBody CopyInsertTripDto trip) {
         int result = tripReviewService.copyTripReview(trip);
 
