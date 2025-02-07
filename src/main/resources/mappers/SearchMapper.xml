@@ -102,11 +102,12 @@
         ORDER BY search_at DESC
         LIMIT 5
     </select>
+
     <insert id="searchIns">
-        INSERT INTO search_word (txt , user_id)
-        VALUES (#{search_word}, #{userId})
-        ON DUPLICATE KEY UPDATE
-        search_at = NOW()
+        <if test="userId != null and userId > 0">
+            INSERT INTO search_word (txt, user_id) VALUES (#{search_word}, #{userId})
+            ON DUPLICATE KEY UPDATE search_at = NOW();
+        </if>
     </insert>
 
 
