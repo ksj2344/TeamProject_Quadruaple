@@ -51,7 +51,6 @@
         FROM trip_review
     </select>
 
-    
     <select id="getAllTripReviews" resultMap="tripReviewResultMap">
         SELECT A.trip_id, A.user_id, A.title, A.content,
         GROUP_CONCAT(B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,

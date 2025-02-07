@@ -276,6 +276,7 @@ public class TripReviewService {
         return 1;
     }
 
+
     // tripReviewId와 tripId의 유효성 검증
     private void validateTripReview(long tripReviewId, long tripId) {
         int count = tripReviewMapper.countTripReview(tripReviewId, tripId);
