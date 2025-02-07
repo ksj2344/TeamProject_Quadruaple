@@ -102,7 +102,6 @@ public class SearchController {
                                               @RequestParam(value = "search_word") String searchWord,
                                               @RequestParam(value = "amenity_id") List<Long> amenityId){
 
-
         return searchService.searchStayFilter(lastIdx,category,searchWord,amenityId);
     }
 
