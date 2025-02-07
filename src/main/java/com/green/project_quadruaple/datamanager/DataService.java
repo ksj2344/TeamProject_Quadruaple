@@ -69,7 +69,7 @@ public class DataService {
         int strfCnt;
         int menuCnt;
         try {
-            //경로에 존재하는 디렉토리와 파일의 갯수를 확인하는 메서드.
+            // 경로에 존재하는 디렉토리와 파일의 갯수를 확인하는 메서드.
             // sourceFile은 menu 디렉토리를 포함하므로 -1하여 실제 사진 파일 갯수를 count
              strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
              menuCnt=(int) myFileUtils.countFiles(menuPath);

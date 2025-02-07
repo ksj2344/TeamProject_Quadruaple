@@ -95,7 +95,7 @@ public class TripController {
 
     @PostMapping("/trip/user")
     @Operation(summary = "구성원 추가", description = "여행 초대 키 입력 페이지에서 공유받은 inviteKey 입력 시 로그인유저가 여행 구성원에 추가")
-    public String addTripUser(@RequestBody PostInviteKeyReq inviteKey) {
+    public ResultResponse addTripUser(@RequestBody PostInviteKeyReq inviteKey) {
         return tripService.addTripUser(inviteKey.getInviteKey());
     }
 

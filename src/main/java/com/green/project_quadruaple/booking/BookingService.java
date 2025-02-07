@@ -31,7 +31,7 @@ public class BookingService {
     private final String secretKey;
     private final String payUrl;
 
-    public KakaoReadyDto kakaoReadyDto;
+    private KakaoReadyDto kakaoReadyDto;
 
     public BookingService(BookingMapper bookingMapper,
                           @Value("${kakao-api-const.affiliate-code}") String affiliateCode,
@@ -75,7 +75,7 @@ public class BookingService {
 
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
-            if(couponDto == null) { // 쿠폰 미소지시 에러
+            if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
             List<MenuDto> menuDtoList = bookingMapper.selMenu(orderList);
@@ -191,7 +191,7 @@ public class BookingService {
                     + "check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
                     + "personnel=" + quantity;
 //            return "http://localhost:5173/booking/complete" + bookingPostReq.getBookingId();
-            return "http://localhost:5173/booking/complete" + redirectParams;
+            return "http://192.168.0.198:5173/booking/complete" + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
