@@ -15,7 +15,8 @@ public interface TripReviewMapper {
     // 로그인한 사용자의 여행기 조회
     List<TripReviewGetDto> getMyTripReviews(long userId, String orderType);
     // 모든 사용자의 여행기 조회
-    List<TripReviewGetDto> getAllTripReviews(String orderType);
+    int getTotalTripReviewsCount();
+    List<TripReviewGetDto> getAllTripReviews(String orderType, int startIdx, int size);
     // 다른 사용자의 여행기 조회
     TripReviewGetDto getOtherTripReviewById(long tripReviewId);
 
