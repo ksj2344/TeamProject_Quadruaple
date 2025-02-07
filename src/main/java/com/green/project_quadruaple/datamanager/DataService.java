@@ -45,26 +45,38 @@ public class DataService {
 
     //strf 사진, 메뉴 등록
     @Transactional
-    public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p){
+    public ResponseEntity<ResponseWrapper<Integer>> insPicAndMenuToStrf(StrfIdGetReq p) {
+        //'strfTitle(title 검색어)' 기준으로 혹은 'startId와 endId 사이에서' category에 해당하는 strf_id목록 가져오기
         List<Long> strfIds= dataMapper.selectStrfId(p);
-        if(strfIds==null){
+        if(strfIds==null){ //못가져오면 예외처리
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
 
+        //시작전에 secret yml 파일에 docker DB 연결해야함
+        //strf_pic 테이블에 INSERT하는 collection
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        List<MenuDto> menus=p.getMenus()==null||p.getMenus().size()==0?new ArrayList<>():p.getMenus();
-        List<Map<String,Object>> menuData =new ArrayList<>(strfIds.size()*menus.size());
-        String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
-        String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(),p.getCategory(),p.getPicFolder());
+        //menu가 있는 상품이 있고 없는 상품이 있음. 없으면 빈배열로.
+        List<MenuDto> menus = p.getMenus() == null || p.getMenus().size() == 0 ? new ArrayList<>() : p.getMenus();
+        //menu 테이블에 INSERT하는 collection
+        List<Map<String,Object>> menuData = new ArrayList<>(strfIds.size()*menus.size());
+
+        // sourcePath: ${file.directory}/pics/${category}/${picFolder}
+        String sourcePath=String.format("%s/pics/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        // menuPath: ${file.directory}/pics/${category}/${picFolder}/menu
+        // menu는 기본적으로 strf 파일 아래에 존재하지만 menu 사진 갯수를 파악하기 위함
+        String menuPath=String.format("%s/pics/%s/%s/menu",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
         int strfCnt;
         int menuCnt;
         try {
-             strfCnt=(int) myFileUtils.countFiles(sourcePath)-1;
+            //경로에 존재하는 디렉토리와 파일의 갯수를 확인하는 메서드.
+            // sourceFile은 menu 디렉토리를 포함하므로 -1하여 실제 사진 파일 갯수를 count
+             strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
              menuCnt=(int) myFileUtils.countFiles(menuPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        //req로 들어온 메뉴 리스트의 길이가 menu 디렉토리 안의 사진 갯수와 다르면 예외발생
         if(menuCnt!=menus.size()){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
@@ -72,15 +84,16 @@ public class DataService {
         for (long strfId : strfIds) {
             String middlePath = String.format("strf/%d", strfId);
             myFileUtils.makeFolders(middlePath);
-            // ${file.directory}/pics/${category}/${picFolder} 내부의 파일을
-            // ${file.directory}/strf/${strfId}/으로 파일을 붙여넣기
+            // filePath: ${file.directory}/strf/${strfId}
             String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
+            // sourcePath 아래의 파일을 filePath로 복사
+            // 이렇게 파일 만들어서 추후 filezilla로 한꺼번에 올림
             try {
                 Path source = Paths.get(sourcePath);
                 Path destination = Paths.get(filePath);
                 myFileUtils.copyFolder(source, destination);
             } catch (IOException e) {
-                //폴더 삭제 처리
+                //실패시 폴더 삭제 처리
                 log.error("파일 저장 실패: {}", filePath, e);
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
@@ -88,12 +101,14 @@ public class DataService {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
+            // strf_pic insert collection 제작
             for (int i = 0; i < strfCnt; i++) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("strfId", strfId);
                 map.put("picName", String.format("%d.png", (i + 1)));
                 picAndStrfIds.add(map);
             }
+            // menu insert collection 제작
             if (menuCnt != 0) {
                 for (int i = 0; i < menus.size(); i++) {
                     Map<String, Object> menuMap = new HashMap<>();
@@ -106,13 +121,16 @@ public class DataService {
                 }
             }
         }
+        //insert
         int result= dataMapper.insStrfPic(picAndStrfIds);
+        //menu insert
         if (menuCnt != 0) { int menuResult= dataMapper.insMenu(menuData);
             if(menuResult==0){
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
         }
+        //예외처리
         if(result==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));

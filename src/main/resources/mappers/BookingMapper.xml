@@ -73,5 +73,19 @@
         (#{receiveId}, #{bookingId})
     </insert>
 
+    <select id="selApproveBookingInfo">
+        SELECT
+            b.check_in AS checkIn
+            , b.check_out AS checkOut
+            , m.title AS title
+            , u.name AS userName
+        FROM booking b
+        JOIN menu m
+            ON b.menu_id = m.menu_id
+        JOIN USER u
+            ON u.user_id = b.user_id
+        WHERE b.booking_id = #{bookingId}
+    </select>
+
 
 </mapper>
