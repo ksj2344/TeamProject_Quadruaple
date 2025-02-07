@@ -186,10 +186,10 @@ public class BookingService {
 
             BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(bookingPostReq.getBookingId());
             String redirectParams = "?user_name=" + bookingApproveInfoDto.getUserName() + "&"
-                    + "?title=" + bookingApproveInfoDto.getTitle() + "&"
-                    + "?check_in=" + bookingApproveInfoDto.getCheckIn() + "&"
-                    + "?check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
-                    + "?personnel=" + quantity;
+                    + "title=" + bookingApproveInfoDto.getTitle() + "&"
+                    + "check_in=" + bookingApproveInfoDto.getCheckIn() + "&"
+                    + "check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
+                    + "personnel=" + quantity;
 //            return "http://localhost:5173/booking/complete" + bookingPostReq.getBookingId();
             return "http://localhost:5173/booking/complete" + redirectParams;
         } catch (Exception e) {
