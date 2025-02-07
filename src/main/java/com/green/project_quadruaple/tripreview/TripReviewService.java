@@ -110,13 +110,13 @@ public class TripReviewService {
         return tripReviewMapper.getTotalTripReviewsCount();
     }
     // 다른 사용자의 여행기 조회
-    public TripReviewGetDto getOtherTripReviews(long tripReviewId) {
+    public List<TripReviewGetDto> getOtherTripReviews(long tripReviewId) {
         long userId = authenticationFacade.getSignedUserId();
 
         // 여행기 조회수 삽입
         tripReviewMapper.insTripReviewRecent(userId, tripReviewId);
 
-        TripReviewGetDto tripReviewGetDto = tripReviewMapper.getOtherTripReviewById(tripReviewId);
+        List<TripReviewGetDto> tripReviewGetDto = tripReviewMapper.getOtherTripReviewById(tripReviewId);
         if (tripReviewGetDto == null) {
             throw new RuntimeException("해당 여행기를 찾을 수 없습니다.");
         }
@@ -188,6 +188,10 @@ public class TripReviewService {
             return 0;
         }
 
+        tripReviewMapper.delTripReviewRecentTr(tripReviewId);
+
+        tripReviewMapper.delTripReviewScrap(tripReviewId);
+
         tripReviewMapper.delTripReviewLikeByTripReviewId(tripReviewId);
 
         tripReviewMapper.delTripReviewPic(tripReviewId);
@@ -202,10 +206,14 @@ public class TripReviewService {
 
     // 여행기 추천
     public int insTripLike(TripLikeDto like) {
+        long userId = authenticationFacade.getSignedUserId();
+        like.setUserId(userId);
         return tripReviewMapper.insTripLike(like);
     }
 
     public int delTripLike(TripLikeDto like) {
+        long userId = authenticationFacade.getSignedUserId();
+        like.setUserId(userId);
         return tripReviewMapper.delTripLike(like);
     }
 
