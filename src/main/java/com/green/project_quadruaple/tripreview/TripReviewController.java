@@ -62,6 +62,13 @@ public class TripReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), allTripReview));
     }
 
+    @GetMapping("allTripReviewCount")
+    @Operation(summary = "모든 여행기 개수")
+    public ResponseEntity<?> getAllTripReviewCount() {
+        int result =  tripReviewService.getTripReviewCount();
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
+    }
+
     @GetMapping("otherTripReview")
     @Operation(summary = "다른 사용자의 여행기 조회")
     public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
