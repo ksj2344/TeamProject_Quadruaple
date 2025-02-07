@@ -9,5 +9,6 @@ public class CouponDto {
 
     private Long receiveId;
     private Long discountRate;
+    private Long usedCouponId;
 
 }

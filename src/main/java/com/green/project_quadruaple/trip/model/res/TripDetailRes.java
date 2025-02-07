@@ -22,6 +22,7 @@ public class TripDetailRes {
     private String title;
     private String startAt;
     private String endAt;
+    private List<Long> tripUserIdList;
     private List<Long> tripLocationList;
     private List<TripDetailDto> days;
 }
