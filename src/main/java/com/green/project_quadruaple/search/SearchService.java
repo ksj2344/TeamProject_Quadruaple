@@ -141,17 +141,38 @@ public class SearchService {
     }
 
     public ResponseWrapper<List<Stay>> searchAll(String searchWord,int lastIdx) {
-        Long signedUserId = authenticationFacade.getSignedUserId();
-        searchMapper.searchIns(searchWord,signedUserId);
-        int more = 1;
-        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId,lastIdx,size+more);
+//        Long signedUserId = authenticationFacade.getSignedUserId();
+//        searchMapper.searchIns(searchWord,signedUserId);
+//        int more = 1;
+//        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId,lastIdx,size+more);
+//
+//        boolean hasMore = stays.size() > size;
+//        if (hasMore) {
+//            stays.get(stays.size()-1).setMore(true);
+//            stays.remove(stays.size()-1);
+//        }
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+        try {
+            Long signedUserId = authenticationFacade.getSignedUserId();
+            if (signedUserId == 0) {
+                signedUserId = 0L;
+            }
+            if (signedUserId > 0) {
+                searchMapper.searchIns(searchWord, signedUserId);
+            }
+            int more = 1;
+            List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId,lastIdx,size+more);
 
-        boolean hasMore = stays.size() > size;
-        if (hasMore) {
-            stays.get(stays.size()-1).setMore(true);
-            stays.remove(stays.size()-1);
+            boolean hasMore = stays.size() > size;
+            if (hasMore) {
+                stays.get(stays.size()-1).setMore(true);
+                stays.remove(stays.size()-1);
+            }
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     }
 
     /*
@@ -191,6 +212,7 @@ public class SearchService {
 
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+
     }
 
     public ResponseWrapper<StaySearchRes> searchStayFilter(int lastIdx, String category, String searchWord, List<Long> amenityIds) {

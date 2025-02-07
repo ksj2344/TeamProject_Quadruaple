@@ -6,6 +6,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,9 @@ import java.util.Map;
 public class WishListService {
     private final AuthenticationFacade authenticationFacade;
     private final WishListMapper wishlistMapper;
+
+    @Value("${const.default-review-size}")
+    private int size;
 
     public WishListService(AuthenticationFacade authenticationFacade, WishListMapper wishListMapper) {
         this.authenticationFacade = authenticationFacade;
@@ -41,18 +45,30 @@ public class WishListService {
         }
     }
 
-    public ResponseWrapper<Map<String, Object>> getWishList(List<String> categoryList, int page) {
-        int limit = 10;
-        int offset = (page - 1) * limit;
+//    public ResponseWrapper<Map<String, Object>> getWishList(List<String> categoryList, int page) {
+//        int limit = 10;
+//        int offset = (page - 1) * limit;
+//
+//        List<Map<String, Object>> wishList = wishlistMapper.getWishList(categoryList, offset, limit);
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), Map.of("wishList", wishList));
+//
+//
+//    }
 
-        List<Map<String, Object>> wishList = wishlistMapper.getWishList(categoryList, offset, limit);
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), Map.of("wishList", wishList));
+    public List<WishListRes> getWishList(int lastIdx) {
+        Long userId = authenticationFacade.getSignedUserId();
 
+        int more = 1;
 
-    }
+        List<WishListRes> list = wishlistMapper.getWishList(userId,lastIdx,size+more);
 
-    public List<WishListRes> getWishList(Long userId, int limit) {
-        return wishlistMapper.getWishList(userId, limit);
+        boolean hasMore = list.size() > size;
+        if (hasMore) {
+            list.get(list.size()-1).setMore(true);
+            list.remove(list.size()-1);
+        }
+
+        return list;
     }
 }
 

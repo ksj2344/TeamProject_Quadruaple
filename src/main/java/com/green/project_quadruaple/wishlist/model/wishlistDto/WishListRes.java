@@ -17,6 +17,7 @@ public class WishListRes {
     private String strfPic;       // 상품 이미지
     private double ratingAvg;     // 평균 평점
 
+    private boolean isMore;
 
 
 

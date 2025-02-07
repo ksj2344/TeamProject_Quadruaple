@@ -26,13 +26,13 @@ public interface WishListMapper {
     );
 
 
-    List<Map<String, Object>> getWishList(@Param("categoryList") List<String> categoryList,
-                                          @Param("offset") int offset,
-                                          @Param("limit") int limit);
+//    List<Map<String, Object>> getWishList(@Param("categoryList") List<String> categoryList,
+//                                          @Param("offset") int offset,
+//                                          @Param("limit") int limit);
 
     int getWishListCount(@Param("categoryList") List<String> categoryList);
 
-    List<WishListRes> getWishList(@Param("userId") Long userId, @Param("limit") int limit);
+    List<WishListRes> getWishList(Long userId, int startIdx , int size);
 
 
 
