@@ -32,10 +32,13 @@ public class ReviewService {
     public List<ReviewSelRes> getReviewWithPics(Long strfId,int lastIdx) {
         int more = 1;
         List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,lastIdx,size+more);
+
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
+
         boolean hasMore = dtoList.size() > size;
+
         if (hasMore) {
             dtoList.get(dtoList.size()-1).setMore(true);
             dtoList.remove(dtoList.size()-1);
@@ -43,7 +46,6 @@ public class ReviewService {
 
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (ReviewSelRes item : dtoList) {
-            // 기존 리뷰 ID로 저장된 객체가 있는지 확인
             ReviewSelRes review = reviewMap.get(item.getReviewId());
         }
         return dtoList;
