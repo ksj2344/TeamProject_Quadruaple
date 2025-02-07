@@ -18,7 +18,7 @@ public interface TripReviewMapper {
     int getTotalTripReviewsCount();
     List<TripReviewGetDto> getAllTripReviews(String orderType, int startIdx, int size);
     // 다른 사용자의 여행기 조회
-    TripReviewGetDto getOtherTripReviewById(long tripReviewId);
+    List<TripReviewGetDto> getOtherTripReviewById(long tripReviewId);
 
     //여행기 update
     int updTripReview(TripReviewPatchDto dto);
@@ -27,6 +27,8 @@ public interface TripReviewMapper {
     //여행기 delete
     int delTripReview(long tripReviewId);
     TripReviewDeleteDto selTripReviewByUserId(long tripReviewId);
+    void delTripReviewRecentTr(long tripReviewId);
+    void delTripReviewScrap(long tripReviewId);
     void delTripReviewLikeByTripReviewId(long tripReviewId);
 
     //여행기 추천
