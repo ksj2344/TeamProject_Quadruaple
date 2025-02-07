@@ -211,7 +211,7 @@
             AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.address LIKE CONCAT('%', #{searchWord}, '%') OR
             c.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            h.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
