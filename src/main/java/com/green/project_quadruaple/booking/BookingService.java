@@ -167,7 +167,7 @@ public class BookingService {
             bookingPostReq.setUserId(Long.parseLong(userId));
             bookingPostReq.setTid(kakaoReadyDto.getTid());
             bookingMapper.insBooking(bookingPostReq);
-//            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
 
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
@@ -186,6 +186,7 @@ public class BookingService {
 
             BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(bookingPostReq.getBookingId());
             String redirectParams = "?user_name=" + bookingApproveInfoDto.getUserName() + "&"
+                    + "?title=" + bookingApproveInfoDto.getTitle() + "&"
                     + "?check_in=" + bookingApproveInfoDto.getCheckIn() + "&"
                     + "?check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
                     + "?personnel=" + quantity;
