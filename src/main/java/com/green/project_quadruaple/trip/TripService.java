@@ -107,6 +107,7 @@ public class TripService {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode() + " 여행이 존재하지 않음", null);
         }
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
+        List<Long> tripUserIdList = tripMapper.selTripUserList(tripId);
         long totalDistance = 0L;
         long totalDuration = 0L;
 
@@ -117,6 +118,7 @@ public class TripService {
         res.setTitle(scAndMcAndTripInfoDto.getTitle());
         res.setStartAt(scAndMcAndTripInfoDto.getStartAt());
         res.setEndAt(scAndMcAndTripInfoDto.getEndAt());
+        res.setTripUserIdList(tripUserIdList);
         res.setTripLocationList(scAndMcAndTripInfoDto.getTripLocationList());
         if(tripDetailDto.isEmpty()) {
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
@@ -500,15 +502,15 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), uuid);
     }
 
-    public String addTripUser(String uuid) {
+    public ResultResponse addTripUser(String uuid) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
         try {
             Long tripId = addUserLinkMap.get(uuid);
             if(tripId == null) {
-                return "잘못된 inviteKey";
+                return ResultResponse.badRequest();
             }
             tripMapper.insTripUser(tripId, List.of(signedUserId));
-            return "리다이렉션 URL"; // 리다이렉션 필요
+            return ResultResponse.success(); // 리다이렉션 필요
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);

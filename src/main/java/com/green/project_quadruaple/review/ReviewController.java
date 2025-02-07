@@ -29,10 +29,10 @@ public class ReviewController {
 
     @GetMapping
     @Operation(summary = "리뷰 조회")
-    public List<ReviewSelRes> getReview(@Valid @ModelAttribute ReviewSelReq req,
+    public List<ReviewSelRes> getReview(@RequestParam("strf_id") Long strfId,
                                         @RequestParam("last_index") int lastIdx) {
 
-        return reviewService.getReviewWithPics(req,lastIdx);
+        return reviewService.getReviewWithPics(strfId,lastIdx);
     }
     @GetMapping("my")
     @Operation(summary = "나의 리뷰 조회")
