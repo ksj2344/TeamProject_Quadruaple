@@ -121,9 +121,9 @@ public class BookingService {
         params.put("quantity", quantity); // 상품 수량
         params.put("total_amount", totalAmount); // 상품 가격
         params.put("tax_free_amount", taxFreeAmount); // 상품 비과세 금액
-        params.put("approval_url", "http://localhost:8080/api/booking/pay-approve"); // 성공시 url
-        params.put("cancel_url", "http://localhost:8080/api/booking/kakaoPayCancle"); // 실패시 url
-        params.put("fail_url", "http://localhost:8080/api/booking/kakaoPayFail");
+        params.put("approval_url", "http://112.222.157.156:5221/api/booking/pay-approve"); // 성공시 url
+        params.put("cancel_url", "http://112.222.157.156:5221/api/booking/kakaoPayCancle"); // 실패시 url
+        params.put("fail_url", "http://112.222.157.156:5221/api/booking/kakaoPayFail");
 
         HttpEntity<HashMap<String, String>> body = new HttpEntity<>(params, headers);
 
@@ -191,7 +191,7 @@ public class BookingService {
                     + "check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
                     + "personnel=" + quantity;
 //            return "http://localhost:5173/booking/complete" + bookingPostReq.getBookingId();
-            return "http://192.168.0.198:5173/booking/complete" + redirectParams;
+            return "http://localhost:5173/booking/complete" + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

@@ -302,9 +302,9 @@ public class TripService {
     * 5. nextSche 의 거리, 시간, 수단을 가져온 API 값으로 update
     * */
     public ResultResponse postSchedule(PostScheduleReq req) {
-        Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+        long signedUserId = AuthenticationFacade.getSignedUserId();
         long tripId = req.getTripId();
-        if(tripMapper.selExistsTripUser(tripId, signedUserId)) {
+        if(!tripMapper.selExistsTripUser(tripId, signedUserId)) {
             return ResultResponse.forbidden();
         }
         long strfId = req.getStrfId();
