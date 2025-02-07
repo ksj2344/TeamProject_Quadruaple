@@ -148,7 +148,7 @@
         ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
         c.pic_name AS strfPic, s.category, a.amenity_id AS amenityId, a.title AS amenityTitle,
         <if test="userId != 0">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == 0">
             0 AS wishIn
