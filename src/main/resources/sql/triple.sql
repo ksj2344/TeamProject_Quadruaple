@@ -292,6 +292,7 @@ CREATE TABLE recent(
 CREATE TABLE wishlist(
                          user_id BIGINT NOT NULL
     , strf_id BIGINT NOT NULL
+    , created_at DATETIME NOT NULL DEFAULT current_timestamp
     , FOREIGN KEY(user_id) REFERENCES user (user_id)
     , FOREIGN KEY(strf_id) REFERENCES stay_tour_restaur_fest (strf_id)
 );
