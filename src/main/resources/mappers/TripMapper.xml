@@ -16,7 +16,7 @@
             1
         FROM trip_user
         WHERE trip_id = #{tripId}
-        AND user_id = #{userid}
+        AND user_id = #{userId}
         )
     </select>
 
