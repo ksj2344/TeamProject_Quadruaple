@@ -15,6 +15,9 @@ public class WishListRes {
     private int reviewCnt;       // 리뷰 수
     private Integer wishCnt;    // 찜 개수
     private String strfPic;       // 상품 이미지
+    private double ratingAvg;     // 평균 평점
+
+
 
 
 
