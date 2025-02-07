@@ -106,6 +106,9 @@ public class TripReviewService {
 
         return result;
     }
+    public int getTripReviewCount() {
+        return tripReviewMapper.getTotalTripReviewsCount();
+    }
     // 다른 사용자의 여행기 조회
     public TripReviewGetDto getOtherTripReviews(long tripReviewId) {
         long userId = authenticationFacade.getSignedUserId();
