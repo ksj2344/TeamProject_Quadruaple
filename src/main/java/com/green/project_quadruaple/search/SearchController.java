@@ -28,6 +28,7 @@ public class SearchController {
     }
 
     @GetMapping("/location")
+    @Operation(summary = "일정 추가 지역 검색")
     public ResponseEntity<?> getTripLocation(@RequestParam String search_word) {
         System.out.println("Received search_word: " + search_word); // 디버깅용 로그 추가
         List<LocationResponse> locations = searchService.getTripLocation(search_word);

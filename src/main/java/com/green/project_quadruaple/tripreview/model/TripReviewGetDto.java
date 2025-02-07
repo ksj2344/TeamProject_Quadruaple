@@ -11,11 +11,13 @@ import java.util.List;
 @ToString
 public class TripReviewGetDto {
     private long tripId;
+    private long userId;
     private String title;
     private String content;
     private int likeCount;
     private int reviewCount;
     private int recentCount;
+    private int scrapCount;
     private long tripReviewId;
     private String name;
     private String profilePic;

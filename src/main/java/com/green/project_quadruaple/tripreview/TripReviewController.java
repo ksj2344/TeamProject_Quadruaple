@@ -37,7 +37,7 @@ public class TripReviewController {
 
     //여행기 조회
     @GetMapping("myTripReview")
-    @Operation(summary = "내 여행기 조회")
+    @Operation(summary = "내 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
     public ResponseEntity<?> getMyTripReview(@Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
                                                  @RequestParam(defaultValue = "latest") String orderType) {
         List<TripReviewGetDto> myTripReview = tripReviewService.getMyTripReviews(orderType);
@@ -49,7 +49,7 @@ public class TripReviewController {
     }
 
     @GetMapping("allTripReview")
-    @Operation(summary = "모든 여행기 조회")
+    @Operation(summary = "모든 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
     public ResponseEntity<ResponseWrapper<List<TripReviewGetDto>>> getAllTripReview(
             @Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
             @RequestParam(defaultValue = "latest") String orderType,
@@ -70,9 +70,9 @@ public class TripReviewController {
     }
 
     @GetMapping("otherTripReview")
-    @Operation(summary = "다른 사용자의 여행기 조회")
+    @Operation(summary = "다른 사용자의 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
     public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
-        TripReviewGetDto tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
+        List<TripReviewGetDto> tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
 
         if (tripReviewGetDto == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
@@ -130,7 +130,7 @@ public class TripReviewController {
     public ResponseEntity<?> countLike(@RequestParam Long tripReviewId) {
         int result = tripReviewService.getTripLikeCount(tripReviewId);
         if (result == 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseWrapper<>("해당 여행기에 추천이 없습니다.", null));
         }
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
@@ -138,7 +138,7 @@ public class TripReviewController {
     //--------------------------------------------------------------------
     // 여행기 스크랩
     @PostMapping("scrap")
-    @Operation(summary = "여행기 스크랩 등록(작업중)")
+    @Operation(summary = "여행기 스크랩 등록")
     public ResponseEntity<?> postScrap(@RequestBody CopyInsertTripDto trip) {
         int result = tripReviewService.copyTripReview(trip);
 
