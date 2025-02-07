@@ -60,20 +60,14 @@
     <select id="getPopularLocation">
         SELECT DISTINCT
         L.location_id AS locationId,
-        LD.location_detail_id AS locationDetailId,
-        LD.detail_title AS locationTitle,
+        L.title AS locationTitle,
         L.location_pic AS locationPic,
         COUNT(TL.location_id) AS tripedCnt
-        FROM
-        location L
-        LEFT JOIN
-        location_detail LD ON LD.location_id = L.location_id
-        LEFT JOIN
-        trip_location TL ON TL.location_id = L.location_id
-        GROUP BY
-        LD.detail_title, L.location_pic
-        ORDER BY
-        tripedCnt DESC
+        FROM location L
+        LEFT JOIN trip_location TL
+        ON TL.location_id = L.location_id
+        GROUP BY L.location_id, L.location_pic
+        ORDER BY tripedCnt DESC
         LIMIT 10
     </select>
 

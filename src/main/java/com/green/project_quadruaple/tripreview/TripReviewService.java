@@ -80,30 +80,32 @@ public class TripReviewService {
         long userId = authenticationFacade.getSignedUserId(); // 현재 로그인한 유저 ID 가져오기
         return tripReviewMapper.getMyTripReviews(userId, orderType);
     }
-    // 모든 여행기 조회
+    // 모든 사용자의 여행기 조회
     public List<TripReviewGetDto> getAllTripReviews(String orderType, int pageNumber) {
-        int startIdx = (pageNumber - 1) * size;  // OFFSET 계산
+        // OFFSET 계산
+        int startIdx = (pageNumber - 1) * size;
 
         // 현재 저장된 전체 개수를 조회
-        int totalCount = tripReviewMapper.getTotalTripReviewsCount();  // 여행기 총 개수
+        int totalCount = tripReviewMapper.getTotalTripReviewsCount(); // 여행기 총 개수
 
         // startIdx가 totalCount보다 크면 빈 리스트 반환
         if (startIdx >= totalCount) {
             return Collections.emptyList();
         }
 
+        // 여행기 목록 조회 (size + 1로 한 개 더 가져오기)
         List<TripReviewGetDto> result = tripReviewMapper.getAllTripReviews(orderType, startIdx, size + 1);
 
-        boolean hasMore = result.size() > size; // 다음 페이지가 있는지 확인
+        // 다음 페이지가 있는지 확인
+        boolean hasMore = result.size() > size;
 
         if (hasMore) {
-            result.remove(result.size() - 1); // 초과된 1개 데이터 삭제
+            // 초과된 1개 데이터 삭제
+            result.remove(result.size() - 1);
         }
 
         return result;
     }
-
-
     // 다른 사용자의 여행기 조회
     public TripReviewGetDto getOtherTripReviews(long tripReviewId) {
         long userId = authenticationFacade.getSignedUserId();
