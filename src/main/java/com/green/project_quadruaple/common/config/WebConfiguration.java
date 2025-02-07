@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -24,8 +25,9 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        //registry.addMapping("/**").allowedOrigins("*").allowCredentials(true);
+//        registry.addMapping("/**").allowedOrigins("*").allowCredentials(true);
          registry.addMapping("/**").allowedOriginPatterns("http://*").allowedMethods("*").allowedHeaders("*").allowCredentials(true);
+         registry.addMapping("/**").allowedOriginPatterns("https://t1.kakaocdn.net/*").allowedMethods("*").allowedHeaders("*").allowCredentials(true);
     }
 
     @Override
@@ -52,6 +54,6 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         // RestController의 모든 URL에 "/api" prefix를 설정
-        configurer.addPathPrefix("api", HandlerTypePredicate.forAnnotation(RestController.class));
+        configurer.addPathPrefix("api", HandlerTypePredicate.forAnnotation(RestController.class, Controller.class));
     }
 }

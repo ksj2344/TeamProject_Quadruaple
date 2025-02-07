@@ -42,6 +42,11 @@
           CASE WHEN #{orderType} = 'popular' THEN like_count END DESC
     </select>
 
+    <select id="getTotalTripReviewsCount">
+        SELECT COUNT(*)
+          FROM trip_review
+    </select>
+
     <select id="getAllTripReviews" resultMap="tripReviewResultMap">
         SELECT A.trip_id, A.title, A.content, B.trip_review_pic,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
@@ -58,6 +63,7 @@
          ORDER BY
           CASE WHEN #{orderType} = 'latest' THEN A.created_at END DESC,
           CASE WHEN #{orderType} = 'popular' THEN like_count END DESC
+        LIMIT #{size} OFFSET #{startIdx}
     </select>
 
     <select id="getOtherTripReviewById" resultMap="tripReviewResultMap">
