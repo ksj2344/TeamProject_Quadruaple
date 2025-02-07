@@ -26,10 +26,8 @@ public class WishListController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WishListRes>> getWishList(
-            @RequestParam("userId") Long userId,
-            @RequestParam(value = "limit", defaultValue = "11") int limit) {
-        List<WishListRes> wishList = wishlistService.getWishList(userId, limit);
+    public ResponseEntity<List<WishListRes>> getWishList(@RequestParam(value = "last_index") int lastIdx) {
+        List<WishListRes> wishList = wishlistService.getWishList(lastIdx);
         return ResponseEntity.ok(wishList);
     }
 }
