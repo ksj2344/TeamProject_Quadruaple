@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -80,6 +82,7 @@ public class BookingService {
             for(MenuDto menuDto : menuDtoList) {
                 for(MenuIdAndQuantityDto order : orderList) {
                     if(menuDto.getMenuId() == order.getMenuId()) { // 메뉴의 상품 가격이 일치하는지
+
                         if(menuDto.getStrfId() == req.getStrfId()) {
                             log.info("상품 가격 일치!");
                         } else {
@@ -131,6 +134,7 @@ public class BookingService {
                 kakaoReadyDto.setPartnerOrderId(orderNo);
                 kakaoReadyDto.setPartnerUserId(String.valueOf(signedUserId));
                 kakaoReadyDto.setBookingPostReq(req);
+                req.getOrderList().get(0).setQuantity(Integer.parseInt(quantity));
                 return new ResponseWrapper<>(ResponseCode.OK.getCode(), kakaoReadyDto.getNextRedirectPcUrl());
             }
         } catch (Exception e) {
@@ -162,14 +166,31 @@ public class BookingService {
             BookingPostReq bookingPostReq = kakaoReadyDto.getBookingPostReq();
             bookingPostReq.setUserId(Long.parseLong(userId));
             bookingPostReq.setTid(kakaoReadyDto.getTid());
-//            bookingMapper.insBooking(bookingPostReq);
+            bookingMapper.insBooking(bookingPostReq);
 //            bookingMapper.insUsedCoupon(bookingPostReq.getReceiveId(), bookingPostReq.getBookingId());
+
             KakaoApproveDto approveDto = restTemplate.postForObject(new URI(payUrl + "/online/v1/payment/approve"), body, KakaoApproveDto.class);
             log.info("approveDto = {}", approveDto);
             if(approveDto == null) {
                 throw new RuntimeException();
             }
-            return "http://localhost:5173/booking/complete?bookingId=" + bookingPostReq.getBookingId();
+
+            int quantity = 0;
+
+            List<MenuIdAndQuantityDto> orderList = bookingPostReq.getOrderList();
+            if(orderList != null) {
+                for (MenuIdAndQuantityDto menuIdAndQuantityDto : orderList) {
+                    quantity += menuIdAndQuantityDto.getQuantity();
+                }
+            }
+
+            BookingApproveInfoDto bookingApproveInfoDto = bookingMapper.selApproveBookingInfo(bookingPostReq.getBookingId());
+            String redirectParams = "?user_name=" + bookingApproveInfoDto.getUserName() + "&"
+                    + "?check_in=" + bookingApproveInfoDto.getCheckIn() + "&"
+                    + "?check_out=" + bookingApproveInfoDto.getCheckOut() + "&"
+                    + "?personnel=" + quantity;
+//            return "http://localhost:5173/booking/complete" + bookingPostReq.getBookingId();
+            return "http://localhost:5173/booking/complete" + redirectParams;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();

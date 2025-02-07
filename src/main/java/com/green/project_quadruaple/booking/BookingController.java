@@ -10,11 +10,16 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 //@RestController
+@Slf4j
 @Controller
 @RequestMapping("booking")
 @RequiredArgsConstructor
@@ -45,6 +50,13 @@ public class BookingController {
     @Hidden
     @GetMapping("/pay-approve")
     public String getBookingList(@RequestParam("pg_token") String pgToken) {
-        return "redirect:"+bookingService.approve(pgToken);
+        return "redirect:" + bookingService.approve(pgToken);
     }
+
+//    @GetMapping("/complete")
+//    @ResponseBody
+//    public String getRedirect(@RequestParam("id") Long id) {
+//        log.info("id = {}", id);
+//        return String.valueOf(id);
+//    }
 }
