@@ -34,4 +34,6 @@ public class ReviewSelRes{
         @Schema(description = "리뷰 사진 리스트")
         private List<ReviewPic> reviewPic;
 
+        private boolean isMore;
+
 }

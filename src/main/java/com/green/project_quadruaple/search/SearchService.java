@@ -1,6 +1,7 @@
 package com.green.project_quadruaple.search;
 
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
+import com.green.project_quadruaple.common.config.jwt.JwtUser;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
@@ -13,6 +14,8 @@ import com.green.project_quadruaple.trip.model.Category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -52,7 +55,7 @@ public class SearchService {
             List<LocationIdAndTitleDto> locationIdList = searchMapper.selLocationIdByTripId(tripId);
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
-            if(dto.size() >= size) {
+            if(dto.size() > size) {
                 res.setMore(true);
             }
             res.setList(dto);
@@ -140,16 +143,80 @@ public class SearchService {
         }
     }
 
-    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
-        Long signedUserId = authenticationFacade.getSignedUserId();
-        searchMapper.searchIns(searchWord,signedUserId);
-        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId);
-        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+//        Long signedUserId = authenticationFacade.getSignedUserId();
+//        searchMapper.searchIns(searchWord,signedUserId);
+//        int more = 1;
+//        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId,lastIdx,size+more);
+//
+//        boolean hasMore = stays.size() > size;
+//        if (hasMore) {
+//            stays.get(stays.size()-1).setMore(true);
+//            stays.remove(stays.size()-1);
+//        }
+//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+    public ResponseWrapper<List<Stay>> searchAll(String searchWord,int lastIdx) {
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+        if (userId>0){
+            searchMapper.searchIns(searchWord, userId);
+        }
+        int more = 1;
+        try {
+            List<Stay> stays = searchMapper.searchAllList(searchWord, userId,lastIdx,size+more);
+
+            boolean hasMore = stays.size() > size;
+            if (hasMore) {
+                stays.get(stays.size()-1).setMore(true);
+                stays.remove(stays.size()-1);
+            }
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+        }
+
     }
 
+    /*
+    Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+
+        searchMapper.searchIns(searchWord, signedUserId);
+
+        int more = 1;
+        try {
+            List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId,lastIdx,size+more);
+
+            boolean hasMore = stays.size() > size;
+            if (hasMore) {
+                stays.get(stays.size()-1).setMore(true);
+                stays.remove(stays.size()-1);
+            }
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+
+        } catch (Exception e) {
+            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
+        }
+     */
     public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord) {
 
-        Long userId = authenticationFacade.getSignedUserId();
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+        if (userId>0){
+            searchMapper.searchIns(searchWord, userId);
+        }
 
         String categoryValue = null;
         if(category != null && Category.getKeyByName(category) != null) {
@@ -158,13 +225,23 @@ public class SearchService {
         int more = 1;
         List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId);
 
-
+        boolean hasMore = res.size() > size;
+        if (hasMore) {
+            res.get(res.size()-1).setMore(true);
+            res.remove(res.size()-1);
+        }
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
+
     }
 
     public ResponseWrapper<StaySearchRes> searchStayFilter(int lastIdx, String category, String searchWord, List<Long> amenityIds) {
-        Long userId = authenticationFacade.getSignedUserId();
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
         String categoryValue = null;
         if (category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
@@ -172,9 +249,6 @@ public class SearchService {
         int more = 1;
 
         try {
-            // amenityIds가 불변 리스트일 경우 가변 리스트로 변환
-
-
             List<SearchAmenity> amenities = searchMapper.searchAmenity(amenityIds);
             List<SearchStay> stays = searchMapper.searchStay(categoryValue, searchWord, lastIdx, size + more, userId,amenityIds);
             StaySearchRes res = new StaySearchRes();

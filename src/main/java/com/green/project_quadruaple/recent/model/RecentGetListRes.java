@@ -22,4 +22,6 @@ public class RecentGetListRes {
     private int wishCnt;
     private int wishIn;
 
+    private boolean isMore;
+
 }

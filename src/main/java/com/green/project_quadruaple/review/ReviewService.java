@@ -7,6 +7,7 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.review.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,21 @@ public class ReviewService {
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
 
-    public List<ReviewSelRes> getReviewWithPics(ReviewSelReq req) {
-        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(req);
+    @Value("${const.default-review-size}")
+    private int size;
+
+    public List<ReviewSelRes> getReviewWithPics(ReviewSelReq req,int lastIdx) {
+        int more = 1;
+        List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(req,lastIdx,size+more);
+        if (dtoList == null || dtoList.isEmpty()) {
+            return null;
+        }
+        boolean hasMore = dtoList.size() > size;
+        if (hasMore) {
+            dtoList.get(dtoList.size()-1).setMore(true);
+            dtoList.remove(dtoList.size()-1);
+        }
+
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (ReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
@@ -34,9 +48,19 @@ public class ReviewService {
         }
         return dtoList;
     }
-    public List<MyReviewSelRes> getMyReviews() {
+    public List<MyReviewSelRes> getMyReviews(int lastIdx) {
         Long userId = authenticationFacade.getSignedUserId();
-        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId);
+        int more = 1;
+        List<MyReviewSelRes> dtoList = reviewMapper.getMyReviews(userId,lastIdx,size+more);
+        if (dtoList == null || dtoList.isEmpty()) {
+            return null;
+        }
+        boolean hasMore = dtoList.size() > size;
+        if (hasMore) {
+            dtoList.get(dtoList.size()-1).setMore(true);
+            dtoList.remove(dtoList.size()-1);
+        }
+
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
 
         for (MyReviewSelRes item : dtoList) {
@@ -51,17 +75,6 @@ public class ReviewService {
     @Transactional
     public int postRating(List<MultipartFile> pics, ReviewPostReq p) {
         Long userId = authenticationFacade.getSignedUserId();
-//        if (p.getReviewId() <= 0) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
-//        }
-
-        // 리뷰 저장
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("content", p.getContent());
-//        params.put("rating", p.getRating());
-//        params.put("strfId", p.getStrfId());
-//        params.put("userId", userId);
 
         int result = reviewMapper.postRating(p,userId);
         if (result == 0) {

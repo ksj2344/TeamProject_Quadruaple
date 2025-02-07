@@ -102,11 +102,12 @@
         ORDER BY search_at DESC
         LIMIT 5
     </select>
+
     <insert id="searchIns">
-        INSERT INTO search_word (txt , user_id)
-        VALUES (#{search_word}, #{userId})
-        ON DUPLICATE KEY UPDATE
-        search_at = NOW()
+        <if test="userId != null and userId > 0">
+            INSERT INTO search_word (txt, user_id) VALUES (#{search_word}, #{userId})
+            ON DUPLICATE KEY UPDATE search_at = NOW();
+        </if>
     </insert>
 
 
@@ -127,8 +128,9 @@
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
+
     <select id="searchBasicPopular">
-        SELECT s.title AS strfName, COUNT(*) AS popularCount
+        SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
         JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
         WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
@@ -137,55 +139,20 @@
         LIMIT 10
     </select>
 
-    <!--
-    회원 비회원 판단해주는 쿼리 추가
-    <select id="searchAllList" resultMap="searchAllResultMap">
-    SELECT *
-    FROM (
-        SELECT
-            a.strf_id AS strfId, a.title AS strfTitle, COUNT(e.user_id) AS wishlistCount, a.created_at,
-            c.title AS locationName, AVG(d.rating) AS averageRating, COUNT(d.review_id) AS reviewCount,
-            <if test="userId != 0">
-                IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS userWishlist
-            </if>
-            <if test="userId == 0">
-                0 AS userWishlist
-            </if>,
-            ROW_NUMBER() OVER (PARTITION BY a.category ORDER BY a.created_at DESC) AS row_num,
-            e.pic_name AS strfPic, a.category, b.amenity_id AS amenityId, b.title AS amenityTitle
-        FROM stay_tour_restaur_fest a
-        JOIN amenipoint b ON a.strf_id = b.strf_id
-        JOIN location_detail c ON a.location_detail_id = c.location_detail_id
-        JOIN location d ON c.location_id = d.location_id
-        LEFT JOIN review d ON a.strf_id = d.strf_id
-        LEFT JOIN wishlist e ON a.strf_id = e.strf_id
-        LEFT JOIN amenity b ON b.amenity_id = b.amenity_id
-        LEFT JOIN strf_pic e ON e.strf_id = a.strf_id
-        WHERE
-        <if test="searchWord != null and searchWord != ''">
-            (a.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            a.address LIKE CONCAT('%', #{searchWord}, '%') OR
-            c.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            d.detail_title LIKE CONCAT('%', #{searchWord}, '%') OR
-            b.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            a.category LIKE CONCAT('%', #{searchWord}, '%'))
-        </if>
-        GROUP BY a.strf_id, a.title, a.created_at, c.title, e.pic_name, a.category, b.amenity_id, b.title
-    ) AS categorized_results
-    WHERE row_num <![CDATA[ <= ]]> 3
-    ORDER BY category, created_at DESC;
-</select>
-
--->
     <select id="searchAllList" resultMap="searchAllResultMap">
         SELECT *
         FROM (
         SELECT
         s.strf_id AS strfId, s.title AS strfTitle, COUNT(w.user_id) AS wishlistCount,s.created_at,
         l.title AS locationName, AVG(r.rating) AS averageRating, COUNT(r.review_id) AS reviewCount,
-        IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS userWishlist,
         ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
-        c.pic_name AS strfPic, s.category, a.amenity_id AS amenityId, a.title AS amenityTitle
+        c.pic_name AS strfPic, s.category, a.amenity_id AS amenityId, a.title AS amenityTitle,
+        <if test="userId != 0">
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS wishIn
+        </if>
+        <if test="userId == 0">
+            0 AS wishIn
+        </if>
         FROM stay_tour_restaur_fest s
         JOIN location_detail ld ON s.location_detail_id = ld.location_detail_id
         JOIN location l ON ld.location_id = l.location_id
@@ -206,7 +173,8 @@
         GROUP BY s.strf_id, s.title, s.created_at, l.title, c.pic_name, s.category, a.amenity_id, a.title
         ) AS categorized_results
         WHERE row_num <![CDATA[ <= ]]> 3
-        ORDER BY category, created_at DESC;
+        ORDER BY category, created_at DESC
+        LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
@@ -217,7 +185,7 @@
         <result property="averageRating" column="averageRating" />
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
-        <result property="userWishlist" column="userWishlist" />
+        <result property="wishIn" column="wishIn" />
     </resultMap>
 
 
@@ -243,7 +211,7 @@
             AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.address LIKE CONCAT('%', #{searchWord}, '%') OR
             c.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            h.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
@@ -333,86 +301,5 @@
         <id property="amenityId" column="amenityId"/>
         <result property="amenityTitle" column="amenityTitle"/>
     </resultMap>
-
-
-    <!--
-    <select id="searchStayFilter" resultMap="stayAmenityResultMap">
-        SELECT a.strf_id AS strfId, a.title AS strfTitle, a.category,
-        b.detail_title AS locationName, h.pic_name AS strfPic, AVG(f.rating) AS averageRating,
-        COUNT(f.review_id) AS reviewCnt, d.amenity_id AS amenityId, d.title AS amenityTitle,
-        (SELECT COUNT(*) FROM wishlist w WHERE w.strf_id = a.strf_id) AS wishlistCnt,
-
-        <if test="userId != 0">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
-        </if>
-        <if test="userId == 0">
-            0 AS wishIn
-        </if>,
-
-        MAX(a.created_at) AS createdAt
-        FROM stay_tour_restaur_fest a
-        LEFT JOIN location_detail b ON a.location_detail_id = b.location_detail_id
-        JOIN amenipoint c ON a.strf_id = c.strf_id
-        JOIN amenity d ON c.amenity_id = d.amenity_id
-        JOIN location e ON e.location_id = b.location_id
-        LEFT JOIN review f ON a.strf_id = f.strf_id
-        LEFT JOIN wishlist g ON a.strf_id = g.strf_id AND g.user_id = #{userId}
-        LEFT JOIN strf_pic h ON a.strf_id = h.strf_id
-        WHERE a.category = 'STAY'
-        <if test="req.amenityId != null and req.amenityId.size() > 0">
-            AND d.amenity_id IN
-            <foreach item="id" collection="req.amenityId" open="(" separator="," close=")">
-                #{id}
-            </foreach>
-        </if>
-        <if test="req.searchWord != null and req.searchWord != ''">
-            AND (
-            a.title LIKE CONCAT('%', #{req.searchWord}, '%')
-            OR a.address LIKE CONCAT('%', #{req.searchWord}, '%')
-            OR b.detail_title LIKE CONCAT('%', #{req.searchWord}, '%')
-            )
-        </if>
-        GROUP BY a.strf_id
-        <if test="req.amenityId != null and req.amenityId.size() > 0">
-            HAVING COUNT(DISTINCT d.amenity_id) = #{req.amenityId.size()}
-        </if>
-        ORDER BY MAX(a.created_at) DESC
-    </select>
-
-    <resultMap id="stayAmenityResultMap" type="com.green.project_quadruaple.search.model.SearchFilter">
-        <id property="strfId" column="strfId" />
-        <result property="strfTitle" column="strfTitle" />
-        <result property="category" column="category" />
-        <result property="locationName" column="locationName" />
-        <result property="strfPic" column="strfPic" />
-        <result property="averageRating" column="averageRating" />
-        <result property="reviewCnt" column="reviewCnt" />
-        <result property="wishlistCnt" column="wishlistCnt" />
-        <result property="wishIn" column="wishIn" />
-        <result property="createdAt" column="createdAt" />
-        <collection property="amenities" ofType="com.green.project_quadruaple.search.model.filter.SearchAmenity">
-            <id property="amenityId" column="amenityId"/>
-            <result property="amenityTitle" column="amenityTitle"/>
-        </collection>
-    </resultMap>
-    <select id="searchAmenity" resultMap="searchAmenityResultMap">
-        SELECT
-        MAX(a.created_at) AS createdAt
-        FROM stay_tour_restaur_fest a
-        JOIN amenipoint c ON a.strf_id = c.strf_id
-        JOIN amenity d ON c.amenity_id = d.amenity_id
-        WHERE a.category = 'STAY'
-         <if test="amenityId != null and amenityId.size() > 0">
-    AND d.amenity_id IN
-    <foreach item="id" collection="amenityId" open="(" separator="," close=")">
-        #{id}
-    </foreach>
-     </if>
-    GROUP BY a.strf_id
-    <if test="amenityId != null and amenityId.size() > 0">
-        HAVING COUNT(DISTINCT d.amenity_id) = #{amenityId.size()}
-    </if>
-</select>
-    -->
 
 </mapper>

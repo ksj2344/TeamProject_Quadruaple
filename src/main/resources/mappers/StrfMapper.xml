@@ -61,7 +61,7 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id;
+        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />
@@ -190,6 +190,5 @@
         undo_recent = VALUES(undo_recent),
         inquired_at = NOW()
     </insert>
-
 
 </mapper>

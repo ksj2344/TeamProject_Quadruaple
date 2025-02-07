@@ -45,6 +45,7 @@ public class StrfSelRes {
     private String reviewCnt;
 
 
+
     private List<StrfAmenity> amenities;
     private List<StrfPicSel> strfPics;
     private List<Menu> menu;

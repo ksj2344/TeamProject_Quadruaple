@@ -22,41 +22,23 @@
     <!-- 위시리스트 조회 -->
     <select id="getWishList" parameterType="map" resultType="HashMap">
         SELECT
-        s.strf_id AS strfId,
-        s.category AS category,
-        p.pic_name AS strfPic,
-        s.title AS title,
-        l.detail_title AS locationTitle,
-        IFNULL(r.rating_cnt, 0) AS ratingCnt,
-        IFNULL(r.average_rating, 0) AS averageRating,
-        IFNULL(w.wish_cnt, 0) AS wishCnt
-        FROM
-        quadruaple.stay_tour_restaru_fest s
-        LEFT JOIN
-        quadruaple.location_detail l ON s.location_detail_id = l.location_detail_id
-        LEFT JOIN
-        quadruaple.strf_pic p ON s.strf_id = p.strf_id
-        LEFT JOIN (
-        SELECT
-        strf_id,
-        COUNT(*) AS rating_cnt,
-        AVG(rating) AS average_rating
-        FROM quadruaple.review
-        GROUP BY strf_id
-        ) r ON s.strf_id = r.strf_id
-        LEFT JOIN (
-        SELECT
-        strf_id,
-        COUNT(*) AS wish_cnt
-        FROM quadruaple.wishlist
-        GROUP BY strf_id
-        ) w ON s.strf_id = w.strf_id
-        WHERE
-        s.category IN
-        <foreach collection="categoryList" item="category" open="(" separator="," close=")">
-            #{category}
-        </foreach>
-        LIMIT #{offset}, #{limit};
+        a.title,
+        d.title AS locationTitle,
+        GROUP_CONCAT(DISTINCT f.pic_name) AS strfPic,
+        AVG(e.rating) AS ratingAvg,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,
+        COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = a.strf_id), 0) AS ratingCnt,
+        a.strf_id,
+        a.category
+        FROM stay_tour_restaur_fest a
+        LEFT JOIN wishlist b ON a.strf_id = b.strf_id
+        LEFT JOIN location_detail c ON a.location_detail_id = c.location_detail_id
+        LEFT JOIN location d ON c.location_id = d.location_id
+        LEFT JOIN review e ON a.strf_id = e.strf_id
+        LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
+        WHERE b.user_id = #{userId}
+        GROUP BY a.strf_id, a.title, d.title, a.category
+        LIMIT #{startIdx} , #{size}
     </select>
 
 
