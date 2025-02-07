@@ -114,7 +114,6 @@ public class ReviewService {
         return 1;
     }
 
-
 //    @Transactional
 //    public ResponseEntity<ResponseWrapper<Integer>> updateReview(List<MultipartFile> pics, ReviewUpdReq p) {
 //        int updatedRows = reviewMapper.patchReview(p);

@@ -41,9 +41,9 @@
         ORDER BY review_id DESC
     </select>
 
-    <insert id="postRating" useGeneratedKeys="true" keyProperty="reviewId">
+    <insert id="postRating" useGeneratedKeys="true" keyProperty="req.reviewId">
         INSERT INTO review (content, rating, strf_id, user_id)
-        VALUES (#{content}, #{rating}, #{strfId}, #{userId})
+        VALUES (#{req.content}, #{req.rating}, #{req.strfId}, #{userId})
     </insert>
 
     <insert id="postReviewPic">
