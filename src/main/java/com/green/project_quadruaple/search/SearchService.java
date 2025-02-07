@@ -152,15 +152,15 @@ public class SearchService {
 //            stays.remove(stays.size()-1);
 //        }
 //        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
+        Long signedUserId = authenticationFacade.getSignedUserId();
+        if (signedUserId == 0) {
+            signedUserId = 0L;
+        }
+        if (signedUserId > 0) {
+            searchMapper.searchIns(searchWord, signedUserId);
+        }
+        int more = 1;
         try {
-            Long signedUserId = authenticationFacade.getSignedUserId();
-            if (signedUserId == 0) {
-                signedUserId = 0L;
-            }
-            if (signedUserId > 0) {
-                searchMapper.searchIns(searchWord, signedUserId);
-            }
-            int more = 1;
             List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId,lastIdx,size+more);
 
             boolean hasMore = stays.size() > size;

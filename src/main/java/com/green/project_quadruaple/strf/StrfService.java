@@ -19,17 +19,14 @@ public class StrfService {
     private final StrfMapper strfMapper;
     private final AuthenticationFacade authenticationFacade;
 
-    @Value("${const.default-review-size}")
-    private int size;
 
-    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId,int lastIdx) {
+    public ResponseWrapper<StrfSelRes> getMemberDetail(Long strfId) {
         Long signedUserId = authenticationFacade.getSignedUserId();
         if (signedUserId == null || strfId == null){
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
 
-        int more = 1;
-        StrfSelRes res = strfMapper.getMemberDetail(signedUserId , strfId,lastIdx,size+more);
+        StrfSelRes res = strfMapper.getMemberDetail(signedUserId,strfId);
 
         if (res == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_GATEWAY.getCode(), null);
