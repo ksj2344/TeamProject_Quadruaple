@@ -23,8 +23,8 @@ public class RecentController {
 
     @GetMapping("list")
     @Operation(description = "최근 본 목록 리스트")
-    public ResponseWrapper<?> recentList (@RequestParam("last_index")int lastIdx){
-        return recentService.recentList(lastIdx);
+    public ResponseWrapper<?> recentList (){
+        return recentService.recentList();
     }
 
     @PatchMapping("hide")
