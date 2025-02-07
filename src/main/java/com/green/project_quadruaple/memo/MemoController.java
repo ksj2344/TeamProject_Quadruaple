@@ -28,17 +28,20 @@ public class MemoController {
 
     private final MemoService memoService;
     @GetMapping("/select")
+    @Operation(summary = "메모 조회")
     public ResponseEntity<?> selectMemo(@RequestParam Long memoId) {
         return memoService.getMemo(memoId);
     }
 
     @PostMapping("/post")
+    @Operation(summary = "메모 생성")
     public ResponseWrapper<Long> postMemo(@RequestBody MemoPostReq memoDto) {
         return memoService.addMemo(memoDto);
 
     }
 
     @PatchMapping("/upd")
+    @Operation(summary = "메모 수정")
     public ResponseEntity<?> updateMemo(@RequestBody MemoUpReq memoDto) {
         return memoService.updateMemo(memoDto);
 
@@ -46,6 +49,7 @@ public class MemoController {
     }
 
     @DeleteMapping("/delete")
+    @Operation(summary = "메모 삭제")
     public ResponseEntity<?> deleteMemo(@RequestParam Long memoId) {
         return memoService.deleteMemo(memoId);
 
