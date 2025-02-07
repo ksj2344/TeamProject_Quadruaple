@@ -30,7 +30,7 @@ public class ReviewController {
     @GetMapping
     @Operation(summary = "리뷰 조회")
     public List<ReviewSelRes> getReview(@RequestParam("strf_id") Long strfId,
-                                        @RequestParam("last_index") int lastIdx) {
+                                        @RequestParam(value = "last_index",required = false) int lastIdx) {
 
         return reviewService.getReviewWithPics(strfId,lastIdx);
     }
