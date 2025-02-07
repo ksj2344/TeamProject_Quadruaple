@@ -157,11 +157,12 @@ public class ExpenseService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), null));
         }
-        int res=expenseMapper.delExpenses(p.getDeId());
-        if(res==0){
+        int respu=expenseMapper.delPaidUser(p.getDeId());
+        int resep=expenseMapper.delExpenses(p.getDeId());
+        if(resep+respu==0){
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
         }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), res));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), resep+respu));
     }
 }
