@@ -208,9 +208,15 @@ public class SearchService {
      */
     public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord) {
 
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Long userId = authenticationFacade.getSignedUserId();
-
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
+        if (userId>0){
+            searchMapper.searchIns(searchWord, userId);
+        }
 
         String categoryValue = null;
         if(category != null && Category.getKeyByName(category) != null) {
@@ -225,13 +231,17 @@ public class SearchService {
             res.remove(res.size()-1);
         }
 
-
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
 
     }
 
     public ResponseWrapper<StaySearchRes> searchStayFilter(int lastIdx, String category, String searchWord, List<Long> amenityIds) {
-        Long userId = authenticationFacade.getSignedUserId();
+        Long userId = 0L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+            userId = authenticationFacade.getSignedUserId();
+        }
         String categoryValue = null;
         if (category != null && Category.getKeyByName(category) != null) {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();

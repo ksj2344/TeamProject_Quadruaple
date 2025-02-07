@@ -128,8 +128,9 @@
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
+
     <select id="searchBasicPopular">
-        SELECT s.title AS strfName, COUNT(*) AS popularCount
+        SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
         JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
         WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
@@ -147,7 +148,7 @@
         ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
         c.pic_name AS strfPic, s.category, a.amenity_id AS amenityId, a.title AS amenityTitle,
         <if test="userId != 0">
-            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
+            IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id), 1, 0) AS wishIn
         </if>
         <if test="userId == 0">
             0 AS wishIn
@@ -210,7 +211,7 @@
             AND ( a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.address LIKE CONCAT('%', #{searchWord}, '%') OR
             c.title LIKE CONCAT('%', #{searchWord}, '%') OR
-            h.title LIKE CONCAT('%', #{searchWord}, '%') OR
+            a.title LIKE CONCAT('%', #{searchWord}, '%') OR
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
