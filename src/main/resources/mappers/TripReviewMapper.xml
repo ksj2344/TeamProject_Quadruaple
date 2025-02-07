@@ -23,7 +23,7 @@
     <!-- 여행기 조회 -->
     <select id="getMyTripReviews" resultMap="tripReviewResultMap">
         SELECT A.trip_id, A.title, A.content,
-        GROUP_CONCAT(B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
@@ -53,7 +53,7 @@
 
     <select id="getAllTripReviews" resultMap="tripReviewResultMap">
         SELECT A.trip_id, A.user_id, A.title, A.content,
-        GROUP_CONCAT(B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count,
         (SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count,
         (SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count,
@@ -73,7 +73,7 @@
 
     <select id="getOtherTripReviewById" resultMap="tripReviewResultMap">
         SELECT A.trip_id, A.title, A.content,
-        GROUP_CONCAT(B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
+        GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
         ,(SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
