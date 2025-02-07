@@ -128,6 +128,7 @@
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
+
     <select id="searchBasicPopular">
         SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
