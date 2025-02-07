@@ -26,6 +26,7 @@ public interface SearchMapper {
     // 검색창 출력 + 검색어 저장
     List<SearchGetRes> searchGetList (Long userId);
     void searchIns (@Param("search_word")String searchWord ,Long userId);
+
     // 홈 기본 검색화면 - 최근 본 목록 & 인기 상품
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
     List<SearchBasicPopualarRes> searchBasicPopular();

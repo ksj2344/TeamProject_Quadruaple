@@ -128,8 +128,9 @@
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
+
     <select id="searchBasicPopular">
-        SELECT s.title AS strfName, COUNT(*) AS popularCount
+        SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
         JOIN stay_tour_restaur_fest s ON r.strf_id = s.strf_id
         WHERE r.inquired_at >=  DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
