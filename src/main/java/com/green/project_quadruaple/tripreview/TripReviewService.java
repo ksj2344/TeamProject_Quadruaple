@@ -7,12 +7,14 @@ import com.green.project_quadruaple.trip.model.req.PostTripReq;
 import com.green.project_quadruaple.tripreview.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +26,9 @@ public class TripReviewService {
     private final TripMapper tripMapper;
     private final MyFileUtils myFileUtils;
     private final AuthenticationFacade authenticationFacade;
+
+    @Value("${const.default-review-size}")
+    private int size;
 
     // 여행기 등록
     public TripReviewPostRes postTripReview(List<MultipartFile> tripReviewPic, TripReviewPostReq req) {
@@ -75,10 +80,30 @@ public class TripReviewService {
         long userId = authenticationFacade.getSignedUserId(); // 현재 로그인한 유저 ID 가져오기
         return tripReviewMapper.getMyTripReviews(userId, orderType);
     }
-    // 모든 사용자의 여행기 조회
-    public List<TripReviewGetDto> getAllTripReviews(String orderType) {
-        return tripReviewMapper.getAllTripReviews(orderType);
+    // 모든 여행기 조회
+    public List<TripReviewGetDto> getAllTripReviews(String orderType, int pageNumber) {
+        int startIdx = (pageNumber - 1) * size;  // OFFSET 계산
+
+        // 현재 저장된 전체 개수를 조회
+        int totalCount = tripReviewMapper.getTotalTripReviewsCount();  // 여행기 총 개수
+
+        // startIdx가 totalCount보다 크면 빈 리스트 반환
+        if (startIdx >= totalCount) {
+            return Collections.emptyList();
+        }
+
+        List<TripReviewGetDto> result = tripReviewMapper.getAllTripReviews(orderType, startIdx, size + 1);
+
+        boolean hasMore = result.size() > size; // 다음 페이지가 있는지 확인
+
+        if (hasMore) {
+            result.remove(result.size() - 1); // 초과된 1개 데이터 삭제
+        }
+
+        return result;
     }
+
+
     // 다른 사용자의 여행기 조회
     public TripReviewGetDto getOtherTripReviews(long tripReviewId) {
         long userId = authenticationFacade.getSignedUserId();

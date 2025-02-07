@@ -1,10 +1,7 @@
 package com.green.project_quadruaple.booking;
 
 import com.green.project_quadruaple.booking.model.*;
-import com.green.project_quadruaple.booking.model.dto.BookingInsDto;
-import com.green.project_quadruaple.booking.model.dto.CouponDto;
-import com.green.project_quadruaple.booking.model.dto.MenuDto;
-import com.green.project_quadruaple.booking.model.dto.MenuIdAndQuantityDto;
+import com.green.project_quadruaple.booking.model.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -20,4 +17,6 @@ public interface BookingMapper {
 
     void insBooking(BookingPostReq dto);
     void insUsedCoupon(Long receiveId, Long bookingId);
+
+    BookingApproveInfoDto selApproveBookingInfo(Long bookingId);
 }
