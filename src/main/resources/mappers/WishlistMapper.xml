@@ -38,6 +38,7 @@
         LEFT JOIN strf_pic f ON f.strf_id = a.strf_id
         WHERE b.user_id = #{userId}
         GROUP BY a.strf_id, a.title, d.title, a.category
+        ORDER BY b.created_at DESC
         LIMIT #{startIdx} , #{size}
     </select>
 
