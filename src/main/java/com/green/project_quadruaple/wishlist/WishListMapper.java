@@ -32,6 +32,8 @@ public interface WishListMapper {
 
     int getWishListCount(@Param("categoryList") List<String> categoryList);
 
+    List<WishListRes> getWishList(@Param("userId") Long userId, @Param("limit") int limit);
+
 
 
     // 위시리스트 조회 쿼리

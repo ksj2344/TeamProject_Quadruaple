@@ -47,10 +47,14 @@ public class WishListService {
 
         List<Map<String, Object>> wishList = wishlistMapper.getWishList(categoryList, offset, limit);
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), Map.of("wishList", wishList));
-    }
 
 
     }
+
+    public List<WishListRes> getWishList(Long userId, int limit) {
+        return wishlistMapper.getWishList(userId, limit);
+    }
+}
 
 
 
