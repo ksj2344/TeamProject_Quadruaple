@@ -31,7 +31,7 @@ public interface SearchMapper {
     List<SearchBasicRecentRes> searchBasicRecent(Long userId);
     List<SearchBasicPopualarRes> searchBasicPopular();
 
-    List<Stay> searchAllList(@Param("search_word") String searchWord, Long userId,int startIdx, int size);
+    List<Stay> searchAllList(@Param("search_word") String searchWord, Long userId);
 
     // 전체 상품에서 해당 카테고리 전환
     List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId);

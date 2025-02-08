@@ -31,6 +31,7 @@ public class ReviewSelRes{
         private String writerUserPic;
         @Schema(description = "리뷰 작성 날짜")
         private String reviewWriteDate;
+        private String strfTitle;
         @Schema(description = "리뷰 사진 리스트")
         private List<ReviewPic> reviewPic;
 

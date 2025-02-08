@@ -5,12 +5,13 @@
     <select id="getReviewWithPics" resultMap="reviewPicResultMap">
         SELECT
         a.review_id AS reviewId, a.strf_id AS strfId, a.content, a.user_id AS writerUserId,
-        a.rating, c.name AS writerUserName, c.profile_pic AS writerUserPic,
+        a.rating, c.name AS writerUserName, c.profile_pic AS writerUserPic, b.title AS strfTitle ,
         (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
         COALESCE(a.updated_at, a.created_at) AS reviewWriteDate, rp.`title` AS pic
         FROM review a
         LEFT JOIN user c ON a.user_id = c.user_id
         LEFT JOIN review_pic rp ON a.review_id = rp.review_id
+        LEFT JOIN stay_tour_ restaur_fest b ON a.strf_id = b.strf_id
         WHERE a.strf_id = #{strfId}
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
@@ -25,6 +26,7 @@
         <result property="writerUserId" column="writerUserId"/>
         <result property="writerUserPic" column="writerUserPic"/>
         <result property="reviewWriteDate" column="reviewWriteDate"/>
+        <result property="strfTitle" column="strfTitle"/>
         <collection property="reviewPic" resultMap="reviewPic"/>
     </resultMap>
     <resultMap id="reviewPic" type="com.green.project_quadruaple.review.model.ReviewPic">

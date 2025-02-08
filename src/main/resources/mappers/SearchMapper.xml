@@ -131,7 +131,6 @@
         ORDER BY inquiredAt DESC
         LIMIT 5
     </select>
-
     <select id="searchBasicPopular">
         SELECT s.title AS strfName, COUNT(*) AS popularCount , s.strf_id AS strfId
         FROM recent r
@@ -218,7 +217,11 @@
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
-        ORDER BY a.created_at DESC
+        ORDER BY a.created_at DESC , A.trip_review_id DESC ,
+        CASE WHEN #{orderType} = 'likeCnt' THEN wishlistCount END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN averageRating END DESC,
+        CASE WHEN #{orderType} = 'ratingCnt' THEN reviewCount END DESC
+
         LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
