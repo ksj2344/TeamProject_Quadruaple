@@ -90,9 +90,10 @@ public class SearchController {
     @GetMapping("/category")
     public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
                                             @RequestParam String category,
-                                            @RequestParam(value = "search_word", required = false) String searchWord) {
+                                            @RequestParam(value = "search_word", required = false) String searchWord,
+                                            @RequestParam(value = "order_type",required = false) String orderType) {
 
-        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord);
+        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
     }
     @GetMapping("/filter")
