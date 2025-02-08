@@ -192,10 +192,18 @@
 
 
     <select id="searchCategory" resultMap="searchCategoryResultMap">
+        SELECT *
+        FROM (
         SELECT
-        a.strf_id AS strfId, a.title AS strfTitle, a.category, c.title AS locationName,
-        f.pic_name AS strfPic, AVG(d.rating) AS averageRating, COUNT(d.review_id) AS reviewCount,
+        a.strf_id AS strfId,
+        a.title AS strfTitle,
+        a.category,
+        c.title AS locationName,
+        f.pic_name AS strfPic,
+        AVG(d.rating) AS averageRating,
+        COUNT(d.review_id) AS reviewCount,
         COUNT(e.user_id) AS wishlistCount,
+        COALESCE(a.created_at, NOW()) AS createdAt,
         <if test="userId != null">
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
         </if>
@@ -217,13 +225,15 @@
             a.category LIKE CONCAT('%', #{searchWord}, '%') )
         </if>
         GROUP BY a.strf_id
-        ORDER BY a.created_at DESC , A.trip_review_id DESC ,
+        ) AS subquery
+        ORDER BY
+        createdAt DESC,
         CASE WHEN #{orderType} = 'likeCnt' THEN wishlistCount END DESC,
         CASE WHEN #{orderType} = 'ratingAvg' THEN averageRating END DESC,
         CASE WHEN #{orderType} = 'ratingCnt' THEN reviewCount END DESC
-
         LIMIT #{startIdx}, #{size}
     </select>
+
     <resultMap id="searchCategoryResultMap" type="com.green.project_quadruaple.search.model.SearchCategoryRes">
         <id property="strfId" column="strfId"/>
         <result property="strfTitle" column="strfTitle"/>

@@ -11,7 +11,7 @@
         FROM review a
         LEFT JOIN user c ON a.user_id = c.user_id
         LEFT JOIN review_pic rp ON a.review_id = rp.review_id
-        LEFT JOIN stay_tour_ restaur_fest b ON a.strf_id = b.strf_id
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
         WHERE a.strf_id = #{strfId}
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
@@ -91,7 +91,7 @@
         LEFT JOIN review_pic b ON a.review_id = b.review_id
         LEFT JOIN user c ON a.user_id = c.user_id
         WHERE a.user_id = #{userId}
-        ORDER BY a.review_id DESC
+        ORDER BY a.review_id DESC , a.created_at DESC
         LIMIT #{startIdx}, #{size}
     </select>
     <resultMap id="myReviewResultMap" type="com.green.project_quadruaple.review.model.MyReviewSelRes">
