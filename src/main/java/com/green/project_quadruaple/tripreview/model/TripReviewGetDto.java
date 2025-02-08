@@ -15,7 +15,6 @@ public class TripReviewGetDto {
     private String title;
     private String content;
     private int likeCount;
-    private int reviewCount;
     private int recentCount;
     private int scrapCount;
     private long tripReviewId;
