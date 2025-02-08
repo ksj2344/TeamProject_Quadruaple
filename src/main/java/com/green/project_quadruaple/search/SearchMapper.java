@@ -34,7 +34,7 @@ public interface SearchMapper {
     List<Stay> searchAllList(@Param("search_word") String searchWord, Long userId);
 
     // 전체 상품에서 해당 카테고리 전환
-    List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId);
+    List<SearchCategoryRes> searchCategory(int startIdx, int size, String category, String searchWord, Long userId, String orderType);
 
     // 전체 상품에서 숙소 카테고리 전환
     List<SearchStay> searchStay(String category, String searchWord, int startIdx, int size, Long userId, List<Long> amenityId);
