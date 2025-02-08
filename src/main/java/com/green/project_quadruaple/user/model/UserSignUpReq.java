@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.green.project_quadruaple.common.config.jwt.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import java.util.List;
 @ToString
 @Getter
 @Setter
+@EqualsAndHashCode
 public class UserSignUpReq {
     @JsonIgnore
     private long userId;
