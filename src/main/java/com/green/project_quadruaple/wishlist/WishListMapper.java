@@ -3,6 +3,7 @@ package com.green.project_quadruaple.wishlist;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
