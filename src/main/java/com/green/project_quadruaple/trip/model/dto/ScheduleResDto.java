@@ -24,4 +24,5 @@ public class ScheduleResDto {
     private long tripId;
     private String content;
     private boolean reviewed;
+    private String picName;
 }
