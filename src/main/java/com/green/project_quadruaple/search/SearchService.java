@@ -154,7 +154,7 @@ public class SearchService {
 //            stays.remove(stays.size()-1);
 //        }
 //        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
-    public ResponseWrapper<List<Stay>> searchAll(String searchWord,int lastIdx) {
+    public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -166,13 +166,8 @@ public class SearchService {
         }
         int more = 1;
         try {
-            List<Stay> stays = searchMapper.searchAllList(searchWord, userId,lastIdx,size+more);
+            List<Stay> stays = searchMapper.searchAllList(searchWord, userId);
 
-            boolean hasMore = stays.size() > size;
-            if (hasMore) {
-                stays.get(stays.size()-1).setMore(true);
-                stays.remove(stays.size()-1);
-            }
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
 
         } catch (Exception e) {
