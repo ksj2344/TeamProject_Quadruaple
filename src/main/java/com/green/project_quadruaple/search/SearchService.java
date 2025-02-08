@@ -201,7 +201,7 @@ public class SearchService {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
      */
-    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord) {
+    public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord, String orderType) {
 
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -218,7 +218,7 @@ public class SearchService {
             categoryValue = Objects.requireNonNull(Category.getKeyByName(category)).getValue();
         }
         int more = 1;
-        List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId);
+        List<SearchCategoryRes> res = searchMapper.searchCategory(lastIdx,size+more,categoryValue,searchWord,userId, orderType);
 
         boolean hasMore = res.size() > size;
         if (hasMore) {
