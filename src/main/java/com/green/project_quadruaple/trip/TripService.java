@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMap;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -100,12 +101,21 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
 
+    /*
+    * 여행 상세 정보 불러우기 getTrip
+    * */
     public ResponseWrapper<TripDetailRes> getTrip(Long tripId) {
         long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
         ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
         if(scAndMcAndTripInfoDto == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode() + " 여행이 존재하지 않음", null);
         }
+        TripPeriodDto tripPeriod = tripMapper.selTripPeriod(tripId);
+        if(tripPeriod == null) {
+            return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
+        }
+
+
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         List<Long> tripUserIdList = tripMapper.selTripUserList(tripId);
         long totalDistance = 0L;
@@ -150,6 +160,40 @@ public class TripService {
         res.setDays(tripDetailDto);
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // 문자열을 LocalDate로 변환
+        LocalDate startDate = LocalDate.parse(tripPeriod.getStartAt(), formatter);
+        LocalDate endDate = LocalDate.parse(tripPeriod.getEndAt(), formatter);
+
+        // 두 날짜의 차이를 계산
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        if(daysBetween > 0) {
+            daysBetween += 2;
+        } else if(daysBetween == 0) {
+            daysBetween = 1;
+        }
+
+        List<TripDetailDto> resTripDetail = new ArrayList<>();
+        boolean flag = false;
+        for(int i=1; i<daysBetween; i++) {
+            for (TripDetailDto detailDto : tripDetailDto) {
+                if(detailDto.getDay() == i) {
+                    resTripDetail.add(detailDto);
+                    flag = true;
+                }
+            }
+            if(flag) {
+                flag = false;
+                continue;
+            }
+            TripDetailDto nullDataWithDay = new TripDetailDto();
+            nullDataWithDay.setDay(i);
+            resTripDetail.add(nullDataWithDay);
+        }
+
+        res.setDays(resTripDetail);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }
@@ -303,7 +347,7 @@ public class TripService {
     * 5. nextSche 의 거리, 시간, 수단을 가져온 API 값으로 update
     * */
     public ResultResponse postSchedule(PostScheduleReq req) {
-        Long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+        long signedUserId = AuthenticationFacade.getSignedUserId();
         long tripId = req.getTripId();
         if(!tripMapper.selExistsTripUser(tripId, signedUserId)) {
             return ResultResponse.forbidden();
