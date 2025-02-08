@@ -17,7 +17,6 @@ public interface TripMapper {
 
     void insTripLocation(long tripId, List<Long> idList);
 
-    TripDetailDto getTrip(long tripId);
     Long selTripManagerId(Long tripId);
     boolean selExistsTripUser(Long tripId, Long userId);
 
@@ -25,6 +24,8 @@ public interface TripMapper {
     List<TripDetailDto> selScheduleDetail(Long tripId, Long userId);
 
     List<Long> selTripUserList(Long tripId);
+
+    TripPeriodDto selTripPeriod(Long tripId);
 
     // patchTrip
     void updateTrip(PatchTripReq req);
