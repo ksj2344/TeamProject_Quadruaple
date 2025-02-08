@@ -3,19 +3,17 @@ package com.green.project_quadruaple.wishlist;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 @Service
+@RequiredArgsConstructor
 public class WishListService {
     private final AuthenticationFacade authenticationFacade;
     private final WishListMapper wishlistMapper;
@@ -23,13 +21,8 @@ public class WishListService {
     @Value("${const.default-review-size}")
     private int size;
 
-    public WishListService(AuthenticationFacade authenticationFacade, WishListMapper wishListMapper) {
-        this.authenticationFacade = authenticationFacade;
-        this.wishlistMapper = wishListMapper;
-    }
-
     public ResponseEntity<ResponseWrapper<String>> toggleWishList(long strfId) {
-        long userId = authenticationFacade.getSignedUserId();
+        Long userId = authenticationFacade.getSignedUserId();
 
         // 찜 상태 확인
         boolean isWishListed = wishlistMapper.isWishListExists(userId, strfId);
@@ -55,20 +48,21 @@ public class WishListService {
 //
 //    }
 
-    public List<WishListRes> getWishList(int lastIdx) {
+    public ResponseWrapper<List<WishListRes>> getWishList(int startIdx) {
         Long userId = authenticationFacade.getSignedUserId();
 
         int more = 1;
 
-        List<WishListRes> list = wishlistMapper.getWishList(userId,lastIdx,size+more);
+        List<WishListRes> list = wishlistMapper.wishListGet(userId,startIdx,size+more);
 
         boolean hasMore = list.size() > size;
+
         if (hasMore) {
             list.get(list.size()-1).setMore(true);
             list.remove(list.size()-1);
         }
 
-        return list;
+        return new ResponseWrapper<>(ResponseCode.OK.getCode(), list);
     }
 }
 
