@@ -20,6 +20,14 @@
         )
     </select>
 
+    <select id="selTripPeriod">
+        SELECT
+            start_at
+            , end_at
+        FROM trip
+        WHERE trip_id = #{tripId}
+    </select>
+
     <select id="getTripList">
         SELECT
             t.trip_id AS tripId
