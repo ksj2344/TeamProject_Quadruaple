@@ -22,10 +22,9 @@
 
     <!-- 여행기 조회 -->
     <select id="getMyTripReviews" resultMap="tripReviewResultMap">
-        SELECT A.trip_id, A.title, A.content,
+        SELECT A.trip_id, A.user_id, A.title, A.content,
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
-        ,(SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
         , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
         , A.trip_review_id, C.name, C.profile_pic
@@ -34,8 +33,6 @@
             ON A.trip_review_id = B.trip_review_id
           LEFT JOIN user C
             ON A.user_id = C.user_id
-          LEFT JOIN review D
-            ON A.user_id = D.user_id
           LEFT JOIN recent_tr E
             ON A.trip_review_id = E.trip_review_id
          WHERE A.user_id = #{userId}
@@ -55,14 +52,14 @@
         SELECT A.trip_id, A.user_id, A.title, A.content,
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count,
-        (SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count,
         (SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count,
         (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count,
         A.trip_review_id, C.name, C.profile_pic
          FROM trip_review A
-         LEFT JOIN trip_review_pic B ON A.trip_review_id = B.trip_review_id
-         LEFT JOIN user C ON A.user_id = C.user_id
-         LEFT JOIN review D ON A.user_id = D.user_id
+         LEFT JOIN trip_review_pic B
+           ON A.trip_review_id = B.trip_review_id
+         LEFT JOIN user C
+           ON A.user_id = C.user_id
         GROUP BY A.trip_review_id, A.trip_id, A.title, A.content, C.name, C.profile_pic
         ORDER BY
         CASE WHEN #{orderType} = 'latest' THEN A.created_at END DESC,
@@ -72,20 +69,17 @@
     </select>
 
     <select id="getOtherTripReviewById" resultMap="tripReviewResultMap">
-        SELECT A.trip_id, A.title, A.content,
+        SELECT A.trip_id, A.user_id, A.title, A.content,
         GROUP_CONCAT(distinct B.trip_review_pic ORDER BY B.trip_review_pic) AS trip_review_pics,
         (SELECT COUNT(user_id) FROM trip_like WHERE trip_review_id = A.trip_review_id) AS like_count
-        ,(SELECT COUNT(review_id) FROM review WHERE user_id = A.user_id) AS review_count
         ,(SELECT COUNT(user_id) FROM recent_tr WHERE trip_review_id = A.trip_review_id) AS recent_count
         , (SELECT COUNT(scrap_id) FROM scrap WHERE trip_review_id = A.trip_review_id) AS scrap_count
         , A.trip_review_id, C.name, C.profile_pic
-        FROM trip_review A
-        LEFT JOIN trip_review_pic B
-        ON A.trip_review_id = B.trip_review_id
-        LEFT JOIN user C
-        ON A.user_id = C.user_id
-        LEFT JOIN review D
-        ON A.user_id = D.user_id
+         FROM trip_review A
+         LEFT JOIN trip_review_pic B
+           ON A.trip_review_id = B.trip_review_id
+         LEFT JOIN user C
+           ON A.user_id = C.user_id
         WHERE A.trip_review_id = #{tripReviewId}
         GROUP BY A.trip_review_id, A.trip_id, A.title, A.content, C.name, C.profile_pic
     </select>
@@ -95,7 +89,6 @@
         <result property="title" column="title"/>
         <result property="content" column="content"/>
         <result property="likeCount" column="like_count"/>
-        <result property="reviewCount" column="review_count"/>
         <result property="recentCount" column="recent_count"/>
         <result property="scrapCount" column="scrap_count"/>
         <result property="tripReviewId" column="trip_review_id"/>

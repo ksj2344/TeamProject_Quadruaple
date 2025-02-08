@@ -37,7 +37,7 @@ public class TripReviewController {
 
     //여행기 조회
     @GetMapping("myTripReview")
-    @Operation(summary = "내 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
+    @Operation(summary = "내 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수)")
     public ResponseEntity<?> getMyTripReview(@Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
                                                  @RequestParam(defaultValue = "latest") String orderType) {
         List<TripReviewGetDto> myTripReview = tripReviewService.getMyTripReviews(orderType);
@@ -49,7 +49,7 @@ public class TripReviewController {
     }
 
     @GetMapping("allTripReview")
-    @Operation(summary = "모든 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
+    @Operation(summary = "모든 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수)")
     public ResponseEntity<ResponseWrapper<List<TripReviewGetDto>>> getAllTripReview(
             @Parameter(name = "orderType", description = "정렬 방식 (latest: 최신순, popular: 추천순)", example = "latest", in = ParameterIn.QUERY)
             @RequestParam(defaultValue = "latest") String orderType,
@@ -70,7 +70,7 @@ public class TripReviewController {
     }
 
     @GetMapping("otherTripReview")
-    @Operation(summary = "다른 사용자의 여행기 조회", description = "like_count(추천수), review_count(리뷰수), recent_count(조회수)")
+    @Operation(summary = "다른 사용자의 여행기 조회", description = "likeCount(추천수), recentCount(조회수), scrapCount(스크랩수)")
     public ResponseEntity<?> getOtherTripReview(@RequestParam long tripReviewId) {
         List<TripReviewGetDto> tripReviewGetDto = tripReviewService.getOtherTripReviews(tripReviewId);
 
