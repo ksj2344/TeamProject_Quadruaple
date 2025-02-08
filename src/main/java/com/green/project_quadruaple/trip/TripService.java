@@ -157,6 +157,7 @@ public class TripService {
         }
 
 
+        res.setDays(tripDetailDto);
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
 
@@ -306,7 +307,7 @@ public class TripService {
         log.info("odsayConst.getSearchPubTransPathUrl = {}", odsayApiConst.getSearchPubTransPathUrl());
         String json = httpPostRequestReturnJson(req);
 
-        log.info("odsay json = {}", json);
+        log.info("길찾기 json = {}", json);
         try {
             JsonNode jsonNode = objectMapper.readTree(json);
             PubTransPathVo pathVo =  objectMapper.convertValue(jsonNode.at("/result")
@@ -372,11 +373,13 @@ public class TripService {
         tripMapper.insSchedule(req);
 
         ScheduleShortInfoDto nextScheInfo = tripMapper.selNextScheduleInfoByTripIdAndSeq(tripId, seq);
+        log.info("nextScheInfo = {}", nextScheInfo);
         if (nextScheInfo == null) {
             return ResultResponse.success();
         }
         // 4. 가져온 nextSche 의 strf 위경도(start)와 postSche 의 위경도(end)로 OdsayAPi 호출, 거리, 시간, 수단 불러오기
         List<StrfLatAndLngDto> strfLatAndLngDtos = tripMapper.selStrfLatAndLng(strfId, nextScheInfo.getStrfId());
+        log.info("strfLatAndLngDtos = {}", strfLatAndLngDtos);
         FindPathReq findPath = new FindPathReq();
         setOdsayParams(findPath, strfLatAndLngDtos, strfId);
         String json = httpPostRequestReturnJson(findPath);

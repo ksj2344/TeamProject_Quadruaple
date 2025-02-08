@@ -9,7 +9,7 @@
         COUNT(DISTINCT f.user_id) AS wishCnt ,
         IF(EXISTS(SELECT 1 FROM wishlist
         WHERE strf_id = a.strf_id AND (#{userId} IS NULL OR user_id = #{userId})
-        ), 1, 0) AS wishIn
+        ), 1, 0) AS wishIn , a.inquired_at AS inquiredAt
         FROM recent a
         LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
         LEFT JOIN strf_pic c ON a.strf_id = c.strf_id
