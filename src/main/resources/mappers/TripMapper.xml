@@ -20,6 +20,14 @@
         )
     </select>
 
+    <select id="selTripPeriod">
+        SELECT
+            start_at
+            , end_at
+        FROM trip
+        WHERE trip_id = #{tripId}
+    </select>
+
     <select id="getTripList">
         SELECT
             t.trip_id AS tripId
@@ -109,6 +117,7 @@
             , strf.lng as lng
             , m.content AS content
             , if(r.user_id = #{userId}, 1, 0) AS reviewed
+            , sp.pic_name AS picName
         FROM sche_memo sm
         LEFT JOIN schedule s
             ON sm.schedule_memo_id = s.schedule_id
@@ -119,6 +128,8 @@
             AND r.user_id = #{userId}
         LEFT JOIN memo m
             ON m.memo_id = sm.schedule_memo_id
+        LEFT JOIN strf_pic sp
+            ON sp.strf_id = strf.strf_id
         WHERE sm.trip_id = #{tripId}
     </select>
 
@@ -141,6 +152,7 @@
             <result column="title" property="title"/>
             <result column="content" property="content"/>
             <result column="reviewed" property="reviewed"/>
+            <result column="picName" property="picName"/>
         </collection>
     </resultMap>
 
