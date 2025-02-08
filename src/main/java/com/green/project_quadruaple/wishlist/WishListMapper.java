@@ -1,38 +1,20 @@
 package com.green.project_quadruaple.wishlist;
 
-import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListGetReq;
-import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListReq;
 import com.green.project_quadruaple.wishlist.model.wishlistDto.WishListRes;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
-
 
 @Mapper
 public interface WishListMapper {
 
-    boolean isWishListExists(@Param("userId") long userId, @Param("strfId") long strfId);
-    void deleteWishList(@Param("userId") long userId, @Param("strfId") long strfId);
+    boolean isWishListExists(Long userId, @Param("strfId") long strfId);
+    void deleteWishList(Long userId, @Param("strfId") long strfId);
 
+    void insertWishList(Long userId, long strfId);
 
-    void insertWishList(long userId, long strfId);
-    List<WishListRes> findWishList(
-            @Param("userId") long userId,
-            @Param("categoryList") List<String> categoryList,
-            @Param("offset") int offset
-    );
-
-
-//    List<Map<String, Object>> getWishList(@Param("categoryList") List<String> categoryList,
-//                                          @Param("offset") int offset,
-//                                          @Param("limit") int limit);
-
-    int getWishListCount(@Param("categoryList") List<String> categoryList);
-
-    List<WishListRes> getWishList(Long userId, int startIdx , int size);
+    List<WishListRes> wishListGet(Long userId, int startIdx , int size);
 
 
 

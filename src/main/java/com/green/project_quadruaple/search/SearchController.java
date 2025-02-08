@@ -4,7 +4,6 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
 import com.green.project_quadruaple.search.model.SearchCategoryRes;
-import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
