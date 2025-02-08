@@ -8,6 +8,7 @@ import com.green.project_quadruaple.datamanager.model.MenuDto;
 import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
 import com.green.project_quadruaple.datamanager.model.UserProfile;
+import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.ReviewService;
 import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +34,52 @@ public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
     private final ReviewService reviewService;
+    private final ReviewMapper reviewMapper;;
 
-    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewDummyReq p){
-        for(Long i=1L; i<901; i+=p.getNum()){
-            p.setStrfId(i);
-            reviewService.postRating(pics, p);
-        }
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
-    }
+//    @Transactional
+//    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(ReviewDummyReq p) {
+//        List<Long> strfIds = dataMapper.selectStrfId(p);
+//        for (Long i = 1L; i < 901; i += p.getNum()) {
+//            p.setStrfId(i);
+//            strfIds.add(i);
+//        }
+//        // 사진을 저장할 폴더 경로 설정
+//        for (Long strfId : strfIds) {
+//            String middlePath = String.format("reviews/%d", strfId);
+//            myFileUtils.makeFolders(middlePath);
+//            // 리뷰 데이터 삽입
+//            int result = reviewMapper.postRating(p);
+//            if (result > 0) {
+//                Long reviewId = p.getReviewId(); // 삽입된 리뷰 ID 가져오기
+//                // 사진 데이터 삽입
+//                List<Map<String, Object>> reviewPics = new ArrayList<>();
+//                for (MultipartFile pic : pics) {
+//                    String picName = myFileUtils.makeRandomFileName(pic); // 랜덤 파일명 생성
+//                    String filePath = String.format("%s/reviews/%d/%s", myFileUtils.getUploadPath(), strfId, picName);
+//                    try {
+//                        // 파일을 지정된 경로에 저장
+//                        myFileUtils.transferTo(pic, filePath);
+//                        Map<String, Object> map = new HashMap<>();
+//                        map.put("title", picName);
+//                        map.put("reviewId", reviewId);
+//                        reviewPics.add(map);
+//                    } catch (IOException e) {
+//                        // 파일 저장 실패 시 예외 처리
+//                        myFileUtils.deleteFolder(middlePath, true); // 폴더 삭제
+//                        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+//                    }
+//                }
+//                // 리뷰 사진 데이터 삽입
+//                reviewMapper.postReviewPic(reviewPics, reviewId);
+//            } else {
+//                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+//            }
+//        }
+//
+//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
+//    }
 
 
     //strf 사진, 메뉴 등록

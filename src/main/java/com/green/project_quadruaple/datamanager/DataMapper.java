@@ -9,6 +9,8 @@ import java.util.Map;
 
 @org.apache.ibatis.annotations.Mapper
 public interface DataMapper {
+
+
     //strf_id 목록 찾기
     List<Long> selectStrfId(StrfIdGetReq p);
     //strf 테이블에 pic넣기
