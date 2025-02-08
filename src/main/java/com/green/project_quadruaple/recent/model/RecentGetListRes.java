@@ -21,6 +21,5 @@ public class RecentGetListRes {
     private int ratingAvg;
     private int wishCnt;
     private int wishIn;
-
-
+    private String inquiredAt;
 }
