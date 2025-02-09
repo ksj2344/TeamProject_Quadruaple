@@ -51,8 +51,8 @@
     <insert id="postReviewPic">
         INSERT INTO review_pic (title , review_id)
         VALUES
-        <foreach collection="pics" item="pic" open="(" close=")" separator="),(">
-            #{pic}, #{reviewId}
+        <foreach collection="pics" item="pics" open="(" close=")" separator="),(">
+            #{pics}, #{reviewId}
         </foreach>
     </insert>
 
