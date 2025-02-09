@@ -12,6 +12,21 @@
         </foreach>
     </insert>
 
+    <select id="selectReviewStrfId">
+        SELECT a.strf_id
+        FROM stay_tour_restaur_fest a
+        left JOIN strf_pic sp
+        on sp.strf_id=a.strf_id
+        WHERE category =#{category}
+        and sp.strf_id IS NULL
+        <if test="startId != null and endId != null">
+            AND a.strf_id BETWEEN #{startId} AND #{endId}
+        </if>
+        <if test="strfTitle != null and strfTitle != '' ">
+            AND a.title LIKE '%${strfTitle}%'
+        </if>
+    </select>
+
     <select id="selectStrfId">
         SELECT a.strf_id
         FROM stay_tour_restaur_fest a

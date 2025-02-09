@@ -1,7 +1,7 @@
 package com.green.project_quadruaple.datamanager;
 
-import com.green.project_quadruaple.datamanager.model.MenuDto;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
+import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
 import com.green.project_quadruaple.datamanager.model.UserProfile;
 
 import java.util.List;
@@ -10,7 +10,8 @@ import java.util.Map;
 @org.apache.ibatis.annotations.Mapper
 public interface DataMapper {
 
-
+    int insReviewAndPics();
+    List<Long> selectReviewStrfId(StrfReviewGetReq p);
     //strf_id 목록 찾기
     List<Long> selectStrfId(StrfIdGetReq p);
     //strf 테이블에 pic넣기

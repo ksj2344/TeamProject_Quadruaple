@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.green.project_quadruaple.review.ReviewMapper">
+    <!--
     <select id="getReviewWithPics" resultMap="reviewPicResultMap">
         SELECT
         a.review_id AS reviewId, a.strf_id AS strfId, a.content, a.user_id AS writerUserId,
@@ -16,6 +17,25 @@
         ORDER BY a.review_id DESC
         LIMIT #{startIdx}, #{size}
     </select>
+    -->
+    <select id="getReviewWithPics" resultMap="reviewPicResultMap">
+        SELECT T1.*, T2.title AS pic
+        FROM (
+        SELECT a.review_id AS reviewId, a.strf_id AS strfId, a.content,
+        a.user_id AS writerUserId, a.rating, c.name AS writerUserName,
+        c.profile_pic AS writerUserPic, b.title AS strfTitle,
+        (SELECT COUNT(*) FROM review WHERE user_id = a.user_id) AS userWriteReviewCnt,
+        COALESCE(a.updated_at, a.created_at) AS reviewWriteDate
+        FROM review a
+        LEFT JOIN user c ON a.user_id = c.user_id
+        LEFT JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
+        WHERE a.strf_id = #{strfId}
+        ORDER BY a.review_id DESC
+        LIMIT #{startIdx}, #{size}
+        ) T1
+        LEFT JOIN review_pic T2 ON T1.reviewId = T2.review_id -- 리뷰 사진을 LEFT JOIN으로 가져옴
+    </select>
+
     <resultMap id="reviewPicResultMap" type="com.green.project_quadruaple.review.model.ReviewSelRes">
         <id property="reviewId" column="reviewId"/>
         <result property="strfId" column="strfId"/>
