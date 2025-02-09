@@ -13,7 +13,7 @@ import lombok.ToString;
 public class ReviewPostReq {
     @JsonIgnore
     private Long reviewId;
-    private Long strfId;
     private String content;
     private int rating;
+    private Long strfId;
 }
