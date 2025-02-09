@@ -4,20 +4,15 @@ package com.green.project_quadruaple.datamanager;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.datamanager.model.MenuDto;
-import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
-import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
-import com.green.project_quadruaple.datamanager.model.UserProfile;
+import com.green.project_quadruaple.datamanager.model.*;
 import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.ReviewService;
-import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,53 +28,75 @@ import java.util.*;
 public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
-    private final ReviewService reviewService;
-    private final ReviewMapper reviewMapper;;
+//    private final ReviewService reviewService;
+//    private final ReviewMapper reviewMapper;
 
-//    @Transactional
-//    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(ReviewDummyReq p) {
-//        List<Long> strfIds = dataMapper.selectStrfId(p);
-//        for (Long i = 1L; i < 901; i += p.getNum()) {
-//            p.setStrfId(i);
-//            strfIds.add(i);
-//        }
-//        // 사진을 저장할 폴더 경로 설정
-//        for (Long strfId : strfIds) {
-//            String middlePath = String.format("reviews/%d", strfId);
-//            myFileUtils.makeFolders(middlePath);
-//            // 리뷰 데이터 삽입
-//            int result = reviewMapper.postRating(p);
-//            if (result > 0) {
-//                Long reviewId = p.getReviewId(); // 삽입된 리뷰 ID 가져오기
-//                // 사진 데이터 삽입
-//                List<Map<String, Object>> reviewPics = new ArrayList<>();
-//                for (MultipartFile pic : pics) {
-//                    String picName = myFileUtils.makeRandomFileName(pic); // 랜덤 파일명 생성
-//                    String filePath = String.format("%s/reviews/%d/%s", myFileUtils.getUploadPath(), strfId, picName);
-//                    try {
-//                        // 파일을 지정된 경로에 저장
-//                        myFileUtils.transferTo(pic, filePath);
-//                        Map<String, Object> map = new HashMap<>();
-//                        map.put("title", picName);
-//                        map.put("reviewId", reviewId);
-//                        reviewPics.add(map);
-//                    } catch (IOException e) {
-//                        // 파일 저장 실패 시 예외 처리
-//                        myFileUtils.deleteFolder(middlePath, true); // 폴더 삭제
-//                        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-//                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-//                    }
-//                }
-//                // 리뷰 사진 데이터 삽입
-//                reviewMapper.postReviewPic(reviewPics, reviewId);
-//            } else {
-//                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-//                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-//            }
-//        }
-//
-//        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
-//    }
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(StrfReviewGetReq p) {
+        List<Long> strfIds = dataMapper.selectReviewStrfId(p);
+        if (strfIds==null || strfIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
+        }
+        List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
+        List<PicDto> reviewDtos = p.getPics().isEmpty() ? new ArrayList<>() : p.getPics();
+        List<Map<String,Object>> picData = new ArrayList<>(strfIds.size()*reviewDtos.size());
+
+        String sourcePath=String.format("%s/reviewsample/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        String menuPath=String.format("%s/reviewsample/%s/%s/menu",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        int strfCnt;
+        int picCnt;
+
+        try{
+            strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
+            picCnt=(int) myFileUtils.countFiles(menuPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if(picCnt!=picData.size()){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        for (long strfId : strfIds) {
+            String middlePath = String.format("strf/%d", strfId);
+            myFileUtils.makeFolders(middlePath);
+
+            String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
+            try {
+                Path source = Paths.get(sourcePath);
+                Path destination = Paths.get(filePath);
+                myFileUtils.copyFolder(source, destination);
+            } catch (IOException e) {
+                //실패시 폴더 삭제 처리
+                log.error("파일 저장 실패: {}", filePath, e);
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+            for (int i = 0; i < strfCnt; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("strfId", strfId);
+                map.put("picName", String.format("%d.png", (i + 1)));
+                picAndStrfIds.add(map);
+            }
+
+            // menu insert collection 제작
+            if (picCnt != 0) {
+                for (int i = 0; i < reviewDtos.size(); i++) {
+                    Map<String, Object> menuMap = new HashMap<>();
+                    PicDto picDto = reviewDtos.get(i);
+                    menuMap.put("strfId", strfId);
+                    menuMap.put("title", picDto.getPics());
+                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
+                    picData.add(menuMap);
+                }
+            }
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
+    }
 
 
     //strf 사진, 메뉴 등록

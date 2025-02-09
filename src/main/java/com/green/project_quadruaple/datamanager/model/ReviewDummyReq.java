@@ -1,7 +1,9 @@
 package com.green.project_quadruaple.datamanager.model;
 
-import com.green.project_quadruaple.review.model.ReviewPostReq;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -9,8 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewDummyReq {
-    private Long strfId;
+    @JsonIgnore
+    private Long reviewId;
     private String content;
     private int rating;
-    private int num; // 몇 개의 리뷰를 생성할 것인지
+    private Long strfId;
+    List<PicDto> pics;
+
 }
