@@ -200,9 +200,10 @@
         a.category,
         c.title AS locationName,
         f.pic_name AS strfPic,
-        AVG(d.rating) AS averageRating,
+        AVG(d.rating) AS ratingAvg,
         COUNT(d.review_id) AS reviewCount,
         COUNT(e.user_id) AS wishlistCount,
+        COUNT(d.rating) AS ratingCnt ,
         COALESCE(a.created_at, NOW()) AS createdAt,
         <if test="userId != null">
             IF(EXISTS(SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = a.strf_id), 1, 0) AS wishIn
@@ -229,7 +230,7 @@
         ORDER BY
         createdAt DESC,
         CASE WHEN #{orderType} = 'likeCnt' THEN wishlistCount END DESC,
-        CASE WHEN #{orderType} = 'ratingAvg' THEN averageRating END DESC,
+        CASE WHEN #{orderType} = 'ratingAvg' THEN ratingAvg END DESC,
         CASE WHEN #{orderType} = 'ratingCnt' THEN reviewCount END DESC
         LIMIT #{startIdx}, #{size}
     </select>
@@ -240,7 +241,7 @@
         <result property="category" column="category"/>
         <result property="locationName" column="locationName"/>
         <result property="strfPic" column="strfPic"/>
-        <result property="averageRating" column="averageRating"/>
+        <result property="ratingAvg" column="ratingAvg"/>
         <result property="reviewCount" column="reviewCount"/>
         <result property="wishlistCount" column="wishlistCount"/>
         <result property="wishIn" column="wishIn"/>
