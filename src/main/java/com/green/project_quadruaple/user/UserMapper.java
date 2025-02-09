@@ -23,7 +23,7 @@ public interface UserMapper {
     UserInfo selUserInfo(long signedUserId);
 
     // 프로필 및 계정 수정
-    UserUpdateRes checkPassword(long signedUserId, String pw);
+    ChangePasswordRes checkPassword(long signedUserId, String pw);
     void changePassword(long signedUserId, String newPw);
     int updUser(UserUpdateReq req);
 

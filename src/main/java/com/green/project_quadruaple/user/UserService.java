@@ -264,7 +264,7 @@ public class UserService {
     public void changePassword(ChangePasswordReq req) {
         long signedUserId = authenticationFacade.getSignedUserId();
 
-        UserUpdateRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
+        ChangePasswordRes checkPassword = userMapper.checkPassword(signedUserId, req.getPw());
 
         if (checkPassword == null || !passwordEncoder.matches(req.getPw(), checkPassword.getPw())) {
             throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
