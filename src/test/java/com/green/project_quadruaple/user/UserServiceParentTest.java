@@ -4,6 +4,7 @@ import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.CookieUtils;
 import com.green.project_quadruaple.common.config.jwt.TokenProvider;
 import com.green.project_quadruaple.common.config.security.AuthenticationFacade;
+import com.green.project_quadruaple.user.model.DuplicateEmailResult;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,6 +17,7 @@ public class UserServiceParentTest {
     @Mock protected UserMapper userMapper;
     @Mock protected PasswordEncoder passwordEncoder;
     @Mock protected MyFileUtils myFileUtils;
+    @Mock protected DuplicateEmailResult duplicateEmailResult;
     @Mock protected TokenProvider tokenProvider;
     @Mock protected CookieUtils cookieUtils;
     @Mock protected AuthenticationFacade authenticationFacade;
