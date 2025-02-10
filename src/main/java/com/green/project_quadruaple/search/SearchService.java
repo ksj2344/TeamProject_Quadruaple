@@ -98,10 +98,6 @@ public class SearchService {
         }
     }
 
-
-
-
-
     // 검색창 - 최근 검색어 출력
     public ResponseWrapper<List<SearchGetRes>> searchGetList (){
        Long userId = authenticationFacade.getSignedUserId();
@@ -114,8 +110,6 @@ public class SearchService {
         }
        return new ResponseWrapper<>(ResponseCode.OK.getCode(),res);
     }
-
-
 
     // 밑으로 상품 검색
     public ResponseWrapper<List<SearchBasicRecentRes>> searchBasicRecent() {

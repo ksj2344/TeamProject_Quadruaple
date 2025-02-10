@@ -104,8 +104,11 @@ public class TripService {
     /*
     * 여행 상세 정보 불러우기 getTrip
     * */
-    public ResponseWrapper<TripDetailRes> getTrip(Long tripId) {
-        long signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+    public ResponseWrapper<TripDetailRes> getTrip(Long tripId, boolean signed) {
+        Long signedUserId = null;
+        if(signed) {
+            signedUserId = Optional.of(AuthenticationFacade.getSignedUserId()).get();
+        }
         ScheCntAndMemoCntDto scAndMcAndTripInfoDto = tripMapper.selScheduleCntAndMemoCnt(tripId);
         if(scAndMcAndTripInfoDto == null) {
             return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode() + " 여행이 존재하지 않음", null);
@@ -127,7 +130,12 @@ public class TripService {
             daysBetween += 1;
         }
 
-        List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
+        List<TripDetailDto> tripDetailDto;
+        if(signedUserId == null) {
+            tripDetailDto = tripMapper.selScheduleDetail(tripId);
+        } else {
+             tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
+        }
         List<Long> tripUserIdList = tripMapper.selTripUserList(tripId);
         long totalDistance = 0L;
         long totalDuration = 0L;
