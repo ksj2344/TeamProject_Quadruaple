@@ -116,7 +116,14 @@
             , strf.lat AS lat
             , strf.lng as lng
             , m.content AS content
-            , if(r.user_id = #{userId}, 1, 0) AS reviewed
+            <choose>
+                <when test="userId != null">
+                    , if(r.user_id = #{userId}, 1, 0) AS reviewed
+                </when>
+                <otherwise>
+                    , 0 AS reviewed
+                </otherwise>
+            </choose>
             , sp.pic_name AS picName
         FROM sche_memo sm
         LEFT JOIN schedule s
@@ -125,7 +132,9 @@
             ON strf.strf_id = s.strf_id
         LEFT JOIN review r
             ON strf.strf_id = r.strf_id
-            AND r.user_id = #{userId}
+            <if test="userId != null">
+                AND r.user_id = #{userId}
+            </if>
         LEFT JOIN memo m
             ON m.memo_id = sm.schedule_memo_id
         LEFT JOIN strf_pic sp
