@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Category {
     STAY("숙소", "STAY"),
-    TOUR("관광", "TOUR"),
+    TOUR("관광지", "TOUR"),
     RESTAUR("맛집", "RESTAUR"),
     FEST("축제", "FEST");
 
