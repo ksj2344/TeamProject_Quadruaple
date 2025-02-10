@@ -16,12 +16,14 @@ import java.util.List;
 public class MyReviewSelRes {
     @Schema(description = "리뷰 ID")
     private Long reviewId;
+    private Long writerUserId;
     @Schema(description = "STRF ID")
     private Long strfId;
     @Schema(description = "리뷰 내용")
     private String content;
+    private String strfTitle;
     @Schema(description = "평점")
-    private int rating;
+    private double rating;
     @Schema(description = "작성자 이름")
     private String writerUserName;
     @Schema(description = "작성자 프로필 사진")
