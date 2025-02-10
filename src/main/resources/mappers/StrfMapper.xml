@@ -121,10 +121,13 @@
         a.open_check as openCheck, a.close_check as closeCheck , a.rest_date AS restDate,
         a.`explain`, a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,
         f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,
-        AVG(h.rating) AS ratingAvg, b.title AS menuTitle, d.title AS amenityTitle,
+        b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
-        COUNT(DISTINCT h.review_id) AS reviewCnt
+        COUNT(DISTINCT h.review_id) AS reviewCnt,
+        <if test="rating != null">
+            AVG(h.rating) AS ratingAvg
+        </if>
         FROM
         stay_tour_restaur_fest a
         LEFT JOIN menu b ON a.strf_id = b.strf_id
