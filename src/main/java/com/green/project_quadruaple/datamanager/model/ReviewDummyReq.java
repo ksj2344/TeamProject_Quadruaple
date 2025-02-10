@@ -1,15 +1,21 @@
 package com.green.project_quadruaple.datamanager.model;
 
-import com.green.project_quadruaple.review.model.ReviewPostReq;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
-@ToString(callSuper=true)
-@EqualsAndHashCode(callSuper = true)
-public class ReviewDummyReq extends ReviewPostReq {
-    private int num;
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class ReviewDummyReq {
+    @JsonIgnore
+    private Long reviewId;
+    private String content;
+    private int rating;
+    private Long strfId;
+    List<PicDto> pics;
+
 }

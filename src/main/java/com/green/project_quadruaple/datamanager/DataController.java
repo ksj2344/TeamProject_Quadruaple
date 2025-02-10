@@ -1,12 +1,12 @@
 package com.green.project_quadruaple.datamanager;
 
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.datamanager.model.MenuReq;
 import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
 import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
-import com.green.project_quadruaple.review.model.ReviewPostReq;
+import com.green.project_quadruaple.datamanager.model.StrfReviewGetReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +23,13 @@ import java.util.List;
 @Tag(name = "더미데이터", description = "기능용x 더미데이터이미지용")
 public class DataController {
     private final DataService dataService;
+
+    @PostMapping("review")
+    @Operation(summary = "review & pics insert" )
+    public ResponseEntity<?> insReviewAndPics(@Valid @RequestPart StrfReviewGetReq p){
+        return dataService.insReviewAndPics(p);
+    }
+
 
     @PostMapping("strf")
     @Operation(summary = "strf사진과 메뉴넣기", description = "strfTitle: 검색할 단어, null허가, picFolder: 복사할폴더명, startId/endId: 제한할strfId범위, null허가. menus: strf에 넣을메뉴들. 3개씩")
@@ -49,7 +56,7 @@ public class DataController {
 //        return dataService.delMenu(p);
 //    }
 
-    @PostMapping("review")
+    @PostMapping("review/dummy")
     public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewDummyReq p){
         return postreviewdummy(pics, p);
     }

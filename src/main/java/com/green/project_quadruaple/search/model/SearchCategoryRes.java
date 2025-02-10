@@ -16,7 +16,7 @@ public class SearchCategoryRes {
     private Category category;
     private String locationName;
     private String strfPic;
-    private Double averageRating;
+    private Double ratingAvg;
     private Integer reviewCount;
     private Integer wishlistCount;
     private Integer wishIn;

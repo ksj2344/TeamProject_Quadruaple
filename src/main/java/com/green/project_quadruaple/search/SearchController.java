@@ -4,7 +4,6 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.search.model.*;
 
 import com.green.project_quadruaple.search.model.SearchCategoryRes;
-import com.green.project_quadruaple.search.model.filter.SearchAmenity;
 import com.green.project_quadruaple.search.model.strf_list.GetSearchStrfListBasicRes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,17 +83,17 @@ public class SearchController {
 
     @PostMapping("/all")
     @Operation(summary = "검색 - 전체 페이지 리스트", description = "최대 3개 출력 - 나머지는 더 보기 누르면 category 로 이전")
-    public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord,
-                                        @RequestParam("last_index") int lastIdx) {
-        return searchService.searchAll(searchWord,lastIdx);
+    public ResponseWrapper<?> searchAll(@RequestParam("search_word") String searchWord) {
+        return searchService.searchAll(searchWord);
     }
 
     @GetMapping("/category")
     public ResponseEntity<?> searchCategory(@RequestParam("last_index") int lastIdx,
                                             @RequestParam String category,
-                                            @RequestParam(value = "search_word", required = false) String searchWord) {
+                                            @RequestParam(value = "search_word", required = false) String searchWord,
+                                            @RequestParam(value = "order_type",required = false) String orderType) {
 
-        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord);
+        ResponseWrapper<List<SearchCategoryRes>> list = searchService.searchCategory(lastIdx,category,searchWord, orderType);
         return ResponseEntity.ok(list);
     }
     @GetMapping("/filter")

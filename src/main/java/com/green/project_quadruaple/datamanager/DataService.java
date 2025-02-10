@@ -4,19 +4,15 @@ package com.green.project_quadruaple.datamanager;
 import com.green.project_quadruaple.common.MyFileUtils;
 import com.green.project_quadruaple.common.config.enumdata.ResponseCode;
 import com.green.project_quadruaple.common.model.ResponseWrapper;
-import com.green.project_quadruaple.datamanager.model.MenuDto;
-import com.green.project_quadruaple.datamanager.model.ReviewDummyReq;
-import com.green.project_quadruaple.datamanager.model.StrfIdGetReq;
-import com.green.project_quadruaple.datamanager.model.UserProfile;
+import com.green.project_quadruaple.datamanager.model.*;
+import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.ReviewService;
-import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,13 +28,73 @@ import java.util.*;
 public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
-    private final ReviewService reviewService;
+//    private final ReviewService reviewService;
+//    private final ReviewMapper reviewMapper;
 
-    public ResponseEntity<ResponseWrapper<Integer>> postRating(List<MultipartFile> pics, ReviewDummyReq p){
-        for(Long i=1L; i<901; i+=p.getNum()){
-            p.setStrfId(i);
-            reviewService.postRating(pics, p);
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(StrfReviewGetReq p) {
+        List<Long> strfIds = dataMapper.selectReviewStrfId(p);
+        if (strfIds==null || strfIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
+        List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
+        List<PicDto> reviewDtos = p.getPics().isEmpty() ? new ArrayList<>() : p.getPics();
+        List<Map<String,Object>> picData = new ArrayList<>(strfIds.size()*reviewDtos.size());
+
+        String sourcePath=String.format("%s/reviewsample/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        String menuPath=String.format("%s/reviewsample/%s/%s/menu",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
+        int strfCnt;
+        int picCnt;
+
+        try{
+            strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
+            picCnt=(int) myFileUtils.countFiles(menuPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if(picCnt!=picData.size()){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+        for (long strfId : strfIds) {
+            String middlePath = String.format("strf/%d", strfId);
+            myFileUtils.makeFolders(middlePath);
+
+            String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
+            try {
+                Path source = Paths.get(sourcePath);
+                Path destination = Paths.get(filePath);
+                myFileUtils.copyFolder(source, destination);
+            } catch (IOException e) {
+                //실패시 폴더 삭제 처리
+                log.error("파일 저장 실패: {}", filePath, e);
+                String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
+                myFileUtils.deleteFolder(delFolderPath, true);
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+            }
+            for (int i = 0; i < strfCnt; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("strfId", strfId);
+                map.put("picName", String.format("%d.png", (i + 1)));
+                picAndStrfIds.add(map);
+            }
+
+            // menu insert collection 제작
+            if (picCnt != 0) {
+                for (int i = 0; i < reviewDtos.size(); i++) {
+                    Map<String, Object> menuMap = new HashMap<>();
+                    PicDto picDto = reviewDtos.get(i);
+                    menuMap.put("strfId", strfId);
+                    menuMap.put("title", picDto.getPics());
+                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
+                    picData.add(menuMap);
+                }
+            }
+        }
+
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
     }
 

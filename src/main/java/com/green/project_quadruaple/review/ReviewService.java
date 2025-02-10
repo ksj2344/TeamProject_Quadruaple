@@ -29,21 +29,17 @@ public class ReviewService {
     @Value("${const.default-review-size}")
     private int size;
 
-    public List<ReviewSelRes> getReviewWithPics(Long strfId,int lastIdx) {
+    public List<ReviewSelRes> getReviewWithPics(Long strfId,int lastIdx ) {
         int more = 1;
         List<ReviewSelRes> dtoList = reviewMapper.getReviewWithPics(strfId,lastIdx,size+more);
-
         if (dtoList == null || dtoList.isEmpty()) {
             return null;
         }
-
         boolean hasMore = dtoList.size() > size;
-
         if (hasMore) {
             dtoList.get(dtoList.size()-1).setMore(true);
             dtoList.remove(dtoList.size()-1);
         }
-
         Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
         for (ReviewSelRes item : dtoList) {
             ReviewSelRes review = reviewMap.get(item.getReviewId());
