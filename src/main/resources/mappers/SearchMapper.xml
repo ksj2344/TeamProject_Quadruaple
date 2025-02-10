@@ -153,29 +153,17 @@
     <select id="searchAllList" resultMap="searchAllResultMap">
         WITH ImageSelection AS (
         SELECT
-        strf_id,
-        MIN(pic_name) AS strfPic -- 같은 strf_id 내에서 가장 작은 파일명을 대표 이미지로 선택
-        FROM strf_pic
-        GROUP BY strf_id
-        )
+        strf_id, MIN(pic_name) AS strfPic FROM strf_pic GROUP BY strf_id )
 
         SELECT *
         FROM (
         SELECT
-        s.strf_id AS strfId,
-        s.title AS strfTitle,
-        COUNT(DISTINCT w.user_id) AS wishlistCount, -- 중복 방지
-        s.created_at,
-        l.title AS locationName,
-        AVG(DISTINCT r.rating) AS averageRating, -- 중복 방지
-        COUNT(DISTINCT r.review_id) AS reviewCount, -- 중복 방지
-        ROW_NUMBER() OVER (PARTITION BY s.strf_id ORDER BY s.created_at DESC) AS row_num,
-        i.strfPic, -- 미리 선정된 대표 이미지 사용
-        s.category,
-        a.amenity_id AS amenityId,
-        a.title AS amenityTitle,
-
-        -- 유저 ID에 따른 위시리스트 확인
+        s.strf_id AS strfId, s.title AS strfTitle, s.created_at, l.title AS locationName,
+        a.title AS amenityTitle, COUNT(DISTINCT w.user_id) AS wishlistCount,
+        AVG(DISTINCT r.rating) AS averageRating, COUNT(DISTINCT r.review_id) AS reviewCount,
+        ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
+        i.strfPic, s.category, a.amenity_id AS amenityId,
+        MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         CASE
         WHEN #{userId} != 0 AND EXISTS (
         SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id
@@ -190,7 +178,8 @@
         LEFT JOIN wishlist w ON s.strf_id = w.strf_id
         LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
         LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
-        LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id -- 대표 이미지 미리 선택
+        LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id
+
         WHERE
         <if test="search_word != null">
             (s.title LIKE CONCAT('%', #{search_word}, '%') OR
@@ -201,11 +190,19 @@
             s.category LIKE CONCAT('%', #{search_word}, '%'))
         </if>
 
-        GROUP BY s.strf_id, s.title, s.created_at, l.title, s.category, a.amenity_id, a.title, i.strfPic
+        GROUP BY
+        s.strf_id,
+        s.title,
+        s.created_at,
+        l.title,
+        s.category,
+        a.amenity_id,
+        a.title,
+        i.strfPic
         ) AS categorized_results
-        WHERE row_num = 1 -- 같은 strfId 중 하나만 유지
+        WHERE row_num <![CDATA[ <= ]]> 3
         ORDER BY category, created_at DESC
-        <!--        LIMIT #{startIdx}, #{size}-->
+
     </select>
     <resultMap id="searchAllResultMap" type="com.green.project_quadruaple.search.model.filter.Stay">
         <id property="strfId" column="strfId" />
@@ -216,6 +213,7 @@
         <result property="averageRating" column="averageRating" />
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
+        <result property="hasMyReview" column="hasMyReview" />
         <result property="wishIn" column="wishIn" />
     </resultMap>
 
