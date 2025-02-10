@@ -11,12 +11,13 @@
         a.open_check as openCheck, a.close_check as closeCheck , a.rest_date AS restDate,
         a.`explain`, a.detail, a.busi_num AS busiNum, b.menu_pic AS menuPic,
         f.detail_title AS locationName, e.pic_name AS strfPic , d.amenity_id AS amenityId,
-        AVG(h.rating) AS ratingAvg, b.title AS menuTitle, d.title AS amenityTitle,
+        b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
         n.inquired_at AS inquiredAt,
-        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,
+        COUNT(DISTINCT m.user_id) AS wishCnt,
         COUNT(DISTINCT h.review_id) AS reviewCnt,
+        COALESCE(AVG(DISTINCT h.rating), 0) AS ratingAvg,
 
         IF(
         EXISTS(
@@ -40,7 +41,7 @@
         WHEN EXISTS(
         SELECT 1
         FROM recent
-        WHERE j.user_id = #{userId} AND a.strf_id = #{strfId}
+        WHERE j.user_id = 116 AND a.strf_id = #{strfId}
         ) THEN 1
         ELSE NULL
         END AS recentCheckStatus
@@ -62,7 +63,7 @@
         LEFT JOIN recent n ON n.strf_id = a.strf_id
 
         WHERE a.strf_id = #{strfId}
-        GROUP BY a.strf_id, f.detail_title, b.menu_id, e.pic_name, d.amenity_id
+        GROUP BY a.strf_id,b.menu_id,d.amenity_id,b.title,e.pic_name;
     </select>
     <resultMap id="memberResultMap" type="com.green.project_quadruaple.strf.model.StrfSelRes">
         <id property="strfId" column="strfId" />

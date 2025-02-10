@@ -75,8 +75,6 @@
         </foreach>
     </update>
 
-
-
     <insert id="postRating" useGeneratedKeys="true" keyProperty="req.reviewId">
         INSERT INTO review (content, rating, strf_id, user_id)
         VALUES (#{req.content}, #{req.rating}, #{req.strfId}, #{userId})
