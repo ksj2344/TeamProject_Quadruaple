@@ -189,7 +189,6 @@
         LEFT JOIN amenipoint ap ON s.strf_id = ap.strf_id
         LEFT JOIN amenity a ON ap.amenity_id = a.amenity_id
         LEFT JOIN ImageSelection i ON s.strf_id = i.strf_id -- 대표 이미지 미리 선택
-
         WHERE
         <if test="search_word != null">
             (s.title LIKE CONCAT('%', #{search_word}, '%') OR
