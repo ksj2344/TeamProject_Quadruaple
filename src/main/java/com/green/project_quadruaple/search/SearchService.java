@@ -153,7 +153,7 @@ public class SearchService {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //&& authentication.getPrincipal() instanceof JwtUser
-        if (authentication != null ) {
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser ) {
             userId = authenticationFacade.getSignedUserId();
         }
         if (userId>0){
