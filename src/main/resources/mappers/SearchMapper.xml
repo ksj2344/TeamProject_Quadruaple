@@ -164,7 +164,6 @@
         ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
         i.strfPic, s.category, a.amenity_id AS amenityId,
         MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
-
         CASE
         WHEN #{userId} != 0 AND EXISTS (
         SELECT 1 FROM wishlist WHERE user_id = #{userId} AND strf_id = s.strf_id
