@@ -151,8 +151,8 @@ public class SearchService {
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+//&& authentication.getPrincipal() instanceof JwtUser
+        if (authentication != null ) {
             userId = authenticationFacade.getSignedUserId();
         }
         if (userId>0){

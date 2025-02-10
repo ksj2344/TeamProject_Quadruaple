@@ -162,7 +162,7 @@
         a.title AS amenityTitle, COUNT(DISTINCT w.user_id) AS wishlistCount,
         AVG(DISTINCT r.rating) AS averageRating, COUNT(DISTINCT r.review_id) AS reviewCount,
         ROW_NUMBER() OVER (PARTITION BY s.category ORDER BY s.created_at DESC) AS row_num,
-        i.strfPic, s.category, a.amenity_id AS amenityId,
+        i.strfPic, s.category, a.amenity_id AS amenityId, r.user_id AS reviewWriterUserId ,
         MAX(CASE WHEN r.user_id = #{userId} THEN 1 ELSE 0 END) AS hasMyReview,
         CASE
         WHEN #{userId} != 0 AND EXISTS (
@@ -214,6 +214,7 @@
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
         <result property="hasMyReview" column="hasMyReview" />
+        <result property="reviewWriterUserId" column="reviewWriterUserId" />
         <result property="wishIn" column="wishIn" />
     </resultMap>
 
