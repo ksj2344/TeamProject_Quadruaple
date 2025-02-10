@@ -11,6 +11,9 @@ import java.util.Map;
 public interface DataMapper {
 
     int insReviewAndPics();
+
+
+
     List<Long> selectReviewStrfId(StrfReviewGetReq p);
     //strf_id 목록 찾기
     List<Long> selectStrfId(StrfIdGetReq p);
