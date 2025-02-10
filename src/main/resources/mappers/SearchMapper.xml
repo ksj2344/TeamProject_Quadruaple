@@ -97,7 +97,9 @@
     </select>
 
     <select id="selLocationIdByTripId">
-        SELECT l.location_id AS locationId , l.title AS locationTitle
+        SELECT
+            l.location_id AS locationId
+            , l.title AS locationTitle
         FROM trip t
         INNER JOIN trip_location tl ON tl.trip_id = t.trip_id
         INNER JOIN location l ON l.location_id = tl.location_id
