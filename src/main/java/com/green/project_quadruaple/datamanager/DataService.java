@@ -30,7 +30,6 @@ import java.util.*;
 public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
-//    private final ReviewService reviewService;
     private final ReviewMapper reviewMapper;
 
     @Transactional
@@ -63,6 +62,7 @@ public class DataService {
             reviewMapper.postRating(req,p.getUserId());
             reviewIds.add(req.getReviewId());
         }
+        int reviewInserted=0;
 
         for(long reviewId:reviewIds){
             String middlePath = String.format("reviewId/%d",reviewId);
@@ -82,13 +82,14 @@ public class DataService {
             }
             ReviewPicDto dto = new ReviewPicDto();
             dto.setReviewId(reviewId);
+            dto.setPics(new ArrayList<>());
             for(int i=1;i<=reviewPicCnt; i++){
                 dto.getPics().add(String.format("%d.png",i));
             }
-            reviewMapper.postReviewPic(dto);
+            reviewInserted+=reviewMapper.postReviewPic(dto);
         }
 
-        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
+        return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), reviewInserted));
     }
 
 

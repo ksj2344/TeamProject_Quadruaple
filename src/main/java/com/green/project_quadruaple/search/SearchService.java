@@ -56,6 +56,7 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() > size) {
+                dto.remove(dto.size() - 1);
                 res.setMore(true);
             }
             res.setList(dto);
@@ -88,6 +89,7 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, categoryValue, searchWord);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() >= size) {
+                dto.remove(dto.size() - 1);
                 res.setMore(true);
             }
             res.setList(dto);
@@ -152,8 +154,8 @@ public class SearchService {
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
+//&& authentication.getPrincipal() instanceof JwtUser
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUser ) {
             userId = authenticationFacade.getSignedUserId();
         }
         if (userId>0){
