@@ -10,6 +10,7 @@ import lombok.ToString;
 public class StrfShortInfoDto {
 
     private long strfId;
+    private String category;
     private String title;
     private double lat;
     private double lng;

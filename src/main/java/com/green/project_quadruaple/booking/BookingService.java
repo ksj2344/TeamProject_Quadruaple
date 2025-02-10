@@ -20,7 +20,9 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -75,16 +77,21 @@ public class BookingService {
         Long couponId = req.getCouponId();
         List<MenuIdAndQuantityDto> orderList = req.getOrderList();
 
+        if(!checkTime(req)) { // 체크인, 아웃 시간 예외 처리
+            log.error("체크인, 아웃 시간 에러");
+            return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
+        }
+
         if(couponId != null) { // 쿠폰이 요청에 담겨 있을 경우
             CouponDto couponDto = bookingMapper.selExistUserCoupon(signedUserId, couponId);
             if(couponDto == null || couponDto.getUsedCouponId() != null) { // 쿠폰 미소지시, 사용시 에러
                 return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), "쿠폰 없음");
             }
+
             List<MenuDto> menuDtoList = bookingMapper.selMenu(orderList);
             for(MenuDto menuDto : menuDtoList) {
                 for(MenuIdAndQuantityDto order : orderList) {
                     if(menuDto.getMenuId() == order.getMenuId()) { // 메뉴의 상품 가격이 일치하는지
-
                         if(menuDto.getStrfId() == req.getStrfId()) {
                             log.info("상품 가격 일치!");
                         } else {
@@ -146,6 +153,19 @@ public class BookingService {
             e.printStackTrace();
         }
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), null);
+    }
+
+    private boolean checkTime(BookingPostReq req) {
+        stayOpenAndCloseAt stayOpenAndCloseAt = bookingMapper.selStrfOpenAndClose(req.getStrfId()); // 숙소 체크인, 체크아웃 시간
+
+        DateTimeFormatter df1 = DateTimeFormatter.ofPattern("HH:mm:ss");
+        LocalTime openCheck = LocalTime.parse(stayOpenAndCloseAt.getOpenCheck(), df1);
+        LocalTime closeCheck = LocalTime.parse(stayOpenAndCloseAt.getCloseCheck(), df1);
+
+        LocalTime checkIn = LocalTime.parse(req.getCheckIn().substring(11), df1);
+        LocalTime checkOut = LocalTime.parse(req.getCheckOut().substring(11), df1);
+
+        return (checkIn.isAfter(openCheck) || checkOut.isBefore(closeCheck));
     }
 
     public String approve(String pgToken) {

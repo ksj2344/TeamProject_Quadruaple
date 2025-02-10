@@ -13,6 +13,7 @@ public interface BookingMapper {
     BookingPostRes postBooking(BookingPostReq req);
 
     CouponDto selExistUserCoupon(Long userId, Long couponId);
+    stayOpenAndCloseAt selStrfOpenAndClose(Long strfId);
     List<MenuDto> selMenu(List<MenuIdAndQuantityDto> menuIdList);
 
     void insBooking(BookingPostReq dto);

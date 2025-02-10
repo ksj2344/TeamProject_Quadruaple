@@ -48,6 +48,15 @@
             AND c.coupon_id = #{couponId}
     </select>
 
+    <select id="selStrfOpenAndClose">
+        SELECT
+            open_check, close_check
+        FROM
+        stay_tour_restaur_fest strf
+        WHERE strf.category = 'STAY'
+            AND strf.strf_id = #{strfId}
+    </select>
+
     <select id="selMenu">
         SELECT
             menu_id AS menuId
