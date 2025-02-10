@@ -13,7 +13,7 @@ public class WishListRes {
     private String locationName;
     private double ratingAvg;
     private int wishCnt;
-    private int ratingCnt;
+    private double ratingCnt;
     private String strfPic;
     private String category;
 
