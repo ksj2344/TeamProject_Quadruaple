@@ -20,6 +20,7 @@ public class Stay {
     private String strfPic;
     private Double averageRating;
     private int reviewCount;
+    private Long reviewWriterUserId;
     private int wishlistCount;
     private int hasMyReview;
     private int wishIn;

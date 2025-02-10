@@ -47,6 +47,7 @@
         COALESCE((select AVG(RO.rating) FROM review RO WHERE RO.strf_id=b.strf_id),0) AS ratingAvg ,
         COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = b.strf_id), 0) AS wishCnt,
         COALESCE((SELECT COUNT(*) FROM review RV WHERE RV.strf_id = b.strf_id), 0) AS ratingCnt,
+        if(EXISTS(SELECT 1 FROM wishlist WM WHERE WM.strf_id=b.strf_id AND WM.user_id=e.user_id),1,0) AS reviewed,
         f.pic_name AS strfPic , b.category , b.title AS strfTitle
         FROM wishlist a
         JOIN stay_tour_restaur_fest b ON a.strf_id = b.strf_id
