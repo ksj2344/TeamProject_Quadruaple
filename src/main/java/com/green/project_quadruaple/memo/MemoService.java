@@ -38,7 +38,7 @@ public class MemoService {
 
     @Transactional
     public ResponseWrapper<Long> addMemo(MemoPostReq memoDto) {
-        long signedUserId=authenticationFacade.getSignedUserId();
+        long signedUserId = authenticationFacade.getSignedUserId();
         Long tripId = memoDto.getTripId();
         if(signedUserId==0){
             return new ResponseWrapper<>(ResponseCode.Forbidden.getCode(), 0L);

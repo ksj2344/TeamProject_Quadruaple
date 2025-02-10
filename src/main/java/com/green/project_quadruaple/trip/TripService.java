@@ -550,15 +550,15 @@ public class TripService {
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), uuid);
     }
 
-    public ResultResponse addTripUser(String uuid) {
+    public ResponseWrapper<Long> addTripUser(String uuid) {
         Long signedUserId = AuthenticationFacade.getSignedUserId();
         try {
             Long tripId = addUserLinkMap.get(uuid);
             if(tripId == null) {
-                return ResultResponse.badRequest();
+                return new ResponseWrapper<>(ResponseCode.BAD_REQUEST.getCode(), null);
             }
             tripMapper.insTripUser(tripId, List.of(signedUserId));
-            return ResultResponse.success(); // 리다이렉션 필요
+            return new ResponseWrapper<>(ResponseCode.OK.getCode(), tripId); // 리다이렉션 필요
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
