@@ -13,7 +13,9 @@ public class StrfReviewGetReq {
     private String category;
     private String strfTitle;
     private String picFolder;
+    private String content;
+    private int rating;
+    private long userId;
     private Long startId;
     private Long endId;
-    private List<PicDto> pics;
 }

@@ -33,32 +33,37 @@ public class DataService {
 
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(StrfReviewGetReq p) {
+        // 리뷰 넣을 strfId list 가져오기
         List<Long> strfIds = dataMapper.selectReviewStrfId(p);
         if (strfIds==null || strfIds.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
+        //리뷰를 넣을 collection
         List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        List<PicDto> reviewDtos = p.getPics().isEmpty() ? new ArrayList<>() : p.getPics();
-        List<Map<String,Object>> picData = new ArrayList<>(strfIds.size()*reviewDtos.size());
+        //리뷰 사진을 넣을 collection
+        List<Map<String,Object>> picData = new ArrayList<>();
 
         String sourcePath=String.format("%s/reviewsample/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
-        String menuPath=String.format("%s/reviewsample/%s/%s/menu",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
         int strfCnt;
-        int picCnt;
 
         try{
+            //review사진 파일 갯수 확인
             strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
-            picCnt=(int) myFileUtils.countFiles(menuPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        if(picCnt!=picData.size()){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+
+        //reviewId를 저장할 리스트
+        List<Long> reviewIds=new ArrayList<>();
+        //여기서 insert 먼저 실행
+        for(long strfId : strfIds){
+
+
         }
+
         for (long strfId : strfIds) {
-            String middlePath = String.format("strf/%d", strfId);
+            String middlePath = String.format("reviewId/%d", strfId);
             myFileUtils.makeFolders(middlePath);
 
             String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
@@ -82,17 +87,21 @@ public class DataService {
                 picAndStrfIds.add(map);
             }
 
+        if(strfCnt!=picData.size()){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
             // menu insert collection 제작
-            if (picCnt != 0) {
-                for (int i = 0; i < reviewDtos.size(); i++) {
-                    Map<String, Object> menuMap = new HashMap<>();
-                    PicDto picDto = reviewDtos.get(i);
-                    menuMap.put("strfId", strfId);
-                    menuMap.put("title", picDto.getPics());
-                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
-                    picData.add(menuMap);
-                }
-            }
+//            if (picCnt != 0) {
+//                for (int i = 0; i < reviewDtos.size(); i++) {
+//                    Map<String, Object> menuMap = new HashMap<>();
+//                    PicDto picDto = reviewDtos.get(i);
+//                    menuMap.put("strfId", strfId);
+//                    menuMap.put("title", picDto.getPics());
+//                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
+//                    picData.add(menuMap);
+//                }
+//            }
         }
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));
