@@ -47,8 +47,9 @@ public class TripController {
 
     @GetMapping("/trip")
     @Operation(summary = "여행 상세 정보 불러오기", description = "로그인유저의 특정 여행 상세정보(여행의 모든 일정 등) 불러오기")
-    public ResponseWrapper<TripDetailRes> getTrip(@RequestParam("trip_id") @Schema(title = "여행 ID", example = "1") Long tripId) {
-        return tripService.getTrip(tripId);
+    public ResponseWrapper<TripDetailRes> getTrip(@RequestParam("trip_id") @Schema(title = "여행 ID", example = "1") Long tripId,
+                                                  @RequestParam("signed") @Schema(title = "로그인 여부", example = "true") boolean signed) {
+        return tripService.getTrip(tripId, signed);
     }
 
     @PatchMapping("/trip")
