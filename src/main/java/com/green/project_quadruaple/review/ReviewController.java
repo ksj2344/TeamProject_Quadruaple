@@ -58,8 +58,7 @@ public class ReviewController {
 //        return response;
 //    }
 
-
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("del")
     @Operation(summary = "리뷰 삭제")
     public ResponseEntity<ResponseWrapper<Integer>> deleteReview(@RequestParam("review_id") Long reviewId) {
         return reviewService.deleteReview(reviewId);
