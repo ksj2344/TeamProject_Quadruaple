@@ -7,6 +7,8 @@ import com.green.project_quadruaple.common.model.ResponseWrapper;
 import com.green.project_quadruaple.datamanager.model.*;
 import com.green.project_quadruaple.review.ReviewMapper;
 import com.green.project_quadruaple.review.ReviewService;
+import com.green.project_quadruaple.review.model.ReviewPicDto;
+import com.green.project_quadruaple.review.model.ReviewPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -29,7 +31,7 @@ public class DataService {
     private final DataMapper dataMapper;
     private final MyFileUtils myFileUtils;
 //    private final ReviewService reviewService;
-//    private final ReviewMapper reviewMapper;
+    private final ReviewMapper reviewMapper;
 
     @Transactional
     public ResponseEntity<ResponseWrapper<Integer>> insReviewAndPics(StrfReviewGetReq p) {
@@ -39,17 +41,13 @@ public class DataService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null));
         }
-        //리뷰를 넣을 collection
-        List<Map<String, Object>> picAndStrfIds = new ArrayList<>(strfIds.size());
-        //리뷰 사진을 넣을 collection
-        List<Map<String,Object>> picData = new ArrayList<>();
 
         String sourcePath=String.format("%s/reviewsample/%s/%s",myFileUtils.getUploadPath(), p.getCategory(), p.getPicFolder());
-        int strfCnt;
+        int reviewPicCnt;
 
         try{
             //review사진 파일 갯수 확인
-            strfCnt=(int) myFileUtils.countFiles(sourcePath) - 1;
+            reviewPicCnt=(int) myFileUtils.countFiles(sourcePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,50 +56,36 @@ public class DataService {
         List<Long> reviewIds=new ArrayList<>();
         //여기서 insert 먼저 실행
         for(long strfId : strfIds){
-
-
+            ReviewPostReq req=new ReviewPostReq();
+            req.setContent(p.getContent());
+            req.setRating(p.getRating());
+            req.setStrfId(strfId);
+            reviewMapper.postRating(req,p.getUserId());
+            reviewIds.add(req.getReviewId());
         }
 
-        for (long strfId : strfIds) {
-            String middlePath = String.format("reviewId/%d", strfId);
+        for(long reviewId:reviewIds){
+            String middlePath = String.format("reviewId/%d",reviewId);
             myFileUtils.makeFolders(middlePath);
 
-            String filePath = String.format("%s/strf/%d", myFileUtils.getUploadPath(), strfId);
-            try {
+            String filePath = String.format("%s/reviewId/%d",myFileUtils.getUploadPath(),reviewId);
+            try{
                 Path source = Paths.get(sourcePath);
                 Path destination = Paths.get(filePath);
-                myFileUtils.copyFolder(source, destination);
-            } catch (IOException e) {
-                //실패시 폴더 삭제 처리
-                log.error("파일 저장 실패: {}", filePath, e);
+                myFileUtils.copyFolder(source,destination);
+            } catch (IOException e){
                 String delFolderPath = String.format("%s/%s", myFileUtils.getUploadPath(), middlePath);
                 myFileUtils.deleteFolder(delFolderPath, true);
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                         .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
             }
-            for (int i = 0; i < strfCnt; i++) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("strfId", strfId);
-                map.put("picName", String.format("%d.png", (i + 1)));
-                picAndStrfIds.add(map);
+            ReviewPicDto dto = new ReviewPicDto();
+            dto.setReviewId(reviewId);
+            for(int i=1;i<=reviewPicCnt; i++){
+                dto.getPics().add(String.format("%d.png",i));
             }
-
-        if(strfCnt!=picData.size()){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
-        }
-            // menu insert collection 제작
-//            if (picCnt != 0) {
-//                for (int i = 0; i < reviewDtos.size(); i++) {
-//                    Map<String, Object> menuMap = new HashMap<>();
-//                    PicDto picDto = reviewDtos.get(i);
-//                    menuMap.put("strfId", strfId);
-//                    menuMap.put("title", picDto.getPics());
-//                    menuMap.put("menuPic", String.format("%d.png", (i + 1)));
-//                    picData.add(menuMap);
-//                }
-//            }
+            reviewMapper.postReviewPic(dto);
         }
 
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), 1));

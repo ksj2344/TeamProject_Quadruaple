@@ -14,7 +14,8 @@
         AVG(h.rating) AS ratingAvg, b.title AS menuTitle, d.title AS amenityTitle,
         j.name AS reviewWriterName , j.profile_pic AS reviewWriterUserPic ,
         l.profile_pic AS hostProfilePic, l.name AS hostName , b.price AS menuPrice,
-        n.inquired_at AS inquiredAt, COUNT(m.user_id) AS wishCnt,
+        n.inquired_at AS inquiredAt,
+        COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = a.strf_id), 0) AS wishCnt,
         COUNT(DISTINCT h.review_id) AS reviewCnt,
 
         IF(
