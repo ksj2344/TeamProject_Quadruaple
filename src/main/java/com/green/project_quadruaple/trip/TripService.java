@@ -115,6 +115,17 @@ public class TripService {
             return new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null);
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // 문자열을 LocalDate로 변환
+        LocalDate startDate = LocalDate.parse(tripPeriod.getStartAt(), formatter);
+        LocalDate endDate = LocalDate.parse(tripPeriod.getEndAt(), formatter);
+
+        // 두 날짜의 차이를 계산
+        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+        if(daysBetween >= 0) {
+            daysBetween += 1;
+        }
 
         List<TripDetailDto> tripDetailDto = tripMapper.selScheduleDetail(tripId, signedUserId);
         List<Long> tripUserIdList = tripMapper.selTripUserList(tripId);
@@ -131,6 +142,14 @@ public class TripService {
         res.setTripUserIdList(tripUserIdList);
         res.setTripLocationList(scAndMcAndTripInfoDto.getTripLocationList());
         if(tripDetailDto.isEmpty()) {
+            ArrayList<TripDetailDto> days = new ArrayList<>();
+            for (int i = 1; i <=daysBetween; i++) {
+                TripDetailDto dto = new TripDetailDto();
+                dto.setDay(i);
+                dto.setSchedules(new ArrayList<>());
+                days.add(dto);
+            }
+            res.setDays(days);
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
         }
         for (TripDetailDto detailDto : tripDetailDto) {
@@ -161,23 +180,10 @@ public class TripService {
         res.setTotalDistance(totalDistance);
         res.setTotalDuration(totalDuration);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        // 문자열을 LocalDate로 변환
-        LocalDate startDate = LocalDate.parse(tripPeriod.getStartAt(), formatter);
-        LocalDate endDate = LocalDate.parse(tripPeriod.getEndAt(), formatter);
-
-        // 두 날짜의 차이를 계산
-        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-        if(daysBetween > 0) {
-            daysBetween += 2;
-        } else if(daysBetween == 0) {
-            daysBetween = 1;
-        }
 
         List<TripDetailDto> resTripDetail = new ArrayList<>();
         boolean flag = false;
-        for(int i=1; i<daysBetween; i++) {
+        for(int i=1; i<=daysBetween; i++) {
             for (TripDetailDto detailDto : tripDetailDto) {
                 if(detailDto.getDay() == i) {
                     resTripDetail.add(detailDto);
@@ -190,6 +196,7 @@ public class TripService {
             }
             TripDetailDto nullDataWithDay = new TripDetailDto();
             nullDataWithDay.setDay(i);
+            nullDataWithDay.setSchedules(new ArrayList<>());
             resTripDetail.add(nullDataWithDay);
         }
 
