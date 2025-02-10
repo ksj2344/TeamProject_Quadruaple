@@ -287,6 +287,13 @@ public class DataService {
         String defaultPicSourcePath = Paths.get(myFileUtils.getUploadPath(), "common", defaultPicName).toString();
         File sourceFile = new File(defaultPicSourcePath);
 
+        // 기본 프로필 파일이 실제로 존재하는지 확인
+        if (!sourceFile.exists()) {
+            System.out.println("오류: 기본 프로필 파일이 존재하지 않습니다! 경로: " + sourceFile.getAbsolutePath());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+        }
+
         for (UserProfile user : users) {
             String profilePic = user.getProfilePic();
 
@@ -298,14 +305,26 @@ public class DataService {
                 String userFolderPath = Paths.get(myFileUtils.getUploadPath(), "user", user.getUserId().toString()).toString();
                 File userFolder = new File(userFolderPath);
 
-                // 프로필 사진 폴더가 없으면 생성
-                myFileUtils.makeFolders(userFolderPath);
+                // 폴더가 없으면 생성
+                if (!userFolder.exists()) {
+                    boolean created = userFolder.mkdirs();
+                    if (created) {
+                        System.out.println("사용자 폴더 생성됨: " + userFolderPath);
+                    } else {
+                        System.out.println("사용자 폴더 생성 실패! 경로: " + userFolderPath);
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
+                    }
+                }
 
                 // 기존 `user.png` 파일 삭제
                 File oldFile = new File(userFolder, oldPicName);
                 if (oldFile.exists()) {
-                    System.out.println("기존 user.png 삭제: " + oldFile.getAbsolutePath());
-                    oldFile.delete();
+                    if (oldFile.delete()) {
+                        System.out.println("기존 user.png 삭제 완료: " + oldFile.getAbsolutePath());
+                    } else {
+                        System.out.println("기존 user.png 삭제 실패! 경로: " + oldFile.getAbsolutePath());
+                    }
                 }
 
                 // 기본 프로필 적용할 경로
@@ -320,6 +339,7 @@ public class DataService {
                         System.out.println("이미 최신 기본 프로필 사진이 적용됨: " + destinationFile.getAbsolutePath());
                     }
                 } catch (IOException e) {
+                    System.out.println("파일 복사 중 오류 발생! 사용자 ID: " + user.getUserId());
                     e.printStackTrace();
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(new ResponseWrapper<>(ResponseCode.SERVER_ERROR.getCode(), null));
