@@ -81,7 +81,7 @@ public class UserService {
             savedPicName = myFileUtils.makeRandomFileName(pic);
         } else {
             // 프로필 사진이 없으면 기본 사진 사용
-            savedPicName = "user.png";
+            savedPicName = "user_profile.png";
             isDefaultPic = true;
         }
         p.setProfilePic(savedPicName); // DB 저장 전에 profilePic 설정
@@ -102,7 +102,7 @@ public class UserService {
                 try {
                     if (isDefaultPic) {
                         // 기본 프로필 사진 복사
-                        Path source = Paths.get(fileDirectory, "common", "user.png");
+                        Path source = Paths.get(fileDirectory, "common", "user_profile.png");
 
                         // 디버깅용 로그 추가
                         System.out.println("Source Path: " + source.toAbsolutePath());
