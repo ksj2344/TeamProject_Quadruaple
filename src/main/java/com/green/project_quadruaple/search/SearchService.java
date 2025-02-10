@@ -137,6 +137,7 @@ public class SearchService {
         }
     }
 
+
 //        Long signedUserId = authenticationFacade.getSignedUserId();
 //        searchMapper.searchIns(searchWord,signedUserId);
 //        int more = 1;
