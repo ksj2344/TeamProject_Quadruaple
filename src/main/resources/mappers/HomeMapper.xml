@@ -94,7 +94,7 @@
         A.title AS strfTitle,
         SP.pic_name AS strfPic,
         LD.detail_title AS locationName,
-        IF(EXISTS (SELECT 1 FROM wishlist W WHERE W.strf_id = A.strf_id AND W.user_id = 101), 1, 0) AS wishIn,
+        IF(EXISTS (SELECT 1 FROM wishlist W WHERE W.strf_id = A.strf_id AND W.user_id = #{userId}), 1, 0) AS wishIn,
         COALESCE((SELECT AVG(RV.rating) FROM review RV WHERE RV.strf_id = A.strf_id), 0) AS averageRating,
         COALESCE((SELECT COUNT(*) FROM wishlist WL WHERE WL.strf_id = A.strf_id), 0) AS wishCnt,
         inquired_at
