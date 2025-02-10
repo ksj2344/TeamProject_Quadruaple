@@ -80,10 +80,10 @@
         GROUP BY de_id, `for`
         )
         SELECT
-        T.title,
-        CONCAT(DATE_FORMAT(T.start_at, '%Y.%m.%d'), '~', DATE_FORMAT(T.end_at, '%m.%d')) AS tripPeriod,
-        TS.tripTotalPrice,
-        TS.myTotalPrice,
+        TW.title,
+        CONCAT(DATE_FORMAT(TW.start_at, '%Y.%m.%d'), '~', DATE_FORMAT(TW.end_at, '%m.%d')) AS tripPeriod,
+        COALESCE(TS.tripTotalPrice,0) AS tripTotalPrice,
+        COALESCE(TS.myTotalPrice,0) AS myTotalPrice,
         ES.paidFor,
         ES.totalPrice,
         ES.myPrice,
@@ -94,7 +94,8 @@
         FROM depay T
         JOIN trip_summary TS ON TS.trip_id = T.trip_id
         JOIN expense_summary ES ON ES.de_id = T.de_id
-        WHERE T.trip_id = #{tripId}
+        right JOIN trip TW ON TW.trip_id=T.trip_id
+        WHERE TW.trip_id =#{tripId}
         ORDER BY T.de_id
     </select>
 
