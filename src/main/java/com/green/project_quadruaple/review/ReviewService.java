@@ -59,11 +59,11 @@ public class ReviewService {
             dtoList.remove(dtoList.size()-1);
         }
 
-        Map<Long, ReviewSelRes> reviewMap = new LinkedHashMap<>();
+        Map<Long, MyReviewSelRes> reviewMap = new LinkedHashMap<>();
 
         for (MyReviewSelRes item : dtoList) {
             // 기존 리뷰 ID로 저장된 객체가 있는지 확인
-            ReviewSelRes review = reviewMap.get(item.getReviewId());
+            MyReviewSelRes review = reviewMap.get(item.getReviewId());
         }
         return dtoList;
     }

@@ -48,6 +48,7 @@ public class ReviewController {
         return ResponseEntity.ok(new ResponseWrapper<>(ResponseCode.OK.getCode(), result));
     }
 
+
 //    @PutMapping
 //    @Operation(summary = "리뷰 수정")
 //    public ResponseEntity<?> updateReview(@RequestPart List<MultipartFile> pics,
