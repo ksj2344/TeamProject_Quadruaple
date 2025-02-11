@@ -54,7 +54,12 @@ public class WishListService {
         int more = 1;
 
         List<WishListRes> list = wishlistMapper.wishListGet(userId,startIdx,size+more);
-
+        list.forEach(stay -> {
+            if (stay.getRatingAvg() != 0) {
+                double roundedRating = Math.round(stay.getRatingAvg() * 10) / 10.0;
+                stay.setRatingAvg(roundedRating);
+            }
+        });
         boolean hasMore = list.size() > size;
 
         if (hasMore) {
