@@ -26,6 +26,7 @@ public class StrfService {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
 
+
         StrfSelRes res = strfMapper.getMemberDetail(signedUserId,strfId);
 
         if (res == null) {
@@ -33,6 +34,9 @@ public class StrfService {
         }
 
         strfMapper.strfUpsert(signedUserId,strfId);
+
+        double roundedRating = Math.round(res.getRatingAvg() * 10) / 10.0;
+        res.setRatingAvg(roundedRating);
 
         return new ResponseWrapper<>(ResponseCode.OK.getCode(), res);
     }

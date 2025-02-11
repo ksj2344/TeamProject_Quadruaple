@@ -214,6 +214,7 @@
         <result property="reviewCount" column="reviewCount" />
         <result property="wishlistCount" column="wishlistCount" />
         <result property="hasMyReview" column="hasMyReview" />
+        <result property="reviewWriterUserId" column="reviewWriterUserId" />
         <result property="wishIn" column="wishIn" />
     </resultMap>
 

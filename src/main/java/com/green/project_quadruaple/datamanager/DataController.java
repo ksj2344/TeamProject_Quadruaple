@@ -57,8 +57,9 @@ public class DataController {
 //    }
 
     @PostMapping("review/dummy")
-    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestPart List<MultipartFile> pics, @RequestPart ReviewDummyReq p){
-        return postreviewdummy(pics, p);
+    @Operation(summary = "review 채우기", description = "카테고리, 원한다면 제목과 범위도")
+    public ResponseEntity<ResponseWrapper<Integer>> postreviewdummy(@RequestBody StrfReviewGetReq p){
+        return dataService.insReviewAndPics(p);
     }
 
     @PostMapping("default-profile-pic")
