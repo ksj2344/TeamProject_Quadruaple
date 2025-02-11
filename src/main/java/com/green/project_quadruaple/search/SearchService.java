@@ -56,7 +56,6 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, null, null);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() > size) {
-                dto.remove(dto.size() - 1);
                 res.setMore(true);
             }
             res.setList(dto);
@@ -89,7 +88,6 @@ public class SearchService {
             List<StrfShortInfoDto> dto = searchMapper.selStrfShortInfoBasic(signedUserId, locationIdList, lastIdx, size+more, categoryValue, searchWord);
             GetSearchStrfListBasicRes res = new GetSearchStrfListBasicRes();
             if(dto.size() >= size) {
-                dto.remove(dto.size() - 1);
                 res.setMore(true);
             }
             res.setList(dto);
@@ -139,65 +137,33 @@ public class SearchService {
         }
     }
 
-
-//        Long signedUserId = authenticationFacade.getSignedUserId();
-//        searchMapper.searchIns(searchWord,signedUserId);
-//        int more = 1;
-//        List<Stay> stays = searchMapper.searchAllList(searchWord,signedUserId,lastIdx,size+more);
-//
-//        boolean hasMore = stays.size() > size;
-//        if (hasMore) {
-//            stays.get(stays.size()-1).setMore(true);
-//            stays.remove(stays.size()-1);
-//        }
-//        return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
     public ResponseWrapper<List<Stay>> searchAll(String searchWord) {
         Long userId = 0L;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//&& authentication.getPrincipal() instanceof JwtUser
-        if (authentication != null && authentication.getPrincipal() instanceof JwtUser ) {
-            userId = authenticationFacade.getSignedUserId();
-        }
-        if (userId>0){
-            searchMapper.searchIns(searchWord, userId);
-        }
-        int more = 1;
-        try {
-            List<Stay> stays = searchMapper.searchAllList(searchWord, userId);
-
-            return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
-
-        } catch (Exception e) {
-            return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
-        }
-
-    }
-
-    /*
-    Long userId = 0L;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.getPrincipal() instanceof JwtUser) {
             userId = authenticationFacade.getSignedUserId();
         }
+        if (userId > 0) {
+            searchMapper.searchIns(searchWord, userId);
+        }
 
-        searchMapper.searchIns(searchWord, signedUserId);
-
-        int more = 1;
         try {
-            List<Stay> stays = searchMapper.searchAllList(searchWord, signedUserId,lastIdx,size+more);
+            List<Stay> stays = searchMapper.searchAllList(searchWord, userId);
+            stays.forEach(stay -> {
+                if (stay.getAverageRating() != null) {
+                    double roundedRating = Math.round(stay.getAverageRating() * 10) / 10.0;
+                    stay.setAverageRating(roundedRating);
+                }
+            });
 
-            boolean hasMore = stays.size() > size;
-            if (hasMore) {
-                stays.get(stays.size()-1).setMore(true);
-                stays.remove(stays.size()-1);
-            }
             return new ResponseWrapper<>(ResponseCode.OK.getCode(), stays);
 
         } catch (Exception e) {
             return new ResponseWrapper<>(ResponseCode.NOT_FOUND.getCode(), null);
         }
-     */
+    }
+
     public ResponseWrapper<List<SearchCategoryRes>> searchCategory(int lastIdx , String category , String searchWord, String orderType) {
 
         Long userId = 0L;
